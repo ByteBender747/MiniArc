@@ -7,6 +7,7 @@ template <typename valueT>
 struct Point2D {
     valueT x{0}, y{0};
     Point2D() = default;
+    Point2D(valueT x, valueT y) : x(x), y(y) {}
 #ifdef SDL_rect_h_
     Point2D(const SDL_FPoint& r) {
         x = static_cast<valueT>(r.x);

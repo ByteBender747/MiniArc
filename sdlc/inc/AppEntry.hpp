@@ -39,7 +39,7 @@ struct AppState {
     SDL_Window* window;
     SDL_Renderer* renderer;
     Uint64 iterations{0};
-    Uint64 timeStamp{0};
+    double timeStamp{0};
     double deltaTime{0};
     bool isRunning{true};
     void* userdata{nullptr};

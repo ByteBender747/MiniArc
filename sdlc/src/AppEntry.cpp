@@ -1,4 +1,5 @@
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_timer.h>
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -71,7 +72,11 @@ SDL_AppResult SDL_AppEvent(void* appState, SDL_Event* event)
 SDL_AppResult SDL_AppIterate(void* appState)
 {
     AppState* state = static_cast<AppState*>(appState);
-    state->deltaTime = static_cast<double>(SDL_GetTicks() - state->timeStamp) * 1e-3;
+    double now = SDL_GetPerformanceCounter() / static_cast<double>(SDL_GetPerformanceFrequency());
+    if (state->timeStamp > 0) {
+        state->deltaTime = now - state->timeStamp;
+    }
+    state->timeStamp = now;
 
     SDL_SetRenderDrawColor(
         state->renderer,
@@ -86,7 +91,6 @@ SDL_AppResult SDL_AppIterate(void* appState)
     SDL_RenderPresent(state->renderer);
 
     ++state->iterations;
-    state->timeStamp = SDL_GetTicks();
     return state->isRunning ? SDL_APP_CONTINUE : SDL_APP_SUCCESS;
 }
 

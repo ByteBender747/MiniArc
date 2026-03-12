@@ -26,9 +26,11 @@ target_compile_definitions(sdlc PUBLIC
     WINDOW_HEIGHT=896
     RENDER_LOGICAL_WIDTH=140
     RENDER_LOGICAL_HEIGHT=224
+    RENDER_VSYNC=1
 )
 
 # Add source files for MiniArc target
 target_sources(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/src/MiniArc.cpp
+    ${CMAKE_SOURCE_DIR}/src/PlayerShip.cpp
 )   

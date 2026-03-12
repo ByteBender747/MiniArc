@@ -2,21 +2,20 @@
 #include <iostream>
 
 #include "AppEntry.hpp"
+#include "PlayerShip.hpp"
 #include "SpriteRenderer.hpp"
 #include "MiniArc.hpp"
 
 #include <SDL3/SDL_render.h>
 #include <SDL3_image/SDL_image.h>
+#include <memory>
 #include <ostream>
 
 void MiniArc_IterateActors(AppState* state)
 {
     GameState* gs = static_cast<GameState*>(state->userdata);
-    sdl::SpriteRenderer sp(gs->spriteTexture);
-    sp.setScaleMode(SDL_SCALEMODE_PIXELART);
-    sp.setSource(gs->sprites["PlayerCenter"]);
-    sp.setPosition(50, 50, sdl::SpriteOrigin::Center);
-    sp.render(state->renderer);
+    gs->player->update();
+    gs->player->render();
 }
 
 void MiniArc_Init(AppState* state, int argc, char** argv)
@@ -34,6 +33,7 @@ void MiniArc_Init(AppState* state, int argc, char** argv)
         state->isRunning = false;
         return;
     }
+    gs->player = std::make_unique<PlayerShip>(state, gs->spriteTexture);
     state->iterateHandler.push_back(MiniArc_IterateActors);
 }
 
