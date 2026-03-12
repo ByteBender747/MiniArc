@@ -1,0 +1,76 @@
+#pragma once
+
+#include <SDL3/SDL_blendmode.h>
+#include <SDL3/SDL_pixels.h>
+#include <SDL3/SDL_rect.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_stdinc.h>
+
+#include <SDL3/SDL_surface.h>
+#include <string>
+#include <unordered_map>
+#include <filesystem>
+
+#include "Rect.hpp"
+
+namespace sdl
+{
+
+using SpriteDefinitions = std::unordered_map<std::string, Rect<int> >;
+
+enum class SpriteOrigin {
+    TopLeft, TopRight, 
+    BottomLeft, BottomRight, 
+    Center
+};
+
+class SpriteRenderer
+{
+public:
+    SpriteRenderer(SDL_Texture* texture);
+    void setPosition(float x, float y, SpriteOrigin origin);
+    void render(SDL_Renderer* render);
+    bool isOnScreen(SDL_Renderer* renderer);
+    void setScaleMode(SDL_ScaleMode mode);
+    void setAlphaMod(Uint8 alpha);
+    void setColorMod(Uint8 r, Uint8 g, Uint8 b);
+    SDL_Color getColorMod();
+    void setBlendMode(SDL_BlendMode mode);
+    SDL_ScaleMode getSaleMode();
+    SDL_BlendMode getBlendMode();
+    Uint8 getAlphaMod();
+    void setSource(const SDL_FRect& rect) { m_source = rect; }
+    void setSource(float x, float y, float w, float h) {
+        m_source.h = h;
+        m_source.w = w;
+        m_source.x = x;
+        m_source.y = y;
+    }
+    void setDestination(const SDL_FRect& rect) {
+        m_destination = rect;
+    }
+    void setDestination(float x, float y, float w, float h) {
+        m_destination.h = h;
+        m_destination.w = w;
+        m_destination.x = x;
+        m_destination.y = y;
+    }
+    SDL_FRect source() const { return m_source; }
+    SDL_FRect destination() const { return m_destination; }
+    void setRotation(double angle) {
+        m_rotation = angle;
+        m_rotated = true;
+    }
+    double rotation() const { return m_rotation; }
+private:
+    bool m_rotated;
+    double m_rotation;
+    SDL_Texture* m_texture;
+    SDL_FRect m_source;
+    SDL_FRect m_destination;
+};
+
+
+bool LoadSpriteDefinitions(SpriteDefinitions& def, const std::filesystem::path& path, char separator = ',');
+
+} // namespace sdl
