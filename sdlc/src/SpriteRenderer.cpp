@@ -120,7 +120,7 @@ value_type ParseValue(const std::string& sval, bool& error)
     return value;
 }
 
-bool LoadSpriteDefinitions(SpriteDefinitions& def, const std::filesystem::path& path, char separator)
+bool loadSpriteDefinitions(SpriteDefinitions& def, const std::filesystem::path& path, char separator)
 {
     std::string line;
     std::ifstream stream(path, std::fstream::in);

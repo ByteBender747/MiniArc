@@ -6,14 +6,14 @@
 #include <memory.h>
 
 #include "Vector2.hpp"
-#include "AppEntry.hpp"
+#include "AppState.hpp"
 #include "MiniArc.hpp"
 #include "SpriteRenderer.hpp"
 
 class PlayerShip
 {
 public:
-    PlayerShip(AppState* state, SDL_Texture* texture);
+    PlayerShip(sdl::AppState* state, SDL_Texture* texture);
     virtual ~PlayerShip();
 private:
     enum class MovementDirection {
@@ -41,6 +41,6 @@ private:
     sdl::SpriteRenderer m_sprite;
     sdl::SpriteRenderer m_flames;
     sdl::SpriteRenderer m_shotSprite;
-    AppState* m_app;
-    GameState* m_game;
+    sdl::AppState* m_app;
+    GameAssets* m_assets;
 };

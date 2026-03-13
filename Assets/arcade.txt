@@ -11,3 +11,6 @@ Laser,47,57,2,9
 LaserCharged1,46,43,4,12
 LaserCharged2,62,43,4,12
 Rocket,53,58,6,8
+StarSmall,77,43,3,3
+StarMedium,79,50,5,5
+StarLarge,84,43,7,7

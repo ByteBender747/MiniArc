@@ -71,6 +71,6 @@ private:
 };
 
 
-bool LoadSpriteDefinitions(SpriteDefinitions& def, const std::filesystem::path& path, char separator = ',');
+bool loadSpriteDefinitions(SpriteDefinitions& def, const std::filesystem::path& path, char separator = ',');
 
 } // namespace sdl

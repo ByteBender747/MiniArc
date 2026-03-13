@@ -1,37 +1,41 @@
-#include <SDL3/SDL_surface.h>
+#include <memory>
+#include <ostream>
 #include <iostream>
 
-#include "AppEntry.hpp"
+#include <SDL3/SDL_surface.h>
+
+#include "AppState.hpp"
 #include "PlayerShip.hpp"
 #include "SpriteRenderer.hpp"
 #include "MiniArc.hpp"
+#include "PathHelper.hpp"
 
 #include <SDL3/SDL_render.h>
 #include <SDL3_image/SDL_image.h>
-#include <memory>
-#include <ostream>
 
-void MiniArc_Init(AppState* state, int argc, char** argv)
+void MiniArc_Init(sdl::AppState* state, int argc, char** argv)
 {
-    GameState* gs = new GameState();
-    state->userdata = gs;
-    if (!sdl::LoadSpriteDefinitions(gs->sprites, "../Assets/arcade.txt")) {
+    GameAssets* assets = new GameAssets();
+    if (!sdl::loadSpriteDefinitions(assets->sprites, sdl::resolveRelativeToExe("../Assets/arcade.txt"))) {
         std::cerr << "Error: Could not load Assets/arcade.txt" << std::endl;
         state->isRunning = false;
         return;
     }
-    gs->spriteTexture = IMG_LoadTexture(state->renderer, "../Assets/arcade.png");
-    if (!gs->spriteTexture) {
+    assets->spriteTexture = IMG_LoadTexture(state->renderer, sdl::resolveRelativeToExe("../Assets/arcade.png").c_str());
+    if (!assets->spriteTexture) {
         std::cerr << "Error: Could not load Assets/arcade.png" << std::endl;
         state->isRunning = false;
         return;
     }
-    gs->player = std::make_unique<PlayerShip>(state, gs->spriteTexture);
+    state->properties["assets"].pointer = assets;
+    state->properties["player"].pointer = new PlayerShip(state, assets->spriteTexture);
 }
 
-void MiniArc_Exit(AppState* state)
+void MiniArc_Exit(sdl::AppState* state)
 {
-    GameState* gs = static_cast<GameState*>(state->userdata);
-    SDL_DestroyTexture(gs->spriteTexture);
-    delete gs;
+    GameAssets* assets = static_cast<GameAssets*>(state->properties["assets"].pointer);
+    PlayerShip* player = static_cast<PlayerShip*>(state->properties["player"].pointer);
+    delete player;
+    SDL_DestroyTexture(assets->spriteTexture);
+    delete assets;
 }
