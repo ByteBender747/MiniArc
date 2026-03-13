@@ -7,3 +7,7 @@ FlameRight1,35,56,9,7
 FlameRight2,35,64,9,6
 FlameCenter1,19,56,10,7
 FlameCenter2,19,64,10,6
+Laser,47,57,2,9
+LaserCharged1,46,43,4,12
+LaserCharged2,62,43,4,12
+Rocket,53,58,6,8

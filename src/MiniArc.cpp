@@ -11,13 +11,6 @@
 #include <memory>
 #include <ostream>
 
-void MiniArc_IterateActors(AppState* state)
-{
-    GameState* gs = static_cast<GameState*>(state->userdata);
-    gs->player->update();
-    gs->player->render();
-}
-
 void MiniArc_Init(AppState* state, int argc, char** argv)
 {
     GameState* gs = new GameState();
@@ -34,7 +27,6 @@ void MiniArc_Init(AppState* state, int argc, char** argv)
         return;
     }
     gs->player = std::make_unique<PlayerShip>(state, gs->spriteTexture);
-    state->iterateHandler.push_back(MiniArc_IterateActors);
 }
 
 void MiniArc_Exit(AppState* state)

@@ -4,8 +4,9 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
 
+#include <map>
 #include <functional>
-#include <vector>
+#include <string>
 
 #ifndef WINDOW_WIDTH
 #define WINDOW_WIDTH 640
@@ -44,6 +45,6 @@ struct AppState {
     bool isRunning{true};
     void* userdata{nullptr};
     SDL_Color clearColor{0, 0, 0, 255};
-    std::vector<EventHandler> eventHandler;
-    std::vector<IterateHandler> iterateHandler;
+    std::map<int, EventHandler> eventHandler;
+    std::map<int, IterateHandler> iterateHandler;
 };

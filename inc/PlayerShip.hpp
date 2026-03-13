@@ -14,23 +14,33 @@ class PlayerShip
 {
 public:
     PlayerShip(AppState* state, SDL_Texture* texture);
-    void update();
-    void render();
-private:
-    void shipMovement();
-    void animateFlames();
+    virtual ~PlayerShip();
 private:
     enum class MovementDirection {
         None, Left, Right
     };
+    struct Projectile {
+        sdl::Vec2f position;
+        bool isActive{false};
+    };
+private:
+    void shipMovement();
+    void animateFlames();
+    void handleInputs();
+    void moveAndRenderProjectiles(float shotSpeed);
+    bool fireProjectile(float x, float y);
+private:
     double m_speed;
     float m_posLimits[4];
     uint8_t m_flameType;
     double m_flameTimer;
+    bool m_triggerState;
+    std::array<Projectile, 8> m_projectiles;
     MovementDirection m_direction;
     sdl::Vec2f m_position;
     sdl::SpriteRenderer m_sprite;
     sdl::SpriteRenderer m_flames;
+    sdl::SpriteRenderer m_shotSprite;
     AppState* m_app;
     GameState* m_game;
 };

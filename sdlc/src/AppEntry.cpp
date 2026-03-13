@@ -1,5 +1,3 @@
-#include <SDL3/SDL_render.h>
-#include <SDL3/SDL_timer.h>
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -64,7 +62,7 @@ SDL_AppResult SDL_AppEvent(void* appState, SDL_Event* event)
         return SDL_APP_SUCCESS;
     }
     for (auto handler : state->eventHandler) {
-        handler(state, event);
+        handler.second(state, event);
     }
     return SDL_APP_CONTINUE;
 }
@@ -85,7 +83,7 @@ SDL_AppResult SDL_AppIterate(void* appState)
     SDL_RenderClear(state->renderer);
 
     for (auto handler : state->iterateHandler) {
-        handler(state);
+        handler.second(state);
     }
 
     SDL_RenderPresent(state->renderer);
