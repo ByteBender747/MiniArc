@@ -5,6 +5,7 @@
 #include <SDL3/SDL_surface.h>
 
 #include "AppState.hpp"
+#include "BackgroundStars.hpp"
 #include "PlayerShip.hpp"
 #include "SpriteRenderer.hpp"
 #include "MiniArc.hpp"
@@ -29,12 +30,15 @@ void MiniArc_Init(sdl::AppState* state, int argc, char** argv)
     }
     state->properties["assets"].pointer = assets;
     state->properties["player"].pointer = new PlayerShip(state, assets->spriteTexture);
+    state->properties["stars"].pointer = new BackgroundStars(state, assets->spriteTexture);
 }
 
 void MiniArc_Exit(sdl::AppState* state)
 {
     GameAssets* assets = static_cast<GameAssets*>(state->properties["assets"].pointer);
     PlayerShip* player = static_cast<PlayerShip*>(state->properties["player"].pointer);
+    BackgroundStars* stars = static_cast<BackgroundStars*>(state->properties["stars"].pointer);
+    delete stars;
     delete player;
     SDL_DestroyTexture(assets->spriteTexture);
     delete assets;

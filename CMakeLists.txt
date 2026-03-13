@@ -31,6 +31,7 @@ target_compile_definitions(sdlc PUBLIC
 
 # Add source files for MiniArc target
 target_sources(${PROJECT_NAME} PRIVATE
-    ${CMAKE_SOURCE_DIR}/src/MiniArc.cpp
-    ${CMAKE_SOURCE_DIR}/src/PlayerShip.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/MiniArc.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PlayerShip.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/BackgroundStars.cpp
 )   

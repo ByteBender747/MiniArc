@@ -88,6 +88,22 @@ SDL_Color SpriteRenderer::getColorMod()
     return color;
 }
 
+void SpriteRenderer::saveTextureState()
+{
+    m_savedState.alphaMod = getAlphaMod();
+    m_savedState.blendMode = getBlendMode();
+    m_savedState.scaleMode = getSaleMode();
+    m_savedState.colorMod = getColorMod();
+}
+
+void SpriteRenderer::restoreTextureState()
+{
+    setAlphaMod(m_savedState.alphaMod);
+    setBlendMode(m_savedState.blendMode);
+    setScaleMode(m_savedState.scaleMode);
+    setColorMod(m_savedState.colorMod.r, m_savedState.colorMod.g, m_savedState.colorMod.b);
+}
+
 void SpriteRenderer::render(SDL_Renderer* renderer)
 {
     if (m_rotated) {

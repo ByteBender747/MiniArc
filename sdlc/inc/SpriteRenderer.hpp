@@ -39,6 +39,8 @@ public:
     SDL_ScaleMode getSaleMode();
     SDL_BlendMode getBlendMode();
     Uint8 getAlphaMod();
+    void saveTextureState();
+    void restoreTextureState();
     void setSource(const SDL_FRect& rect) { m_source = rect; }
     void setSource(float x, float y, float w, float h) {
         m_source.h = h;
@@ -65,6 +67,12 @@ public:
 private:
     bool m_rotated;
     double m_rotation;
+    struct {
+        Uint8 alphaMod;
+        SDL_Color colorMod;
+        SDL_ScaleMode scaleMode;
+        SDL_BlendMode blendMode;
+    } m_savedState;
     SDL_Texture* m_texture;
     SDL_FRect m_source;
     SDL_FRect m_destination;
