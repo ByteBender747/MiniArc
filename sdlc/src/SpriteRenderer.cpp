@@ -11,7 +11,7 @@
 #include "SpriteRenderer.hpp"
 #include "Rect.hpp"
 
-namespace sdl
+namespace sdlc
 {
 
 SpriteRenderer::SpriteRenderer(SDL_Texture* texture)
@@ -22,19 +22,19 @@ SpriteRenderer::SpriteRenderer(SDL_Texture* texture)
 void SpriteRenderer::setPosition(float x, float y, SpriteOrigin origin)
 {
     switch (origin) {
-    case sdl::SpriteOrigin::TopLeft:
+    case sdlc::SpriteOrigin::TopLeft:
         setDestination(x, y, m_source.w, m_source.h);
         break;
-    case sdl::SpriteOrigin::TopRight:
+    case sdlc::SpriteOrigin::TopRight:
         setDestination(x - m_source.w, y, m_source.w, m_source.h);
         break;
-    case sdl::SpriteOrigin::BottomLeft:
+    case sdlc::SpriteOrigin::BottomLeft:
         setDestination(x, y - m_source.h, m_source.w, m_source.h);
         break;
-    case sdl::SpriteOrigin::BottomRight:
+    case sdlc::SpriteOrigin::BottomRight:
         setDestination(x - m_source.w, y - m_source.h, m_source.w, m_source.h);
         break;
-    case sdl::SpriteOrigin::Center:
+    case sdlc::SpriteOrigin::Center:
         setDestination(x - m_source.w / 2.0f, y - m_source.h / 2.0f, m_source.w, m_source.h);
         break;
     }
@@ -164,4 +164,4 @@ bool loadSpriteDefinitions(SpriteDefinitions& def, const std::filesystem::path& 
     return true;
 }
 
-} // namespace sdl
+} // namespace sdlc

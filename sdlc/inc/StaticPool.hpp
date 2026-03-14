@@ -3,7 +3,7 @@
 #include <array>
 #include <functional>
 
-namespace sdl
+namespace sdlc
 {
 
 template <typename item_type, std::size_t elements>
@@ -91,4 +91,4 @@ private:
     std::array<PoolItem, elements> m_data;
 };
 
-} // namespace sdl
+} // namespace sdlc

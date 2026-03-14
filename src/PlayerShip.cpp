@@ -9,7 +9,7 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_scancode.h>
 
-using namespace sdl;
+using namespace sdlc;
 
 constexpr int playerZIndex = 1;
 
@@ -18,7 +18,7 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
 {
     m_assets = static_cast<GameAssets*>(state->properties["assets"].pointer);
     m_sprite.setScaleMode(SDL_SCALEMODE_PIXELART);
-    m_position = sdl::Vec2f(RENDER_LOGICAL_WIDTH / 2., RENDER_LOGICAL_HEIGHT - 20.);
+    m_position = sdlc::Vec2f(RENDER_LOGICAL_WIDTH / 2., RENDER_LOGICAL_HEIGHT - 20.);
     m_posLimits[0] = 7;
     m_posLimits[1] = RENDER_LOGICAL_WIDTH - 7;
     m_posLimits[2] = 8;
@@ -34,7 +34,7 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     };
     m_appState->eventHandler[playerZIndex] = [this](AppState* appState, SDL_Event* event) {
         if (event->type == SDL_EVENT_KEY_UP && m_triggerState) {
-            if (!sdl::keyPressed(SDL_SCANCODE_SPACE)) {
+            if (!sdlc::keyPressed(SDL_SCANCODE_SPACE)) {
                 m_triggerState = false;
             }
         }
@@ -51,7 +51,7 @@ bool PlayerShip::fireProjectile(float x, float y)
 {
     Projectile* projectile = m_projectiles.acquire();
     if (projectile)  {
-        projectile->position = sdl::Vec2f(x, y);
+        projectile->position = sdlc::Vec2f(x, y);
     }
     return projectile != nullptr;
 }
@@ -61,8 +61,8 @@ void PlayerShip::moveAndRenderProjectiles(float shotSpeed)
     for (auto& item : m_projectiles) {
         if (item.acquired) {
             Projectile& projectile = item.value;
-            projectile.position += sdl::Vec2f(0, -shotSpeed * m_appState->deltaTime);
-            m_shotSprite.setPosition(projectile.position.x, projectile.position.y, sdl::SpriteOrigin::Center);
+            projectile.position += sdlc::Vec2f(0, -shotSpeed * m_appState->deltaTime);
+            m_shotSprite.setPosition(projectile.position.x, projectile.position.y, sdlc::SpriteOrigin::Center);
             m_shotSprite.render(m_appState->renderer);
             if (projectile.position.y < 0) {
                 item.acquired = false;
@@ -95,21 +95,21 @@ void PlayerShip::handleInputs()
 {
     float delta = m_appState->deltaTime * m_speed;
     m_direction = MovementDirection::None;
-    if (sdl::keyPressed(SDL_SCANCODE_D)) {
-        m_position += sdl::Vec2f(delta, 0);
+    if (sdlc::keyPressed(SDL_SCANCODE_D)) {
+        m_position += sdlc::Vec2f(delta, 0);
         m_direction = MovementDirection::Right;
     }
-    if (sdl::keyPressed(SDL_SCANCODE_A)) {
-        m_position += sdl::Vec2f(-delta, 0);
+    if (sdlc::keyPressed(SDL_SCANCODE_A)) {
+        m_position += sdlc::Vec2f(-delta, 0);
         m_direction = MovementDirection::Left;
     }
-    if (sdl::keyPressed(SDL_SCANCODE_W)) {
-        m_position += sdl::Vec2f(0, -delta);
+    if (sdlc::keyPressed(SDL_SCANCODE_W)) {
+        m_position += sdlc::Vec2f(0, -delta);
     }
-    if (sdl::keyPressed(SDL_SCANCODE_S)) {
-        m_position += sdl::Vec2f(0, delta);
+    if (sdlc::keyPressed(SDL_SCANCODE_S)) {
+        m_position += sdlc::Vec2f(0, delta);
     }
-    if (sdl::keyPressed(SDL_SCANCODE_SPACE) && !m_triggerState) {
+    if (sdlc::keyPressed(SDL_SCANCODE_SPACE) && !m_triggerState) {
         fireProjectile(m_position.x - 4, m_position.y);
         fireProjectile(m_position.x + 4, m_position.y);
         m_triggerState = true;
@@ -118,21 +118,21 @@ void PlayerShip::handleInputs()
 
 void PlayerShip::shipMovement()
 {
-    m_position.x = sdl::clamp(m_position.x, m_posLimits[0], m_posLimits[1]);
-    m_position.y = sdl::clamp(m_position.y, m_posLimits[2], m_posLimits[3]);
-    m_sprite.setPosition(m_position.x, m_position.y, sdl::SpriteOrigin::Center);
+    m_position.x = sdlc::clamp(m_position.x, m_posLimits[0], m_posLimits[1]);
+    m_position.y = sdlc::clamp(m_position.y, m_posLimits[2], m_posLimits[3]);
+    m_sprite.setPosition(m_position.x, m_position.y, sdlc::SpriteOrigin::Center);
     switch (m_direction) {
     case MovementDirection::Left:
         m_sprite.setSource(m_assets->sprites["PlayerLeft"]);
-        m_flames.setPosition(m_position.x - 1, m_position.y + 10, sdl::SpriteOrigin::Center);
+        m_flames.setPosition(m_position.x - 1, m_position.y + 10, sdlc::SpriteOrigin::Center);
         break;
     case MovementDirection::Right:
         m_sprite.setSource(m_assets->sprites["PlayerRight"]);
-        m_flames.setPosition(m_position.x + 1, m_position.y + 10, sdl::SpriteOrigin::Center);
+        m_flames.setPosition(m_position.x + 1, m_position.y + 10, sdlc::SpriteOrigin::Center);
         break;
     case MovementDirection::None:
         m_sprite.setSource(m_assets->sprites["PlayerCenter"]);
-        m_flames.setPosition(m_position.x, m_position.y + 10, sdl::SpriteOrigin::Center);
+        m_flames.setPosition(m_position.x, m_position.y + 10, sdlc::SpriteOrigin::Center);
         break;
     }
 }

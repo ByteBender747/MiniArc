@@ -12,7 +12,7 @@
 
 class BackgroundStars {
 public:
-    BackgroundStars(sdl::AppState* state, SDL_Texture* texture);
+    BackgroundStars(sdlc::AppState* state, SDL_Texture* texture);
     virtual ~BackgroundStars();
 private:
     void spawnStar();
@@ -23,8 +23,8 @@ private:
     };
     struct Star {
         StarType type;
-        sdl::Vec2f position;
-        sdl::RGB color;
+        sdlc::Vec2f position;
+        sdlc::RGB color;
         float speed;
         bool isOnScreen{false};
     };
@@ -32,10 +32,10 @@ private:
 private:
     double m_spawnTimer{0};
     GameAssets* m_assets;
-    sdl::AppState* m_appState;
-    sdl::Random m_rng;
-    sdl::SpriteRenderer m_sprite;
+    sdlc::AppState* m_appState;
+    sdlc::Random m_rng;
+    sdlc::SpriteRenderer m_sprite;
     std::array<Star, 32> m_stars;
 };
 
-void deleteBackgroundStar(sdl::AppState* state, const std::string& name);
+void deleteBackgroundStar(sdlc::AppState* state, const std::string& name);

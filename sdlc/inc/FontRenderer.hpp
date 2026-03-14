@@ -10,7 +10,7 @@
 
 #include "Dimension.hpp"
 
-namespace sdl {
+namespace sdlc {
 
 constexpr char atlasString[] =
     "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ";
@@ -64,4 +64,4 @@ private:
 
 using FontMap = std::unordered_map<std::string, std::shared_ptr<FontRenderer>>;
 
-} // namespace sdl
+} // namespace sdlc

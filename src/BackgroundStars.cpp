@@ -10,11 +10,11 @@ constexpr int starsZIndex = 0;
 constexpr float starSpeed[] = { 120, 80, 45 };
 constexpr double spawnInterval = 0.1;
 
-BackgroundStars::BackgroundStars(sdl::AppState* state, SDL_Texture* texture)
+BackgroundStars::BackgroundStars(sdlc::AppState* state, SDL_Texture* texture)
     : m_sprite(texture), m_appState(state)
 {
     m_assets = static_cast<GameAssets*>(state->properties["assets"].pointer);
-    m_appState->iterateHandler[starsZIndex] = [this](sdl::AppState* appState) {
+    m_appState->iterateHandler[starsZIndex] = [this](sdlc::AppState* appState) {
         m_spawnTimer += appState->deltaTime;
         if (m_spawnTimer > spawnInterval) {
             m_spawnTimer = 0;
@@ -44,24 +44,24 @@ void BackgroundStars::spawnStar()
 {
     for (auto& star : m_stars) {
         if (!star.isOnScreen) {
-            star.position = sdl::Vec2f(m_rng.next() % RENDER_LOGICAL_WIDTH, -7);
+            star.position = sdlc::Vec2f(m_rng.next() % RENDER_LOGICAL_WIDTH, -7);
             star.isOnScreen = true;
             star.type = getStarType();
-            sdl::HSL hsl { 0, 1, .5 };
+            sdlc::HSL hsl { 0, 1, .5 };
             switch (star.type) {
                 case StarType::Small:
-                    hsl.h = sdl::lerp(170, 230, m_rng.uniform());
+                    hsl.h = sdlc::lerp(170, 230, m_rng.uniform());
                     break;
                 case StarType::Middle:
-                    hsl.h = sdl::lerp(270, 330, m_rng.uniform());             
+                    hsl.h = sdlc::lerp(270, 330, m_rng.uniform());             
                     break;
                 case StarType::Large:
-                    hsl.h = sdl::lerp(0, 60, m_rng.uniform());                 
+                    hsl.h = sdlc::lerp(0, 60, m_rng.uniform());                 
                     break;
             }
-            hsl.l = sdl::lerp(.1, .5, m_rng.uniform());
+            hsl.l = sdlc::lerp(.1, .5, m_rng.uniform());
             star.speed = starSpeed[static_cast<int>(star.type)];
-            star.color = sdl::ColorConverter::hslToRgb(hsl);
+            star.color = sdlc::ColorConverter::hslToRgb(hsl);
             return;
         }
     }
@@ -71,7 +71,7 @@ void BackgroundStars::moveAndRender()
 {
     for (auto& star : m_stars) {
         if (star.isOnScreen) {
-            star.position += sdl::Vec2f(0, star.speed * m_appState->deltaTime);
+            star.position += sdlc::Vec2f(0, star.speed * m_appState->deltaTime);
             if (star.position.y > RENDER_LOGICAL_HEIGHT + 7) {
                 star.isOnScreen = false;
             }
@@ -89,14 +89,14 @@ void BackgroundStars::moveAndRender()
             m_sprite.saveTextureState();
             m_sprite.setScaleMode(SDL_SCALEMODE_LINEAR);
             m_sprite.setColorMod(star.color.r, star.color.g, star.color.b);
-            m_sprite.setPosition(star.position.x, star.position.y, sdl::SpriteOrigin::Center);
+            m_sprite.setPosition(star.position.x, star.position.y, sdlc::SpriteOrigin::Center);
             m_sprite.render(m_appState->renderer);
             m_sprite.restoreTextureState();
         }
     }
 }
 
-void deleteBackgroundStar(sdl::AppState* state, const std::string& name)
+void deleteBackgroundStar(sdlc::AppState* state, const std::string& name)
 {
     BackgroundStars* ptr = static_cast<BackgroundStars*>(state->properties[name].pointer);
     if (ptr) {

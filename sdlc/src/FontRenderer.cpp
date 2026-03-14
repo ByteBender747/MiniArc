@@ -17,7 +17,7 @@
 constexpr SDL_Color black = { 0, 0, 0, 255 };
 constexpr SDL_Color white = { 255, 255, 255, 255 };
 
-namespace sdl
+namespace sdlc
 {
 
 FontRenderer::FontRenderer(SDL_Renderer* renderer, const char* filePath, int size, FontRenderMode mode)
@@ -43,16 +43,16 @@ FontRenderer::FontRenderer(SDL_Renderer* renderer, const char* filePath, int siz
     for (int i = 0; i < sizeof(atlasString) - 1; ++i) {
         SDL_Surface* glyph;
         switch (mode) {
-            case sdl::FontRenderMode::Solid:
+            case sdlc::FontRenderMode::Solid:
                 glyph = TTF_RenderGlyph_Solid(ttf, atlasString[i], white);
                 break;
-            case sdl::FontRenderMode::Blended:
+            case sdlc::FontRenderMode::Blended:
                 glyph = TTF_RenderGlyph_Blended(ttf, atlasString[i], white);
                 break;
-            case sdl::FontRenderMode::Shaded:
+            case sdlc::FontRenderMode::Shaded:
                 glyph = TTF_RenderGlyph_Shaded(ttf, atlasString[i], white, black);
                 break;
-            case sdl::FontRenderMode::LCD:
+            case sdlc::FontRenderMode::LCD:
                 glyph = TTF_RenderGlyph_LCD(ttf, atlasString[i], white, black);
                 break;
             default:
@@ -138,4 +138,4 @@ Font::Font()
     size = width = height = characterCount = 0;
 }
 
-} // namespace sdl
+} // namespace sdlc

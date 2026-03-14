@@ -6,7 +6,7 @@
 
 #include "MathFunc.hpp"
 
-namespace sdl {
+namespace sdlc {
 
 template <typename ValueT>
 struct Vec2 {
@@ -190,4 +190,4 @@ inline double angleTo(const Vec2<ValueT>& d)
     return atan2(d.y, d.x);
 }
 
-} // namespace sdl
+} // namespace sdlc

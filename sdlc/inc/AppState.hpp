@@ -10,7 +10,7 @@
 #include <functional>
 #include <unordered_map>
 
-namespace sdl
+namespace sdlc
 {
 
 union Property {
@@ -33,7 +33,7 @@ struct AppState {
     SDL_Color clearColor{0, 0, 0, 255};
     std::map<int, EventHandler> eventHandler;
     std::map<int, IterateHandler> iterateHandler;
-    std::unordered_map<std::string, sdl::Property> properties;
+    std::unordered_map<std::string, sdlc::Property> properties;
 };
 
-} // namespace sdl
+} // namespace sdlc

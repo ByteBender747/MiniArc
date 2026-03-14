@@ -13,7 +13,7 @@
 
 #include "Rect.hpp"
 
-namespace sdl
+namespace sdlc
 {
 
 using SpriteDefinitions = std::unordered_map<std::string, Rect<int> >;
@@ -81,4 +81,4 @@ private:
 
 bool loadSpriteDefinitions(SpriteDefinitions& def, const std::filesystem::path& path, char separator = ',');
 
-} // namespace sdl
+} // namespace sdlc

@@ -2,9 +2,9 @@
 
 #include <filesystem>
 
-namespace sdl
+namespace sdlc
 {
 
 std::filesystem::path resolveRelativeToExe(const std::string& relativePath);
 
-} // namespace sdl
+} // namespace sdlc

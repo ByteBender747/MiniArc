@@ -4,7 +4,7 @@
 #include "MathFunc.hpp"
 #include "ColorConverter.hpp"
 
-namespace sdl
+namespace sdlc
 {
 
 RGB ColorConverter::hslToRgb(const HSL& hsl)
@@ -73,4 +73,4 @@ double ColorConverter::hueToRgb(double p, double q, double t)
     return p;
 }
 
-} // namespace sdl
+} // namespace sdlc

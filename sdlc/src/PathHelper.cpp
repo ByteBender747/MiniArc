@@ -10,7 +10,7 @@
 #include <limits.h>
 #endif
 
-namespace sdl
+namespace sdlc
 {
 
 static std::filesystem::path getExecutablePath()
@@ -39,4 +39,4 @@ std::filesystem::path resolveRelativeToExe(const std::string& relativePath)
     return std::filesystem::canonical(exeDir / relativePath);
 }
 
-} // namespace sdl
+} // namespace sdlc

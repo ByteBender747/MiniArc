@@ -4,7 +4,7 @@
 
 #include "AppState.hpp"
 
-using namespace sdl;
+using namespace sdlc;
 
 #ifdef TTF_INIT
 #include <SDL3_ttf/SDL_ttf.h>

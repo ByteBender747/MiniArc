@@ -2,7 +2,7 @@
 
 #include <cstdlib>
 
-namespace sdl {
+namespace sdlc {
 
 constexpr double pi = 3.14159265358979323846;
 constexpr double tau = pi * 2.;
@@ -67,4 +67,4 @@ inline void _vdiv(ValueT c[], const ValueT a[], const ValueT b[])
     }
 }
 
-} // namespace sdl
+} // namespace sdlc

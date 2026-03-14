@@ -2,7 +2,7 @@
 
 #include <SDL3/SDL_pixels.h>
 
-namespace sdl
+namespace sdlc
 {
 
 struct RGB {
@@ -41,4 +41,4 @@ private:
     static double hueToRgb(double p, double q, double t);
 };
 
-} // namespace sdl
+} // namespace sdlc

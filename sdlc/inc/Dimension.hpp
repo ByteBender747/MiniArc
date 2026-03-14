@@ -1,6 +1,6 @@
 #pragma  once
 
-namespace sdl
+namespace sdlc
 {
 
 template <typename ValueT>

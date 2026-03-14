@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <SDL3/SDL_timer.h>
 
-namespace sdl
+namespace sdlc
 {
 
 class Random
@@ -56,4 +56,4 @@ private:
     uint64_t m_s[2];
 };
 
-} // namespace sdl
+} // namespace sdlc

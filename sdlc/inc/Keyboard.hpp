@@ -2,7 +2,7 @@
 
 #include <SDL3/SDL_keyboard.h>
 
-namespace sdl
+namespace sdlc
 {
 
 static inline bool keyPressed(SDL_Scancode code)
@@ -15,4 +15,4 @@ static inline bool keyPressed(SDL_Scancode code)
     }
 }
 
-} // namespace sdl
+} // namespace sdlc

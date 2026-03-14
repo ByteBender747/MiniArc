@@ -6,6 +6,6 @@
 
 struct GameAssets
 {
-    sdl::SpriteDefinitions sprites;
-    sdl::ResPtr<SDL_Texture> spriteTexture;
+    sdlc::SpriteDefinitions sprites;
+    sdlc::ResPtr<SDL_Texture> spriteTexture;
 };

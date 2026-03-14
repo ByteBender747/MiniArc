@@ -13,15 +13,15 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3_image/SDL_image.h>
 
-void MiniArc_Init(sdl::AppState* state, int argc, char** argv)
+void MiniArc_Init(sdlc::AppState* state, int argc, char** argv)
 {
     GameAssets* assets = new GameAssets();
-    if (!sdl::loadSpriteDefinitions(assets->sprites, sdl::resolveRelativeToExe("../Assets/arcade.txt"))) {
+    if (!sdlc::loadSpriteDefinitions(assets->sprites, sdlc::resolveRelativeToExe("../Assets/arcade.txt"))) {
         std::cerr << "Error: Could not load Assets/arcade.txt" << std::endl;
         state->isRunning = false;
         return;
     }
-    assets->spriteTexture = IMG_LoadTexture(state->renderer, sdl::resolveRelativeToExe("../Assets/arcade.png").c_str());
+    assets->spriteTexture = IMG_LoadTexture(state->renderer, sdlc::resolveRelativeToExe("../Assets/arcade.png").c_str());
     if (!assets->spriteTexture) {
         std::cerr << "Error: Could not load Assets/arcade.png" << std::endl;
         state->isRunning = false;
@@ -32,7 +32,7 @@ void MiniArc_Init(sdl::AppState* state, int argc, char** argv)
     state->properties["stars"].pointer = new BackgroundStars(state, assets->spriteTexture);
 }
 
-void MiniArc_Exit(sdl::AppState* state)
+void MiniArc_Exit(sdlc::AppState* state)
 {
     GameAssets* assets = static_cast<GameAssets*>(state->properties["assets"].pointer);
     deleteBackgroundStar(state, "stars");

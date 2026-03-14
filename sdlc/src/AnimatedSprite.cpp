@@ -1,7 +1,7 @@
 #include "AnimatedSprite.hpp"
 #include "SpriteRenderer.hpp"
 
-namespace sdl
+namespace sdlc
 {
 
 AnimatedSprite::AnimatedSprite(SDL_Texture* texture)
@@ -57,4 +57,4 @@ void AnimatedSprite::addFrames(const SpriteImageDistribution& dist)
     }
 }
 
-} // namespace sdl
+} // namespace sdlc

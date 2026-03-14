@@ -1,6 +1,6 @@
 #pragma once
 
-namespace sdl
+namespace sdlc
 {
 
 template <typename valueT>
@@ -117,4 +117,4 @@ struct Rect {
 #endif
 };
 
-} // namespace sdl
+} // namespace sdlc

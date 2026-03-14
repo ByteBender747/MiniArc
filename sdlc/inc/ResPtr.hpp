@@ -6,7 +6,7 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_surface.h>
 
-namespace sdl
+namespace sdlc
 {
 
 template<typename resT>
@@ -89,4 +89,4 @@ private:
     resT* m_res;
 };
 
-} // namespace sdl
+} // namespace sdlc

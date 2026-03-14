@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <functional>
 
-namespace sdl
+namespace sdlc
 {
 
 struct SpriteImageDistribution {
@@ -58,4 +58,4 @@ private:
     std::vector<SDL_FRect> m_frames;
 };
 
-} // namespace sdl
+} // namespace sdlc
