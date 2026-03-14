@@ -34,7 +34,7 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     };
     m_appState->eventHandler[playerZIndex] = [this](AppState* appState, SDL_Event* event) {
         if (event->type == SDL_EVENT_KEY_UP && m_triggerState) {
-            if (!sdl::KeyPressed(SDL_SCANCODE_SPACE)) {
+            if (!sdl::keyPressed(SDL_SCANCODE_SPACE)) {
                 m_triggerState = false;
             }
         }
@@ -49,25 +49,23 @@ PlayerShip::~PlayerShip()
 
 bool PlayerShip::fireProjectile(float x, float y)
 {
-    for (auto& projectile : m_projectiles) {
-        if (!projectile.isActive) {
-            projectile.position = sdl::Vec2f(x, y);
-            projectile.isActive = true;
-            return true;
-        }
+    Projectile* projectile = m_projectiles.acquire();
+    if (projectile)  {
+        projectile->position = sdl::Vec2f(x, y);
     }
-    return false;
+    return projectile != nullptr;
 }
 
 void PlayerShip::moveAndRenderProjectiles(float shotSpeed)
 {
-    for (auto& projectile : m_projectiles) {
-        if (projectile.isActive) {
+    for (auto& item : m_projectiles) {
+        if (item.acquired) {
+            Projectile& projectile = item.value;
             projectile.position += sdl::Vec2f(0, -shotSpeed * m_appState->deltaTime);
             m_shotSprite.setPosition(projectile.position.x, projectile.position.y, sdl::SpriteOrigin::Center);
             m_shotSprite.render(m_appState->renderer);
             if (projectile.position.y < 0) {
-                projectile.isActive = false;
+                item.acquired = false;
             }
         }
     }
@@ -97,21 +95,21 @@ void PlayerShip::handleInputs()
 {
     float delta = m_appState->deltaTime * m_speed;
     m_direction = MovementDirection::None;
-    if (sdl::KeyPressed(SDL_SCANCODE_D)) {
+    if (sdl::keyPressed(SDL_SCANCODE_D)) {
         m_position += sdl::Vec2f(delta, 0);
         m_direction = MovementDirection::Right;
     }
-    if (sdl::KeyPressed(SDL_SCANCODE_A)) {
+    if (sdl::keyPressed(SDL_SCANCODE_A)) {
         m_position += sdl::Vec2f(-delta, 0);
         m_direction = MovementDirection::Left;
     }
-    if (sdl::KeyPressed(SDL_SCANCODE_W)) {
+    if (sdl::keyPressed(SDL_SCANCODE_W)) {
         m_position += sdl::Vec2f(0, -delta);
     }
-    if (sdl::KeyPressed(SDL_SCANCODE_S)) {
+    if (sdl::keyPressed(SDL_SCANCODE_S)) {
         m_position += sdl::Vec2f(0, delta);
     }
-    if (sdl::KeyPressed(SDL_SCANCODE_SPACE) && !m_triggerState) {
+    if (sdl::keyPressed(SDL_SCANCODE_SPACE) && !m_triggerState) {
         fireProjectile(m_position.x - 4, m_position.y);
         fireProjectile(m_position.x + 4, m_position.y);
         m_triggerState = true;

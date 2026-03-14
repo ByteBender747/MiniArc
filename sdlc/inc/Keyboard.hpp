@@ -5,7 +5,7 @@
 namespace sdl
 {
 
-static inline bool KeyPressed(SDL_Scancode code)
+static inline bool keyPressed(SDL_Scancode code)
 {
     const bool* keys = SDL_GetKeyboardState(nullptr);
     if (keys && code < SDL_SCANCODE_COUNT) {
