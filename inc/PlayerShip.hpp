@@ -1,9 +1,11 @@
 #pragma once
 
-#include <SDL3/SDL_render.h>
-#include <SDL3/SDL_time.h>
+#include <string>
 #include <cstdint>
 #include <memory.h>
+
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_time.h>
 
 #include "Vector2.hpp"
 #include "AppState.hpp"
@@ -30,17 +32,19 @@ private:
     void moveAndRenderProjectiles(float shotSpeed);
     bool fireProjectile(float x, float y);
 private:
-    double m_speed;
+    double m_speed{100};
     float m_posLimits[4];
-    uint8_t m_flameType;
-    double m_flameTimer;
-    bool m_triggerState;
-    std::array<Projectile, 8> m_projectiles;
-    MovementDirection m_direction;
+    uint8_t m_flameType{0};
+    double m_flameTimer{0};
+    bool m_triggerState{false};
+    std::array<Projectile, 16> m_projectiles;
+    MovementDirection m_direction{MovementDirection::None};
     sdl::Vec2f m_position;
     sdl::SpriteRenderer m_sprite;
     sdl::SpriteRenderer m_flames;
     sdl::SpriteRenderer m_shotSprite;
-    sdl::AppState* m_app;
+    sdl::AppState* m_appState;
     GameAssets* m_assets;
 };
+
+void deletePlayerShip(sdl::AppState* state, const std::string& name);

@@ -1,4 +1,3 @@
-#include <memory>
 #include <ostream>
 #include <iostream>
 
@@ -36,10 +35,7 @@ void MiniArc_Init(sdl::AppState* state, int argc, char** argv)
 void MiniArc_Exit(sdl::AppState* state)
 {
     GameAssets* assets = static_cast<GameAssets*>(state->properties["assets"].pointer);
-    PlayerShip* player = static_cast<PlayerShip*>(state->properties["player"].pointer);
-    BackgroundStars* stars = static_cast<BackgroundStars*>(state->properties["stars"].pointer);
-    delete stars;
-    delete player;
-    SDL_DestroyTexture(assets->spriteTexture);
+    deleteBackgroundStar(state, "stars");
+    deletePlayerShip(state, "player");
     delete assets;
 }

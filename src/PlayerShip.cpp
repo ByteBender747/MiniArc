@@ -14,8 +14,7 @@ using namespace sdl;
 constexpr int playerZIndex = 1;
 
 PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
-    : m_app(state), m_sprite(texture), m_flames(texture), m_shotSprite(texture),
-      m_speed(100), m_direction(MovementDirection::None), m_flameType(0), m_flameTimer(0), m_triggerState(false)
+    : m_appState(state), m_sprite(texture), m_flames(texture), m_shotSprite(texture)
 {
     m_assets = static_cast<GameAssets*>(state->properties["assets"].pointer);
     m_sprite.setScaleMode(SDL_SCALEMODE_PIXELART);
@@ -25,7 +24,7 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_posLimits[2] = 8;
     m_posLimits[3] = RENDER_LOGICAL_HEIGHT - 8;
     m_shotSprite.setSource(m_assets->sprites["Laser"]);
-    m_app->iterateHandler[playerZIndex] = [this](AppState* appState) {
+    m_appState->iterateHandler[playerZIndex] = [this](AppState* appState) {
         handleInputs();
         shipMovement();
         animateFlames();
@@ -33,7 +32,7 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
         m_sprite.render(appState->renderer);
         m_flames.render(appState->renderer);
     };
-    m_app->eventHandler[playerZIndex] = [this](AppState* appState, SDL_Event* event) {
+    m_appState->eventHandler[playerZIndex] = [this](AppState* appState, SDL_Event* event) {
         if (event->type == SDL_EVENT_KEY_UP && m_triggerState) {
             if (!sdl::KeyPressed(SDL_SCANCODE_SPACE)) {
                 m_triggerState = false;
@@ -44,8 +43,8 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
 
 PlayerShip::~PlayerShip()
 {
-    m_app->iterateHandler[playerZIndex] = nullptr;
-    m_app->eventHandler[playerZIndex] = nullptr;
+    m_appState->iterateHandler[playerZIndex] = nullptr;
+    m_appState->eventHandler[playerZIndex] = nullptr;
 }
 
 bool PlayerShip::fireProjectile(float x, float y)
@@ -64,9 +63,9 @@ void PlayerShip::moveAndRenderProjectiles(float shotSpeed)
 {
     for (auto& projectile : m_projectiles) {
         if (projectile.isActive) {
-            projectile.position += sdl::Vec2f(0, -shotSpeed * m_app->deltaTime);
+            projectile.position += sdl::Vec2f(0, -shotSpeed * m_appState->deltaTime);
             m_shotSprite.setPosition(projectile.position.x, projectile.position.y, sdl::SpriteOrigin::Center);
-            m_shotSprite.render(m_app->renderer);
+            m_shotSprite.render(m_appState->renderer);
             if (projectile.position.y < 0) {
                 projectile.isActive = false;
             }
@@ -76,7 +75,7 @@ void PlayerShip::moveAndRenderProjectiles(float shotSpeed)
 
 void PlayerShip::animateFlames()
 {
-    m_flameTimer += m_app->deltaTime;
+    m_flameTimer += m_appState->deltaTime;
     if (m_flameTimer > 0.05) {
         m_flameType = (m_flameType + 1) & 0x01;
         m_flameTimer = 0;
@@ -96,7 +95,7 @@ void PlayerShip::animateFlames()
 
 void PlayerShip::handleInputs()
 {
-    float delta = m_app->deltaTime * m_speed;
+    float delta = m_appState->deltaTime * m_speed;
     m_direction = MovementDirection::None;
     if (sdl::KeyPressed(SDL_SCANCODE_D)) {
         m_position += sdl::Vec2f(delta, 0);
@@ -113,7 +112,8 @@ void PlayerShip::handleInputs()
         m_position += sdl::Vec2f(0, delta);
     }
     if (sdl::KeyPressed(SDL_SCANCODE_SPACE) && !m_triggerState) {
-        fireProjectile(m_position.x, m_position.y);
+        fireProjectile(m_position.x - 4, m_position.y);
+        fireProjectile(m_position.x + 4, m_position.y);
         m_triggerState = true;
     }
 }
@@ -136,5 +136,14 @@ void PlayerShip::shipMovement()
         m_sprite.setSource(m_assets->sprites["PlayerCenter"]);
         m_flames.setPosition(m_position.x, m_position.y + 10, sdl::SpriteOrigin::Center);
         break;
+    }
+}
+
+void deletePlayerShip(AppState* state, const std::string& name)
+{
+    PlayerShip* player = static_cast<PlayerShip*>(state->properties[name].pointer);
+    if (player) {
+        delete player;
+        state->properties[name].pointer = nullptr;
     }
 }

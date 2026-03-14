@@ -8,7 +8,7 @@
 
 constexpr int starsZIndex = 0;
 constexpr float starSpeed[] = { 120, 80, 45 };
-constexpr double spawnInterval = 0.3;
+constexpr double spawnInterval = 0.1;
 
 BackgroundStars::BackgroundStars(sdl::AppState* state, SDL_Texture* texture)
     : m_sprite(texture), m_appState(state)
@@ -29,13 +29,24 @@ BackgroundStars::~BackgroundStars()
     m_appState->iterateHandler[starsZIndex] = nullptr;
 }
 
+BackgroundStars::StarType BackgroundStars::getStarType()
+{
+    StarType result = StarType::Small;
+    if (m_rng.chance(.2)) {
+        result = StarType::Large;
+    } else if (m_rng.chance(.4)) {
+        result = StarType::Middle;
+    }
+    return result;
+}
+
 void BackgroundStars::spawnStar()
 {
     for (auto& star : m_stars) {
         if (!star.isOnScreen) {
             star.position = sdl::Vec2f(m_rng.next() % RENDER_LOGICAL_WIDTH, -7);
             star.isOnScreen = true;
-            star.type = static_cast<StarType>(m_rng.next() % 3);
+            star.type = getStarType();
             sdl::HSL hsl { 0, 1, .5 };
             switch (star.type) {
                 case StarType::Small:
@@ -76,10 +87,20 @@ void BackgroundStars::moveAndRender()
                     break;
             }
             m_sprite.saveTextureState();
+            m_sprite.setScaleMode(SDL_SCALEMODE_LINEAR);
             m_sprite.setColorMod(star.color.r, star.color.g, star.color.b);
             m_sprite.setPosition(star.position.x, star.position.y, sdl::SpriteOrigin::Center);
             m_sprite.render(m_appState->renderer);
             m_sprite.restoreTextureState();
         }
+    }
+}
+
+void deleteBackgroundStar(sdl::AppState* state, const std::string& name)
+{
+    BackgroundStars* ptr = static_cast<BackgroundStars*>(state->properties[name].pointer);
+    if (ptr) {
+        delete ptr;
+        state->properties[name].pointer = nullptr;
     }
 }

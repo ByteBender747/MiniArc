@@ -2,9 +2,10 @@
 
 #include "SpriteRenderer.hpp"
 #include <SDL3/SDL_render.h>
+#include "ResPtr.hpp"
 
 struct GameAssets
 {
     sdl::SpriteDefinitions sprites;
-    SDL_Texture* spriteTexture;
+    sdl::ResPtr<SDL_Texture> spriteTexture;
 };

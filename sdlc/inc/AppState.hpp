@@ -14,7 +14,7 @@ namespace sdl
 {
 
 union Property {
-    uint8_t data[8];
+    uint8_t data[8] {0, 0, 0, 0, 0, 0, 0, 0};
     void* pointer;
     int64_t integer;
     float floatValue;

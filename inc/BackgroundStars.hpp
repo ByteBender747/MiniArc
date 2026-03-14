@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <SDL3/SDL_render.h>
 
 #include "AppState.hpp"
@@ -27,11 +28,14 @@ private:
         float speed;
         bool isOnScreen{false};
     };
+    StarType getStarType();
 private:
     double m_spawnTimer{0};
     GameAssets* m_assets;
     sdl::AppState* m_appState;
     sdl::Random m_rng;
     sdl::SpriteRenderer m_sprite;
-    std::array<Star, 16> m_stars;
+    std::array<Star, 32> m_stars;
 };
+
+void deleteBackgroundStar(sdl::AppState* state, const std::string& name);
