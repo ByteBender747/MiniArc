@@ -13,8 +13,14 @@ class Enemy
 public:
     Enemy(sdlc::AppState* appState);
     virtual void updateAndRender() = 0;
-    void kill() { m_alive = false; }
-    bool isAlive() const { return m_alive; }
+    virtual void hitByProjectile(int damage) {};
+    virtual sdlc::Rect<float> getPositionRect() = 0;
+    void kill() {
+        m_alive = false;
+    }
+    bool isAlive() const {
+        return m_alive;
+    }
 public:
     enum EnemyType {
         None, Alan, Lips, Bon
@@ -34,10 +40,14 @@ class EnemyLips : public Enemy
 public:
     EnemyLips(sdlc::AppState* appState);
     void updateAndRender() override;
+    void hitByProjectile(int damage) override;
+    sdlc::Rect<float> getPositionRect() override;
 private:
     double m_jitterTimer{0};
     float m_jitterValue{0};
+    bool m_playDeathAnimation{false};
     sdlc::AnimatedSprite m_sprite;
+    sdlc::AnimatedSprite m_boomAnimation;
 };
 
 class EnemySpawner
@@ -45,6 +55,7 @@ class EnemySpawner
 public:
     EnemySpawner(sdlc::AppState* appState);
     virtual ~EnemySpawner();
+    bool hitCheckAllEnemies(const sdlc::Rect<float>& projectileRect, int damage);
 private:
     double m_spawnTimer{0};
     sdlc::AppState* m_appState;

@@ -6,9 +6,16 @@ namespace sdlc
 
 AnimatedSprite::AnimatedSprite(SDL_Texture* texture)
     : SpriteRenderer(texture)
-    , m_time(0), m_interval(1), m_currentFrame(0), m_running(true)
     , m_animationFinished(nullptr)
 {
+}
+
+void AnimatedSprite::stop()
+{
+    m_running = false;
+    m_currentFrame = 0;
+    m_time = 0;
+    setSource(0, 0, 0, 0);
 }
 
 void AnimatedSprite::update(double deltaTime)
@@ -19,8 +26,9 @@ void AnimatedSprite::update(double deltaTime)
             m_time = 0;
             m_currentFrame = (m_currentFrame + 1) % m_frames.size();
             setSource(m_frames[m_currentFrame]);
-            if (!m_currentFrame && m_animationFinished) {
-                m_animationFinished(*this);
+            if (!m_currentFrame) {
+                if (m_animationFinished) m_animationFinished(*this);
+                if (!m_repeat) stop();
             }
         }
     }
@@ -43,7 +51,7 @@ void AnimatedSprite::setFPS(double fps)
     m_interval = 1.0 / static_cast<double>(fps);
 }
 
-void AnimatedSprite::setFrame(int number)
+void AnimatedSprite::setFrame(unsigned int number)
 {
     if (number < m_frames.size()) {
         m_currentFrame = number;

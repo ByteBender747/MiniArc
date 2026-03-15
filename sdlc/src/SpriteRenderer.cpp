@@ -107,11 +107,13 @@ void SpriteRenderer::restoreTextureState()
 
 void SpriteRenderer::render(SDL_Renderer* renderer)
 {
-    if (m_rotated) {
-        SDL_FPoint center{m_destination.x + m_destination.w / 2, m_destination.y + m_destination.h / 2};
-        SDL_RenderTextureRotated(renderer, m_texture, &m_source, &m_destination, m_rotation, &center, SDL_FLIP_NONE);
-    } else {
-        SDL_RenderTexture(renderer, m_texture, &m_source, &m_destination);
+    if (m_source.w && m_source.h && m_destination.w && m_destination.h) {
+        if (m_rotated) {
+            SDL_FPoint center{m_destination.x + m_destination.w / 2, m_destination.y + m_destination.h / 2};
+            SDL_RenderTextureRotated(renderer, m_texture, &m_source, &m_destination, m_rotation, &center, SDL_FLIP_NONE);
+        } else {
+            SDL_RenderTexture(renderer, m_texture, &m_source, &m_destination);
+        }
     }
 }
 

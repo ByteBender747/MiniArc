@@ -32,29 +32,25 @@ public:
     void addFrames(const SpriteImageDistribution& dist);
     void setDuration(double time);
     void setFPS(double fps);
-    void setFrame(int number);
-    void play() {
-        m_running = true;
-    }
-    void pause() {
-        m_running = false;
-    }
-    void stop() {
-        m_running = false;
-        m_currentFrame = 0;
-        m_time = 0;
-    }
+    void setFrame(unsigned int number);
+    void play() { m_running = true; }
+    void pause() { m_running = false; }
+    void stop();
     bool isPlaying() const {
         return m_running;
     }
     void animationFinished(FinishedCallback cb) {
         m_animationFinished = cb;
     }
+    bool isFinished() const { return !m_repeat && !m_running; }
+    void setRepeat(bool state) { m_repeat = state; }
+    bool repeating() const { return m_repeat; }
 private:
-    bool m_running;
-    double m_time;
-    double m_interval;
-    uint32_t m_currentFrame;
+    bool m_running{false};
+    bool m_repeat{true};
+    double m_time{0};
+    double m_interval{1};
+    uint32_t m_currentFrame{0};
     FinishedCallback m_animationFinished;
     std::vector<SDL_FRect> m_frames;
 };

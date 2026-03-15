@@ -1,6 +1,7 @@
 #include <cassert>
 
 #include "Enemies.hpp"
+#include "AnimatedSprite.hpp"
 #include "AppState.hpp"
 #include "MiniArc.hpp"
 #include "Rect.hpp"
@@ -16,6 +17,15 @@ constexpr double spawnInterval = 2.;
 constexpr float lipsEnemyDownSpeed = 10;
 constexpr float lipsEnemyMaxJitter = 32;
 constexpr double lipsEnemyJitterInterval = 1.5;
+
+static void initBoom(GameAssets* assets, sdlc::AnimatedSprite& sprite)
+{
+    sprite.addFrame(assets->sprites["Boom1"]);
+    sprite.addFrame(assets->sprites["Boom2"]);
+    sprite.addFrame(assets->sprites["Boom3"]);
+    sprite.addFrame(assets->sprites["Boom4"]);
+    sprite.addFrame(assets->sprites["Boom5"]);
+}
 
 EnemySpawner::EnemySpawner(sdlc::AppState* appState)
     : m_appState(appState)
@@ -45,7 +55,21 @@ EnemySpawner::~EnemySpawner()
     m_appState->iterateHandler[enemyZIndex] = nullptr;
 }
 
-Enemy::Enemy(sdlc::AppState* appState) 
+bool EnemySpawner::hitCheckAllEnemies(const sdlc::Rect<float>& projectileRect, int damage)
+{
+    bool hitSomething = false; 
+    m_enemies.foreachAcquired([projectileRect, damage, &hitSomething](sdlc::PoolItem<std::unique_ptr<Enemy>>& item) {
+        if (item.value->isAlive()) {
+            if (projectileRect.intersects(item.value->getPositionRect())) {
+                item.value->hitByProjectile(damage);
+                hitSomething = true;
+            }
+        }
+    });
+    return hitSomething;
+}
+
+Enemy::Enemy(sdlc::AppState* appState)
     : m_appState(appState)
 {
     assert(m_appState);
@@ -55,19 +79,43 @@ Enemy::Enemy(sdlc::AppState* appState)
 }
 
 EnemyLips::EnemyLips(sdlc::AppState* appState)
-    : Enemy(appState), m_sprite(m_assets->spriteTexture)
+    : Enemy(appState), m_sprite(m_assets->spriteTexture), m_boomAnimation(m_assets->spriteTexture)
 {
     m_sprite.addFrame(m_assets->sprites["Lips1"]);
     m_sprite.addFrame(m_assets->sprites["Lips2"]);
     m_sprite.addFrame(m_assets->sprites["Lips3"]);
     m_sprite.addFrame(m_assets->sprites["Lips4"]);
     m_sprite.addFrame(m_assets->sprites["Lips5"]);
-    m_sprite.setPosition(spawnXMargin + (m_rng.next() % (RENDER_LOGICAL_WIDTH - spawnXMargin)), 0, sdlc::SpritePositionOffset::Center);
+    m_sprite.setPosition(spawnXMargin + (m_rng.next() % (RENDER_LOGICAL_WIDTH - spawnXMargin)), 0,
+                         sdlc::SpritePositionOffset::Center);
     m_sprite.setFPS(10);
+    m_sprite.play();
+    initBoom(m_assets, m_boomAnimation);
+    m_boomAnimation.setRepeat(false);
+    m_boomAnimation.setFPS(20);
+}
+
+sdlc::Rect<float> EnemyLips::getPositionRect()
+{
+    return sdlc::Rect<float>(m_sprite.destination());
+}
+
+void EnemyLips::hitByProjectile(int damage)
+{
+    m_boomAnimation.play();
+    m_sprite.stop();
+    m_playDeathAnimation = true;
 }
 
 void EnemyLips::updateAndRender()
 {
+    if (m_playDeathAnimation && isAlive()) {
+        m_boomAnimation.setPosition(m_sprite.position().x, m_sprite.position().y, sdlc::SpritePositionOffset::Center);
+        m_boomAnimation.update(m_appState->deltaTime);
+        m_boomAnimation.render(m_appState->renderer);
+        if (m_boomAnimation.isFinished()) kill();
+        return;
+    }
     sdlc::Vec2f pos(m_sprite.position());
     m_jitterTimer += m_appState->deltaTime;
     if (m_jitterTimer > lipsEnemyJitterInterval) {
@@ -76,8 +124,7 @@ void EnemyLips::updateAndRender()
     }
     pos += sdlc::Vec2f(m_jitterValue, lipsEnemyDownSpeed) * sdlc::Vec2f(m_appState->deltaTime);
     m_sprite.setPosition(pos.x, pos.y, sdlc::SpritePositionOffset::Center);
-    sdlc::Rect<float> posRect = m_sprite.destination();
-    if (m_viewPort.intersects(posRect)) {
+    if (m_viewPort.intersects(getPositionRect())) {
         m_sprite.update(m_appState->deltaTime);
         m_sprite.render(m_appState->renderer);
     } else {

@@ -1,5 +1,8 @@
+#include <cassert>
+
 #include "PlayerShip.hpp"
 #include "AppState.hpp"
+#include "Enemies.hpp"
 #include "MathFunc.hpp"
 #include "MiniArc.hpp"
 #include "SpriteRenderer.hpp"
@@ -56,6 +59,8 @@ bool PlayerShip::fireProjectile(float x, float y)
 
 void PlayerShip::moveAndRenderProjectiles(float shotSpeed)
 {
+    EnemySpawner* enemies = static_cast<EnemySpawner*>(m_appState->properties["enemies"].pointer);
+    assert(enemies);
     for (auto& item : m_projectiles) {
         if (item.acquired) {
             Projectile& projectile = item.value;
@@ -63,6 +68,9 @@ void PlayerShip::moveAndRenderProjectiles(float shotSpeed)
             m_shotSprite.setPosition(projectile.position.x, projectile.position.y, sdlc::SpritePositionOffset::Center);
             m_shotSprite.render(m_appState->renderer);
             if (projectile.position.y < 0) {
+                item.acquired = false;
+            }
+            if (enemies->hitCheckAllEnemies(m_shotSprite.destination(), 1)) {
                 item.acquired = false;
             }
         }
