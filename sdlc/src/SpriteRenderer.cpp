@@ -19,25 +19,26 @@ SpriteRenderer::SpriteRenderer(SDL_Texture* texture)
 {
 }
 
-void SpriteRenderer::setPosition(float x, float y, SpriteOrigin origin)
+void SpriteRenderer::setPosition(float x, float y, SpritePositionOffset origin)
 {
     switch (origin) {
-    case sdlc::SpriteOrigin::TopLeft:
+    case sdlc::SpritePositionOffset::TopLeft:
         setDestination(x, y, m_source.w, m_source.h);
         break;
-    case sdlc::SpriteOrigin::TopRight:
+    case sdlc::SpritePositionOffset::TopRight:
         setDestination(x - m_source.w, y, m_source.w, m_source.h);
         break;
-    case sdlc::SpriteOrigin::BottomLeft:
+    case sdlc::SpritePositionOffset::BottomLeft:
         setDestination(x, y - m_source.h, m_source.w, m_source.h);
         break;
-    case sdlc::SpriteOrigin::BottomRight:
+    case sdlc::SpritePositionOffset::BottomRight:
         setDestination(x - m_source.w, y - m_source.h, m_source.w, m_source.h);
         break;
-    case sdlc::SpriteOrigin::Center:
+    case sdlc::SpritePositionOffset::Center:
         setDestination(x - m_source.w / 2.0f, y - m_source.h / 2.0f, m_source.w, m_source.h);
         break;
     }
+    m_position = {x, y};
 }
 
 void SpriteRenderer::setBlendMode(SDL_BlendMode mode)

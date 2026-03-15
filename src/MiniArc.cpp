@@ -1,11 +1,12 @@
-#include <SDL3/SDL_scancode.h>
 #include <ostream>
 #include <iostream>
 
 #include <SDL3/SDL_surface.h>
+#include <SDL3/SDL_scancode.h>
 
 #include "AppState.hpp"
 #include "BackgroundStars.hpp"
+#include "Enemies.hpp"
 #include "PlayerShip.hpp"
 #include "SpriteRenderer.hpp"
 #include "MiniArc.hpp"
@@ -36,11 +37,13 @@ void MiniArc_Init(sdlc::AppState* state, int argc, char** argv)
     state->properties["assets"].pointer = assets;
     state->properties["player"].pointer = new PlayerShip(state, assets->spriteTexture);
     state->properties["stars"].pointer = new BackgroundStars(state, assets->spriteTexture);
+    state->properties["enemies"].pointer = new EnemySpawner(state);
 }
 
 void MiniArc_Exit(sdlc::AppState* state)
 {
     GameAssets* assets = static_cast<GameAssets*>(state->properties["assets"].pointer);
+    deleteEnemies(state, "enemies");
     deleteBackgroundStar(state, "stars");
     deletePlayerShip(state, "player");
     delete assets;

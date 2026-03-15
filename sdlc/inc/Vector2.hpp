@@ -1,12 +1,14 @@
 #pragma once
 
+#include <SDL3/SDL_rect.h>
 #define __VECTOR2_INCLUDED__
 
 #include <cmath>
 
 #include "MathFunc.hpp"
 
-namespace sdlc {
+namespace sdlc
+{
 
 template <typename ValueT>
 struct Vec2 {
@@ -22,6 +24,14 @@ struct Vec2 {
     Vec2(ValueT x, ValueT y)
         : x(x)
         , y(y) {
+    }
+    Vec2(const SDL_FPoint& ref)
+        : x(ref.x)
+        , y(ref.y) {
+    }
+    Vec2(const SDL_Point& ref)
+        : x(ref.x)
+        , y(ref.y) {
     }
     Vec2& operator+=(const Vec2& rhs) {
         _vadd<ValueT, 2>(reinterpret_cast<ValueT*>(this), reinterpret_cast<const ValueT*>(this),

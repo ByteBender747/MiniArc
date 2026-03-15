@@ -31,7 +31,8 @@ public:
     void addFrame(const SDL_FRect& rect);
     void addFrames(const SpriteImageDistribution& dist);
     void setDuration(double time);
-    void setFPS(int fps);
+    void setFPS(double fps);
+    void setFrame(int number);
     void play() {
         m_running = true;
     }

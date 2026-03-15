@@ -89,7 +89,7 @@ void BackgroundStars::moveAndRender()
             m_sprite.saveTextureState();
             m_sprite.setScaleMode(SDL_SCALEMODE_LINEAR);
             m_sprite.setColorMod(star.color.r, star.color.g, star.color.b);
-            m_sprite.setPosition(star.position.x, star.position.y, sdlc::SpriteOrigin::Center);
+            m_sprite.setPosition(star.position.x, star.position.y, sdlc::SpritePositionOffset::Center);
             m_sprite.render(m_appState->renderer);
             m_sprite.restoreTextureState();
         }

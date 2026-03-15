@@ -6,18 +6,19 @@
 namespace sdlc
 {
 
+template <typename item_type>
+struct PoolItem {
+    item_type value;
+    bool acquired{false};
+};
+
 template <typename item_type, std::size_t elements>
 class StaticPool
 {
 public:
-    struct PoolItem {
-        item_type value;
-        bool acquired{false};
-    };
-
-    using ForEachCallback = std::function<void(PoolItem&)>;
-    using iterator = typename std::array<PoolItem, elements>::iterator;
-    using const_iterator = typename std::array<PoolItem, elements>::const_iterator;
+    using ForEachCallback = std::function<void(PoolItem<item_type>&)>;
+    using iterator = typename std::array<PoolItem<item_type>, elements>::iterator;
+    using const_iterator = typename std::array<PoolItem<item_type>, elements>::const_iterator;
 
 public:
     // Iterator methods - delegate to std::array
@@ -46,10 +47,10 @@ public:
     }
 
     // Access operators
-    PoolItem& operator[](std::size_t index) {
+    PoolItem<item_type>& operator[](std::size_t index) {
         return m_data[index];
     }
-    const PoolItem& operator[](std::size_t index) const {
+    const PoolItem<item_type>& operator[](std::size_t index) const {
         return m_data[index];
     }
 
@@ -71,6 +72,16 @@ public:
         }
     }
 
+    bool release(const item_type* value) {
+        for (auto i = 0; i < elements; ++i) {
+            if (value == &m_data[i].value) {
+                m_data[i].acquired = false;
+                return true;
+            }
+        }
+        return false;
+    }
+
     void clear() {
         for (std::size_t i = 0; i < elements; ++i) {
             m_data[i].acquired = false;
@@ -88,7 +99,7 @@ public:
     }
 
 private:
-    std::array<PoolItem, elements> m_data;
+    std::array<PoolItem<item_type>, elements> m_data;
 };
 
 } // namespace sdlc

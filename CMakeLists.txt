@@ -34,4 +34,5 @@ target_sources(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MiniArc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PlayerShip.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/BackgroundStars.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Enemies.cpp
 )   

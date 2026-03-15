@@ -11,8 +11,6 @@
 
 using namespace sdlc;
 
-constexpr int playerZIndex = 1;
-
 PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     : m_appState(state), m_sprite(texture), m_flames(texture), m_shotSprite(texture)
 {
@@ -62,7 +60,7 @@ void PlayerShip::moveAndRenderProjectiles(float shotSpeed)
         if (item.acquired) {
             Projectile& projectile = item.value;
             projectile.position += sdlc::Vec2f(0, -shotSpeed * m_appState->deltaTime);
-            m_shotSprite.setPosition(projectile.position.x, projectile.position.y, sdlc::SpriteOrigin::Center);
+            m_shotSprite.setPosition(projectile.position.x, projectile.position.y, sdlc::SpritePositionOffset::Center);
             m_shotSprite.render(m_appState->renderer);
             if (projectile.position.y < 0) {
                 item.acquired = false;
@@ -119,19 +117,19 @@ void PlayerShip::shipMovement()
 {
     m_position.x = sdlc::clamp(m_position.x, m_posLimits[0], m_posLimits[1]);
     m_position.y = sdlc::clamp(m_position.y, m_posLimits[2], m_posLimits[3]);
-    m_sprite.setPosition(m_position.x, m_position.y, sdlc::SpriteOrigin::Center);
+    m_sprite.setPosition(m_position.x, m_position.y, sdlc::SpritePositionOffset::Center);
     switch (m_direction) {
     case MovementDirection::Left:
         m_sprite.setSource(m_assets->sprites["PlayerLeft"]);
-        m_flames.setPosition(m_position.x - 1, m_position.y + 10, sdlc::SpriteOrigin::Center);
+        m_flames.setPosition(m_position.x - 1, m_position.y + 10, sdlc::SpritePositionOffset::Center);
         break;
     case MovementDirection::Right:
         m_sprite.setSource(m_assets->sprites["PlayerRight"]);
-        m_flames.setPosition(m_position.x + 1, m_position.y + 10, sdlc::SpriteOrigin::Center);
+        m_flames.setPosition(m_position.x + 1, m_position.y + 10, sdlc::SpritePositionOffset::Center);
         break;
     case MovementDirection::None:
         m_sprite.setSource(m_assets->sprites["PlayerCenter"]);
-        m_flames.setPosition(m_position.x, m_position.y + 10, sdlc::SpriteOrigin::Center);
+        m_flames.setPosition(m_position.x, m_position.y + 10, sdlc::SpritePositionOffset::Center);
         break;
     }
 }

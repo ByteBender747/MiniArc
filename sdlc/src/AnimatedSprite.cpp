@@ -38,9 +38,17 @@ void AnimatedSprite::setDuration(double time)
     m_interval = time / static_cast<double>(m_frames.size());
 }
 
-void AnimatedSprite::setFPS(int fps)
+void AnimatedSprite::setFPS(double fps)
 {
-    m_interval = 1.0 / static_cast<double>(m_frames.size()) / static_cast<double>(fps);
+    m_interval = 1.0 / static_cast<double>(fps);
+}
+
+void AnimatedSprite::setFrame(int number)
+{
+    if (number < m_frames.size()) {
+        m_currentFrame = number;
+        setSource(m_frames[m_currentFrame]);
+    }
 }
 
 void AnimatedSprite::addFrames(const SpriteImageDistribution& dist)
