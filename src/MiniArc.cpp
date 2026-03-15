@@ -1,3 +1,4 @@
+#include <SDL3/SDL_scancode.h>
 #include <ostream>
 #include <iostream>
 
@@ -27,6 +28,11 @@ void MiniArc_Init(sdlc::AppState* state, int argc, char** argv)
         state->isRunning = false;
         return;
     }
+    state->input.keys.mapKey("shipUp", SDL_SCANCODE_W);
+    state->input.keys.mapKey("shipDown", SDL_SCANCODE_S);
+    state->input.keys.mapKey("shipLeft", SDL_SCANCODE_A);
+    state->input.keys.mapKey("shipRight", SDL_SCANCODE_D);
+    state->input.keys.mapKey("fireBeam", SDL_SCANCODE_SPACE);
     state->properties["assets"].pointer = assets;
     state->properties["player"].pointer = new PlayerShip(state, assets->spriteTexture);
     state->properties["stars"].pointer = new BackgroundStars(state, assets->spriteTexture);

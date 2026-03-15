@@ -34,7 +34,7 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     };
     m_appState->eventHandler[playerZIndex] = [this](AppState* appState, SDL_Event* event) {
         if (event->type == SDL_EVENT_KEY_UP && m_triggerState) {
-            if (!sdlc::keyPressed(SDL_SCANCODE_SPACE)) {
+            if (!sdlc::getKeyState(SDL_SCANCODE_SPACE)) {
                 m_triggerState = false;
             }
         }
@@ -95,24 +95,23 @@ void PlayerShip::handleInputs()
 {
     float delta = m_appState->deltaTime * m_speed;
     m_direction = MovementDirection::None;
-    if (sdlc::keyPressed(SDL_SCANCODE_D)) {
+    if (m_appState->input.keys.down("shipRight")) {
         m_position += sdlc::Vec2f(delta, 0);
         m_direction = MovementDirection::Right;
     }
-    if (sdlc::keyPressed(SDL_SCANCODE_A)) {
+    if (m_appState->input.keys.down("shipLeft")) {
         m_position += sdlc::Vec2f(-delta, 0);
         m_direction = MovementDirection::Left;
     }
-    if (sdlc::keyPressed(SDL_SCANCODE_W)) {
+    if (m_appState->input.keys.down("shipUp")) {
         m_position += sdlc::Vec2f(0, -delta);
     }
-    if (sdlc::keyPressed(SDL_SCANCODE_S)) {
+    if (m_appState->input.keys.down("shipDown")) {
         m_position += sdlc::Vec2f(0, delta);
     }
-    if (sdlc::keyPressed(SDL_SCANCODE_SPACE) && !m_triggerState) {
+    if (m_appState->input.keys.fallingEdge("fireBeam")) {
         fireProjectile(m_position.x - 4, m_position.y);
         fireProjectile(m_position.x + 4, m_position.y);
-        m_triggerState = true;
     }
 }
 

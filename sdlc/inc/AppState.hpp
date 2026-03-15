@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Keyboard.hpp"
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
@@ -34,6 +35,9 @@ struct AppState {
     std::map<int, EventHandler> eventHandler;
     std::map<int, IterateHandler> iterateHandler;
     std::unordered_map<std::string, sdlc::Property> properties;
+    struct {
+        KeyMap keys;
+    } input;
 };
 
 } // namespace sdlc
