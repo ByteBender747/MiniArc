@@ -26,6 +26,7 @@ public:
         None, Alan, Lips, Bon
     };
 protected:
+    int m_hitPoints{1};
     GameAssets* m_assets;
     EnemyType m_type{None};
     sdlc::Random m_rng;
@@ -45,6 +46,7 @@ public:
 private:
     double m_jitterTimer{0};
     float m_jitterValue{0};
+    bool m_hitFlash{false};
     bool m_playDeathAnimation{false};
     sdlc::AnimatedSprite m_sprite;
     sdlc::AnimatedSprite m_boomAnimation;

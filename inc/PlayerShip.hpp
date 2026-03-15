@@ -32,7 +32,6 @@ private:
     void moveAndRenderProjectiles(float shotSpeed);
     bool fireProjectile(float x, float y);
 private:
-    double m_speed{100};
     float m_posLimits[4];
     uint8_t m_flameType{0};
     double m_flameTimer{0};

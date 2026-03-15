@@ -14,7 +14,8 @@ constexpr int spawnXMargin = 8;
 constexpr double spawnInterval = 2.;
 
 // Enemy Lips behavior configuration
-constexpr float lipsEnemyDownSpeed = 10;
+constexpr int lipsHitPoints = 150;
+constexpr float lipsEnemyDownSpeed = 20;
 constexpr float lipsEnemyMaxJitter = 32;
 constexpr double lipsEnemyJitterInterval = 1.5;
 
@@ -57,7 +58,7 @@ EnemySpawner::~EnemySpawner()
 
 bool EnemySpawner::hitCheckAllEnemies(const sdlc::Rect<float>& projectileRect, int damage)
 {
-    bool hitSomething = false; 
+    bool hitSomething = false;
     m_enemies.foreachAcquired([projectileRect, damage, &hitSomething](sdlc::PoolItem<std::unique_ptr<Enemy>>& item) {
         if (item.value->isAlive()) {
             if (projectileRect.intersects(item.value->getPositionRect())) {
@@ -93,6 +94,7 @@ EnemyLips::EnemyLips(sdlc::AppState* appState)
     initBoom(m_assets, m_boomAnimation);
     m_boomAnimation.setRepeat(false);
     m_boomAnimation.setFPS(20);
+    m_hitPoints = lipsHitPoints;
 }
 
 sdlc::Rect<float> EnemyLips::getPositionRect()
@@ -102,9 +104,14 @@ sdlc::Rect<float> EnemyLips::getPositionRect()
 
 void EnemyLips::hitByProjectile(int damage)
 {
-    m_boomAnimation.play();
-    m_sprite.stop();
-    m_playDeathAnimation = true;
+    m_hitPoints -= damage;
+    if (m_hitPoints <= 0) {
+        m_boomAnimation.play();
+        m_sprite.stop();
+        m_playDeathAnimation = true;
+    } else {
+        m_hitFlash = true;
+    }
 }
 
 void EnemyLips::updateAndRender()
@@ -125,8 +132,13 @@ void EnemyLips::updateAndRender()
     pos += sdlc::Vec2f(m_jitterValue, lipsEnemyDownSpeed) * sdlc::Vec2f(m_appState->deltaTime);
     m_sprite.setPosition(pos.x, pos.y, sdlc::SpritePositionOffset::Center);
     if (m_viewPort.intersects(getPositionRect())) {
+        if (m_hitFlash) {
+            SDL_SetRenderColorScale(m_appState->renderer, 255);
+            m_hitFlash = false;
+        }
         m_sprite.update(m_appState->deltaTime);
         m_sprite.render(m_appState->renderer);
+        SDL_SetRenderColorScale(m_appState->renderer, 1);
     } else {
         kill(); // Runs out of visible area
     }

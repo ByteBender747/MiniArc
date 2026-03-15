@@ -19,4 +19,5 @@ target_sources(sdlc PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/AnimatedSprite.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ColorConverter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Keyboard.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Painter.cpp
 )

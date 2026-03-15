@@ -61,7 +61,7 @@ void BackgroundStars::spawnStar()
             }
             hsl.l = sdlc::lerp(.1, .5, m_rng.uniform());
             star.speed = starSpeed[static_cast<int>(star.type)];
-            star.color = sdlc::ColorConverter::hslToRgb(hsl);
+            star.color = sdlc::hslToRgb(hsl);
             return;
         }
     }

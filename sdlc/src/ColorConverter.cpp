@@ -1,5 +1,6 @@
 #include <cmath>
 #include <algorithm>
+#include <cstdint>
 
 #include "MathFunc.hpp"
 #include "ColorConverter.hpp"
@@ -7,7 +8,17 @@
 namespace sdlc
 {
 
-RGB ColorConverter::hslToRgb(const HSL& hsl)
+static double hueToRgb(double p, double q, double t)
+{
+    if (t < 0.0) t += 1.0;
+    if (t > 1.0) t -= 1.0;
+    if (t < 1.0/6.0) return p + (q - p) * 6.0 * t;
+    if (t < 1.0/2.0) return q;
+    if (t < 2.0/3.0) return p + (q - p) * (2.0/3.0 - t) * 6.0;
+    return p;
+}
+
+RGB hslToRgb(const HSL& hsl)
 {
     double h = clamp(hsl.h, 0.0, 360.0) / 360.0;
     double s = clamp(hsl.s, 0.0, 1.0);
@@ -34,11 +45,11 @@ RGB ColorConverter::hslToRgb(const HSL& hsl)
            );
 }
 
-HSL ColorConverter::rgbToHsl(const RGB& rgb)
+HSL rgbToHsl(const RGB& rgb)
 {
-    double r = clamp(rgb.r, 0, 255) / 255.0;
-    double g = clamp(rgb.g, 0, 255) / 255.0;
-    double b = clamp(rgb.b, 0, 255) / 255.0;
+    double r = clamp<uint8_t>(rgb.r, 0, 255) / 255.0;
+    double g = clamp<uint8_t>(rgb.g, 0, 255) / 255.0;
+    double b = clamp<uint8_t>(rgb.b, 0, 255) / 255.0;
 
     double max = std::max({r, g, b});
     double min = std::min({r, g, b});
@@ -61,16 +72,6 @@ HSL ColorConverter::rgbToHsl(const RGB& rgb)
     }
 
     return HSL(h * 360.0, s, l);
-}
-
-double ColorConverter::hueToRgb(double p, double q, double t)
-{
-    if (t < 0.0) t += 1.0;
-    if (t > 1.0) t -= 1.0;
-    if (t < 1.0/6.0) return p + (q - p) * 6.0 * t;
-    if (t < 1.0/2.0) return q;
-    if (t < 2.0/3.0) return p + (q - p) * (2.0/3.0 - t) * 6.0;
-    return p;
 }
 
 } // namespace sdlc

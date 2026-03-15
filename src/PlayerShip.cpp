@@ -14,6 +14,9 @@
 
 using namespace sdlc;
 
+constexpr float playerMoveSpeed = 100;
+constexpr int playerBeamDamage = 50;
+
 PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     : m_appState(state), m_sprite(texture), m_flames(texture), m_shotSprite(texture)
 {
@@ -70,7 +73,7 @@ void PlayerShip::moveAndRenderProjectiles(float shotSpeed)
             if (projectile.position.y < 0) {
                 item.acquired = false;
             }
-            if (enemies->hitCheckAllEnemies(m_shotSprite.destination(), 1)) {
+            if (enemies->hitCheckAllEnemies(m_shotSprite.destination(), playerBeamDamage)) {
                 item.acquired = false;
             }
         }
@@ -99,7 +102,7 @@ void PlayerShip::animateFlames()
 
 void PlayerShip::handleInputs()
 {
-    float delta = m_appState->deltaTime * m_speed;
+    float delta = m_appState->deltaTime * playerMoveSpeed;
     m_direction = MovementDirection::None;
     if (m_appState->input.keys.down("shipRight")) {
         m_position += sdlc::Vec2f(delta, 0);

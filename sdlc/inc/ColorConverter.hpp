@@ -1,16 +1,17 @@
 #pragma once
 
 #include <SDL3/SDL_pixels.h>
+#include <cstdint>
 
 namespace sdlc
 {
 
 struct RGB {
-    int r; // 0-255
-    int g; // 0-255
-    int b; // 0-255
+    uint8_t r; // 0-255
+    uint8_t g; // 0-255
+    uint8_t b; // 0-255
 
-    RGB(int red = 0, int green = 0, int blue = 0)
+    RGB(uint8_t red = 0, uint8_t green = 0, uint8_t blue = 0)
         : r(red), g(green), b(blue) {}
 
     operator SDL_Color() const {
@@ -20,6 +21,37 @@ struct RGB {
             static_cast<Uint8>(b),
             255
         };
+    }
+
+    bool operator==(const RGB& other) const {
+        return r == other.r && g == other.g && b == other.b;
+    }
+};
+
+struct RGBA {
+    uint8_t r; // 0-255
+    uint8_t g; // 0-255
+    uint8_t b; // 0-255
+    uint8_t a; // 0-255
+
+    RGBA(uint8_t red = 0, uint8_t green = 0, uint8_t blue = 0, uint8_t alpha = 255)
+        : r(red), g(green), b(blue), a(alpha) {}
+
+    // Constructor from RGB (with optional alpha)
+    RGBA(const RGB& rgb, uint8_t alpha = 255)
+        : r(rgb.r), g(rgb.g), b(rgb.b), a(alpha) {}
+
+    operator SDL_Color() const {
+        return {
+            static_cast<Uint8>(r),
+            static_cast<Uint8>(g),
+            static_cast<Uint8>(b),
+            static_cast<Uint8>(a)
+        };
+    }
+
+    bool operator==(const RGBA& other) const {
+        return r == other.r && g == other.g && b == other.b && a == other.a;
     }
 };
 
@@ -32,13 +64,7 @@ struct HSL {
         : h(hue), s(saturation), l(lightness) {}
 };
 
-class ColorConverter
-{
-public:
-    static RGB hslToRgb(const HSL& hsl);
-    static HSL rgbToHsl(const RGB& rgb);
-private:
-    static double hueToRgb(double p, double q, double t);
-};
+RGB hslToRgb(const HSL& hsl);
+HSL rgbToHsl(const RGB& rgb);
 
 } // namespace sdlc
