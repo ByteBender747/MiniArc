@@ -25,9 +25,12 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     , m_flames(texture)
     , m_shotSprite(texture)
     , m_deathAnimation(texture)
+    , m_spawnEffect(texture)
 {
     m_assets = static_cast<GameAssets*>(state->properties["assets"].pointer);
     m_sprite.setScaleMode(SDL_SCALEMODE_PIXELART);
+    m_sprite.setSource(m_assets->sprites["PlayerCenter"]);
+    m_flames.setSource(m_assets->sprites["FlameLeft1"]);
     m_position = sdlc::Vec2f(RENDER_LOGICAL_WIDTH / 2., RENDER_LOGICAL_HEIGHT - 20.);
     m_posLimits[0] = 7;
     m_posLimits[1] = RENDER_LOGICAL_WIDTH - 7;
@@ -35,28 +38,12 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_posLimits[3] = RENDER_LOGICAL_HEIGHT - 8;
     m_shotSprite.setSource(m_assets->sprites["Laser"]);
     m_appState->iterateHandler[playerZIndex] = [this](AppState* appState) {
-        if (m_isAlive) {
-            handleInputs();
-            shipMovement();
-            animateFlames();
-        }
-        moveAndRenderProjectiles(200);
-        if (m_hitPoints > 0) {
-            if (m_hitFlash) {
-                SDL_SetRenderColorScale(m_appState->renderer, 255);
-                --m_hitFlash;
-            }
-            m_sprite.render(appState->renderer);
-            SDL_SetRenderColorScale(m_appState->renderer, 1);
-            m_flames.render(appState->renderer);
+        if (!m_spawnEffect.isFinished()) {
+            m_spawnEffect.setPosition(m_position.x, m_position.y);
+            m_spawnEffect.update(appState->deltaTime);
+            m_spawnEffect.render(appState->renderer);
         } else {
-            if (m_isAlive) {
-                m_deathAnimation.play();
-                m_isAlive = false;
-            }
-            m_deathAnimation.setPosition(m_position.x, m_position.y);
-            m_deathAnimation.update(m_appState->deltaTime);
-            m_deathAnimation.render(m_appState->renderer);
+            iteratePlayerShip();
         }
     };
     m_appState->eventHandler[playerZIndex] = [this](AppState* appState, SDL_Event* event) {
@@ -66,6 +53,7 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
             }
         }
     };
+
     m_deathAnimation.addFrame(m_assets->sprites["Boom1"]);
     m_deathAnimation.addFrame(m_assets->sprites["Boom2"]);
     m_deathAnimation.addFrame(m_assets->sprites["Boom3"]);
@@ -76,12 +64,56 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_deathAnimation.animationFinished([this](sdlc::AnimatedSprite& sprite) {
         reSpawn();
     });
+
+    sdlc::SpriteImageDistribution dist;
+    dist.spriteCount = 8;
+    dist.spriteHeight = 14;
+    dist.spriteWidth = 14;
+    dist.marginX = 2;
+    dist.marginY = 0;
+    dist.startX = 3;
+    dist.startY = 71;
+    dist.spritesPerLine = 8;
+    m_spawnEffect.addFrames(dist);
+    m_spawnEffect.setDuration(1.5);
+    m_spawnEffect.setRepeat(false);
+    m_spawnEffect.play();
+    m_spawnEffect.animationFinished([this](sdlc::AnimatedSprite& sprite) {
+        m_isAlive = true;
+    });
 }
 
 PlayerShip::~PlayerShip()
 {
     m_appState->iterateHandler[playerZIndex] = nullptr;
     m_appState->eventHandler[playerZIndex] = nullptr;
+}
+
+void PlayerShip::iteratePlayerShip()
+{
+    if (m_isAlive) {
+        handleInputs();
+        shipMovement();
+        animateFlames();
+    }
+    moveAndRenderProjectiles(200);
+    if (m_hitPoints > 0) {
+        if (m_hitFlash) {
+            SDL_SetRenderColorScale(m_appState->renderer, 255);
+            --m_hitFlash;
+        }
+        m_sprite.render(m_appState->renderer);
+        SDL_SetRenderColorScale(m_appState->renderer, 1);
+        m_flames.render(m_appState->renderer);
+    } else {
+        if (m_isAlive) {
+            m_deathAnimation.play();
+            m_isAlive = false;
+        }
+        m_deathAnimation.setPosition(m_position.x, m_position.y);
+        m_deathAnimation.update(m_appState->deltaTime);
+        m_deathAnimation.render(m_appState->renderer);
+    }
 }
 
 bool PlayerShip::fireProjectile(float x, float y)
@@ -97,9 +129,12 @@ void PlayerShip::reSpawn()
 {
     if (m_appState->properties["playerShips"].integer > 0) {
         m_position = sdlc::Vec2f(RENDER_LOGICAL_WIDTH / 2., RENDER_LOGICAL_HEIGHT - 20.);
-        m_isAlive = true;
         m_hitPoints = playerInitialHitPoints;
         --m_appState->properties["playerShips"].integer;
+        m_projectiles.clear();
+        m_spawnEffect.play();
+        m_appState->input.keys.clearStates();
+        m_hitFlash = 0;
     }
 }
 

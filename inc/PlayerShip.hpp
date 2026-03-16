@@ -27,6 +27,9 @@ public:
     bool isAlive() const {
         return m_isAlive;
     }
+    bool isSpawning() const {
+        return m_spawnEffect.isPlaying();
+    }
     bool hitCheck(const SDL_FRect& rect, int damage);
 private:
     enum class MovementDirection {
@@ -42,8 +45,9 @@ private:
     void moveAndRenderProjectiles(float shotSpeed);
     bool fireProjectile(float x, float y);
     void reSpawn();
+    void iteratePlayerShip();
 private:
-    bool m_isAlive{true};
+    bool m_isAlive{false};
     float m_posLimits[4];
     uint8_t m_flameType{0};
     double m_flameTimer{0};
@@ -57,6 +61,7 @@ private:
     sdlc::SpriteRenderer m_flames;
     sdlc::SpriteRenderer m_shotSprite;
     sdlc::AnimatedSprite m_deathAnimation;
+    sdlc::AnimatedSprite m_spawnEffect;
     sdlc::AppState* m_appState;
     GameAssets* m_assets;
 };

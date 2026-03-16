@@ -28,6 +28,7 @@ public:
     bool up(const std::string& keyName);
     bool risingEdge(const std::string& keyName);
     bool fallingEdge(const std::string& keyName);
+    void clearStates();
 public:
     struct KeyState {
         SDL_Scancode scanCode{SDL_SCANCODE_UNKNOWN};

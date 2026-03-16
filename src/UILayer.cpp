@@ -33,7 +33,7 @@ UILayer::UILayer(sdlc::AppState* appState)
 bool UILayer::isGameOver()
 {
     PlayerShip* player = static_cast<PlayerShip*>(m_appState->properties["player"].pointer);
-    return !player->isAlive() && m_appState->properties["playerShips"].integer <= 0;
+    return !player->isAlive() && !player->isSpawning() && m_appState->properties["playerShips"].integer <= 0;
 }
 
 UILayer::~UILayer()

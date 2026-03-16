@@ -22,6 +22,13 @@ bool KeyMap::up(const std::string& keyName)
     return !down(keyName);
 }
 
+void KeyMap::clearStates()
+{
+    for (auto key : m_keyMap) {
+        key.second.previousState = false;
+    }
+}
+
 bool KeyMap::risingEdge(const std::string& keyName)
 {
     auto it = m_keyMap.find(keyName);
