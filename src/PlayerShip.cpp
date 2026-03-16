@@ -1,6 +1,7 @@
 #include <cassert>
 
 #include "PlayerShip.hpp"
+#include "AnimatedSprite.hpp"
 #include "AppState.hpp"
 #include "Enemies.hpp"
 #include "MathFunc.hpp"
@@ -72,6 +73,9 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_deathAnimation.addFrame(m_assets->sprites["Boom5"]);
     m_deathAnimation.setFPS(20);
     m_deathAnimation.setRepeat(false);
+    m_deathAnimation.animationFinished([this](sdlc::AnimatedSprite& sprite) {
+        reSpawn();
+    });
 }
 
 PlayerShip::~PlayerShip()
@@ -87,6 +91,16 @@ bool PlayerShip::fireProjectile(float x, float y)
         projectile->position = sdlc::Vec2f(x, y);
     }
     return projectile != nullptr;
+}
+
+void PlayerShip::reSpawn()
+{
+    if (m_appState->properties["playerShips"].integer > 0) {
+        m_position = sdlc::Vec2f(RENDER_LOGICAL_WIDTH / 2., RENDER_LOGICAL_HEIGHT - 20.);
+        m_isAlive = true;
+        m_hitPoints = playerInitialHitPoints;
+        --m_appState->properties["playerShips"].integer;
+    }
 }
 
 bool PlayerShip::hitCheck(const SDL_FRect& rect, int damage)

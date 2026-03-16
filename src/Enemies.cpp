@@ -19,9 +19,10 @@ constexpr int lipsScore                  = 200;
 constexpr float lipsEnemyDownSpeed       = 40;
 constexpr float lipsEnemyMaxJitter       = 32;
 constexpr double lipsEnemyJitterInterval = 1.5;
-constexpr float lipsProjectileSpeed      = 80;
+constexpr double lipsAnimationSpeed      = 1.2;
 
 // Enemy projectiles
+constexpr float enemyProjectileSpeed       = 150;
 constexpr int enemyProjectileDamage        = 250;
 constexpr int chargedEnemyProjectileDamage = 500;
 
@@ -109,7 +110,7 @@ EnemyProjectile::EnemyProjectile(sdlc::AppState* appState, const sdlc::Vec2f& po
     m_projectileSprite.setFPS(30);
     m_projectileSprite.play();
     m_projectile.position = pos;
-    m_projectile.velocity = sdlc::normalized(target - pos) * sdlc::Vec2f(lipsProjectileSpeed);
+    m_projectile.velocity = sdlc::normalized(target - pos) * sdlc::Vec2f(enemyProjectileSpeed);
 }
 
 sdlc::Rect<float> EnemyProjectile::getPositionRect()
@@ -146,7 +147,7 @@ EnemyLips::EnemyLips(sdlc::AppState* appState)
     m_sprite.addFrame(m_assets->sprites["Lips5"]);
     m_sprite.setPosition(spawnXMargin + (m_rng.next() % (RENDER_LOGICAL_WIDTH - spawnXMargin)), 0,
                          sdlc::SpritePositionOffset::Center);
-    m_sprite.setDuration(2.5);
+    m_sprite.setDuration(lipsAnimationSpeed);
     m_sprite.animationFinished([this](sdlc::AnimatedSprite& ref) {
         if (getPlayer()->isAlive()) {
             EnemySpawner* spawner = static_cast<EnemySpawner*>(m_appState->properties["enemies"].pointer);
@@ -174,7 +175,7 @@ bool EnemyLips::hitByProjectile(int damage)
         m_playDeathAnimation = true;
         m_appState->properties["score"].integer += lipsScore;
     } else {
-        m_hitFlash = true;
+        m_hitFlash = 3;
     }
     return true;
 }
@@ -197,9 +198,9 @@ void EnemyLips::updateAndRender()
     pos += sdlc::Vec2f(m_jitterValue, lipsEnemyDownSpeed) * sdlc::Vec2f(m_appState->deltaTime);
     m_sprite.setPosition(pos.x, pos.y, sdlc::SpritePositionOffset::Center);
     if (m_viewPort.intersects(getPositionRect())) {
-        if (m_hitFlash) {
+        if (m_hitFlash > 0) {
             SDL_SetRenderColorScale(m_appState->renderer, 255);
-            m_hitFlash = false;
+            --m_hitFlash;
         }
         m_sprite.update(m_appState->deltaTime);
         m_sprite.render(m_appState->renderer);

@@ -75,11 +75,10 @@ private:
         SDL_BlendMode blendMode;
     } m_savedState;
     SDL_Texture* m_texture;
-    SDL_FRect m_source;
-    SDL_FRect m_destination;
-    SDL_FPoint m_position;
+    SDL_FRect m_source{0, 0, 0, 0};
+    SDL_FRect m_destination{0, 0, 0, 0};
+    SDL_FPoint m_position{0, 0};
 };
-
 
 bool loadSpriteDefinitions(SpriteDefinitions& def, const std::filesystem::path& path, char separator = ',');
 

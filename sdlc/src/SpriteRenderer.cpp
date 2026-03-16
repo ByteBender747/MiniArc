@@ -17,6 +17,7 @@ namespace sdlc
 SpriteRenderer::SpriteRenderer(SDL_Texture* texture)
     : m_texture(texture)
 {
+    SDL_GetTextureSize(texture, &m_source.w, &m_source.h);
 }
 
 void SpriteRenderer::setPosition(float x, float y, SpritePositionOffset offset)

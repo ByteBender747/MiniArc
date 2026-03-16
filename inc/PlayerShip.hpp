@@ -41,6 +41,7 @@ private:
     void handleInputs();
     void moveAndRenderProjectiles(float shotSpeed);
     bool fireProjectile(float x, float y);
+    void reSpawn();
 private:
     bool m_isAlive{true};
     float m_posLimits[4];

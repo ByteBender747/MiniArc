@@ -53,7 +53,7 @@ public:
 private:
     double m_jitterTimer{0};
     float m_jitterValue{0};
-    bool m_hitFlash{false};
+    int m_hitFlash{0};
     bool m_playDeathAnimation{false};
     sdlc::AnimatedSprite m_projectileSprite;
     sdlc::AnimatedSprite m_sprite;
