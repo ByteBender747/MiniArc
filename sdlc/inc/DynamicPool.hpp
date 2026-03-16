@@ -1,6 +1,6 @@
 #pragma once
 
-#include <array>
+#include <vector>
 #include <functional>
 
 #include "PoolItem.hpp"
@@ -8,16 +8,20 @@
 namespace sdlc
 {
 
-template <typename item_type, std::size_t elements>
-class StaticPool
+template <typename item_type>
+class DynamicPool
 {
 public:
     using ForEachCallback = std::function<void(PoolItem<item_type>&)>;
-    using iterator = typename std::array<PoolItem<item_type>, elements>::iterator;
-    using const_iterator = typename std::array<PoolItem<item_type>, elements>::const_iterator;
+    using iterator = typename std::vector<PoolItem<item_type>>::iterator;
+    using const_iterator = typename std::vector<PoolItem<item_type>>::const_iterator;
 
 public:
-    // Iterator methods - delegate to std::array
+    DynamicPool() {
+        m_data.reserve(16);
+    }
+
+    // Iterator methods - delegate to std::vector
     iterator begin() {
         return m_data.begin();
     }
@@ -38,7 +42,7 @@ public:
     }
 
     // Size methods
-    constexpr std::size_t size() const {
+    std::size_t size() const {
         return m_data.size();
     }
 
@@ -51,17 +55,22 @@ public:
     }
 
     [[nodiscard]] item_type* acquire() {
-        for (std::size_t i = 0; i < elements; ++i) {
+        // First, try to find a free item
+        for (std::size_t i = 0; i < m_data.size(); ++i) {
             if (!m_data[i].acquired) {
                 m_data[i].acquired = true;
                 return &m_data[i].value;
             }
         }
-        return nullptr;
+        
+        // No free item available, add a new one
+        m_data.emplace_back(PoolItem<item_type>{});
+        m_data.back().acquired = true;
+        return &m_data.back().value;
     }
 
     void foreachAcquired(ForEachCallback cb) {
-        for (std::size_t i = 0; i < elements; ++i) {
+        for (std::size_t i = 0; i < m_data.size(); ++i) {
             if (m_data[i].acquired) {
                 cb(m_data[i]);
             }
@@ -69,7 +78,7 @@ public:
     }
 
     bool release(const item_type* value) {
-        for (auto i = 0; i < elements; ++i) {
+        for (std::size_t i = 0; i < m_data.size(); ++i) {
             if (value == &m_data[i].value) {
                 m_data[i].acquired = false;
                 return true;
@@ -79,14 +88,14 @@ public:
     }
 
     void clear() {
-        for (std::size_t i = 0; i < elements; ++i) {
+        for (std::size_t i = 0; i < m_data.size(); ++i) {
             m_data[i].acquired = false;
         }
     }
 
     std::size_t count() const {
         std::size_t result = 0;
-        for (auto i = 0; i < elements; ++i) {
+        for (std::size_t i = 0; i < m_data.size(); ++i) {
             if (m_data[i].acquired) {
                 ++result;
             }
@@ -94,8 +103,16 @@ public:
         return result;
     }
 
+    void reserve(std::size_t capacity) {
+        m_data.reserve(capacity);
+    }
+
+    std::size_t capacity() const {
+        return m_data.capacity();
+    }
+
 private:
-    std::array<PoolItem<item_type>, elements> m_data;
+    std::vector<PoolItem<item_type>> m_data;
 };
 
 } // namespace sdlc

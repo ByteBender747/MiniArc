@@ -4,21 +4,26 @@
 #include "AnimatedSprite.hpp"
 #include "AppState.hpp"
 #include "MiniArc.hpp"
+#include "PlayerShip.hpp"
 #include "Rect.hpp"
 #include "SpriteRenderer.hpp"
-#include "StaticPool.hpp"
 #include "Vector2.hpp"
 
 // General spawning behavior
-constexpr int spawnXMargin = 8;
+constexpr int spawnXMargin     = 8;
 constexpr double spawnInterval = 2.;
 
 // Enemy Lips behavior configuration
-constexpr int lipsHitPoints = 150;
-constexpr int lipsScore = 200;
-constexpr float lipsEnemyDownSpeed = 20;
-constexpr float lipsEnemyMaxJitter = 32;
+constexpr int lipsHitPoints              = 150;
+constexpr int lipsScore                  = 200;
+constexpr float lipsEnemyDownSpeed       = 40;
+constexpr float lipsEnemyMaxJitter       = 32;
 constexpr double lipsEnemyJitterInterval = 1.5;
+constexpr float lipsProjectileSpeed      = 80;
+
+// Enemy projectiles
+constexpr int enemyProjectileDamage        = 250;
+constexpr int chargedEnemyProjectileDamage = 500;
 
 static void initBoom(GameAssets* assets, sdlc::AnimatedSprite& sprite)
 {
@@ -57,14 +62,23 @@ EnemySpawner::~EnemySpawner()
     m_appState->iterateHandler[enemyZIndex] = nullptr;
 }
 
+bool EnemySpawner::createProjectile(const sdlc::Vec2f& pos, const sdlc::Vec2f& target)
+{
+    auto item = m_enemies.acquire();
+    if (item) {
+        item->reset(new EnemyProjectile(m_appState, pos, target));
+        return true;
+    }
+    return false;
+}
+
 bool EnemySpawner::hitCheckAllEnemies(const sdlc::Rect<float>& projectileRect, int damage)
 {
     bool hitSomething = false;
     m_enemies.foreachAcquired([projectileRect, damage, &hitSomething](sdlc::PoolItem<std::unique_ptr<Enemy>>& item) {
         if (item.value->isAlive()) {
             if (projectileRect.intersects(item.value->getPositionRect())) {
-                item.value->hitByProjectile(damage);
-                hitSomething = true;
+                hitSomething = hitSomething || item.value->hitByProjectile(damage);
             }
         }
     });
@@ -80,8 +94,50 @@ Enemy::Enemy(sdlc::AppState* appState)
     m_viewPort = sdlc::Rect<float>(0, 0, RENDER_LOGICAL_WIDTH, RENDER_LOGICAL_HEIGHT);
 }
 
+PlayerShip* Enemy::getPlayer()
+{
+    PlayerShip* player = static_cast<PlayerShip*>(m_appState->properties["player"].pointer);
+    assert(player);
+    return player;
+}
+
+EnemyProjectile::EnemyProjectile(sdlc::AppState* appState, const sdlc::Vec2f& pos, const sdlc::Vec2f& target)
+    : Enemy(appState), m_projectileSprite(m_assets->spriteTexture)
+{
+    m_projectileSprite.addFrame(m_assets->sprites["AlienShot11"]);
+    m_projectileSprite.addFrame(m_assets->sprites["AlienShot12"]);
+    m_projectileSprite.setFPS(30);
+    m_projectileSprite.play();
+    m_projectile.position = pos;
+    m_projectile.velocity = sdlc::normalized(target - pos) * sdlc::Vec2f(lipsProjectileSpeed);
+}
+
+sdlc::Rect<float> EnemyProjectile::getPositionRect()
+{
+    return m_projectileSprite.destination();
+}
+
+void EnemyProjectile::updateAndRender()
+{
+    if (m_projectile.lifeTime > 0) {
+        m_projectileSprite.setPosition(m_projectile.position.x, m_projectile.position.y);
+        m_projectile.position += m_projectile.velocity * sdlc::Vec2f(m_appState->deltaTime);
+        m_projectile.lifeTime -= m_appState->deltaTime;
+        m_projectileSprite.update(m_appState->deltaTime);
+        m_projectileSprite.render(m_appState->renderer);
+        if (getPlayer()->hitCheck(m_projectileSprite.destination(), enemyProjectileDamage)) {
+            kill();
+        }
+    } else {
+        kill();
+    }
+}
+
 EnemyLips::EnemyLips(sdlc::AppState* appState)
-    : Enemy(appState), m_sprite(m_assets->spriteTexture), m_boomAnimation(m_assets->spriteTexture)
+    : Enemy(appState)
+    , m_sprite(m_assets->spriteTexture)
+    , m_boomAnimation(m_assets->spriteTexture)
+    , m_projectileSprite(m_assets->spriteTexture)
 {
     m_sprite.addFrame(m_assets->sprites["Lips1"]);
     m_sprite.addFrame(m_assets->sprites["Lips2"]);
@@ -90,7 +146,13 @@ EnemyLips::EnemyLips(sdlc::AppState* appState)
     m_sprite.addFrame(m_assets->sprites["Lips5"]);
     m_sprite.setPosition(spawnXMargin + (m_rng.next() % (RENDER_LOGICAL_WIDTH - spawnXMargin)), 0,
                          sdlc::SpritePositionOffset::Center);
-    m_sprite.setFPS(10);
+    m_sprite.setDuration(2.5);
+    m_sprite.animationFinished([this](sdlc::AnimatedSprite& ref) {
+        if (getPlayer()->isAlive()) {
+            EnemySpawner* spawner = static_cast<EnemySpawner*>(m_appState->properties["enemies"].pointer);
+            spawner->createProjectile(m_sprite.position(), getPlayer()->getPosition());
+        }
+    });
     m_sprite.play();
     initBoom(m_assets, m_boomAnimation);
     m_boomAnimation.setRepeat(false);
@@ -103,7 +165,7 @@ sdlc::Rect<float> EnemyLips::getPositionRect()
     return sdlc::Rect<float>(m_sprite.destination());
 }
 
-void EnemyLips::hitByProjectile(int damage)
+bool EnemyLips::hitByProjectile(int damage)
 {
     m_hitPoints -= damage;
     if (m_hitPoints <= 0) {
@@ -114,6 +176,7 @@ void EnemyLips::hitByProjectile(int damage)
     } else {
         m_hitFlash = true;
     }
+    return true;
 }
 
 void EnemyLips::updateAndRender()

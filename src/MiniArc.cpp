@@ -40,6 +40,7 @@ void MiniArc_Init(sdlc::AppState* state, int argc, char** argv)
     state->properties["stars"].pointer = new BackgroundStars(state, assets->spriteTexture);
     state->properties["enemies"].pointer = new EnemySpawner(state);
     state->properties["ui"].pointer = new UILayer(state);
+    state->properties["score"].integer = 0;
 }
 
 void MiniArc_Exit(sdlc::AppState* state)

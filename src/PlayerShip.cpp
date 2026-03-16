@@ -5,6 +5,7 @@
 #include "Enemies.hpp"
 #include "MathFunc.hpp"
 #include "MiniArc.hpp"
+#include "Rect.hpp"
 #include "SpriteRenderer.hpp"
 #include "Vector2.hpp"
 #include "Keyboard.hpp"
@@ -18,7 +19,11 @@ constexpr float playerMoveSpeed = 100;
 constexpr int playerBeamDamage = 50;
 
 PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
-    : m_appState(state), m_sprite(texture), m_flames(texture), m_shotSprite(texture)
+    : m_appState(state)
+    , m_sprite(texture)
+    , m_flames(texture)
+    , m_shotSprite(texture)
+    , m_deathAnimation(texture)
 {
     m_assets = static_cast<GameAssets*>(state->properties["assets"].pointer);
     m_sprite.setScaleMode(SDL_SCALEMODE_PIXELART);
@@ -29,12 +34,29 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_posLimits[3] = RENDER_LOGICAL_HEIGHT - 8;
     m_shotSprite.setSource(m_assets->sprites["Laser"]);
     m_appState->iterateHandler[playerZIndex] = [this](AppState* appState) {
-        handleInputs();
-        shipMovement();
-        animateFlames();
+        if (m_isAlive) {
+            handleInputs();
+            shipMovement();
+            animateFlames();
+        }
         moveAndRenderProjectiles(200);
-        m_sprite.render(appState->renderer);
-        m_flames.render(appState->renderer);
+        if (m_hitPoints > 0) {
+            if (m_hitFlash) {
+                SDL_SetRenderColorScale(m_appState->renderer, 255);
+                --m_hitFlash;
+            }
+            m_sprite.render(appState->renderer);
+            SDL_SetRenderColorScale(m_appState->renderer, 1);
+            m_flames.render(appState->renderer);
+        } else {
+            if (m_isAlive) {
+                m_deathAnimation.play();
+                m_isAlive = false;
+            }
+            m_deathAnimation.setPosition(m_position.x, m_position.y);
+            m_deathAnimation.update(m_appState->deltaTime);
+            m_deathAnimation.render(m_appState->renderer);
+        }
     };
     m_appState->eventHandler[playerZIndex] = [this](AppState* appState, SDL_Event* event) {
         if (event->type == SDL_EVENT_KEY_UP && m_triggerState) {
@@ -43,7 +65,13 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
             }
         }
     };
-    m_appState->properties["score"].integer = 0;
+    m_deathAnimation.addFrame(m_assets->sprites["Boom1"]);
+    m_deathAnimation.addFrame(m_assets->sprites["Boom2"]);
+    m_deathAnimation.addFrame(m_assets->sprites["Boom3"]);
+    m_deathAnimation.addFrame(m_assets->sprites["Boom4"]);
+    m_deathAnimation.addFrame(m_assets->sprites["Boom5"]);
+    m_deathAnimation.setFPS(20);
+    m_deathAnimation.setRepeat(false);
 }
 
 PlayerShip::~PlayerShip()
@@ -59,6 +87,18 @@ bool PlayerShip::fireProjectile(float x, float y)
         projectile->position = sdlc::Vec2f(x, y);
     }
     return projectile != nullptr;
+}
+
+bool PlayerShip::hitCheck(const SDL_FRect& rect, int damage)
+{
+    bool result = false;
+    sdlc::Rect<float> shipRect = m_sprite.destination();
+    if (shipRect.intersects(rect)) {
+        result = true;
+        m_hitPoints -= damage;
+        m_hitFlash = 5;
+    }
+    return result;
 }
 
 void PlayerShip::moveAndRenderProjectiles(float shotSpeed)
