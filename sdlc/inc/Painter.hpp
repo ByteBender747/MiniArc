@@ -18,6 +18,7 @@ public:
     void line(int x0, int y0, int x1, int y1);
     void circle(int x0, int y0, int radius);
     void ellipse(int xm, int ym, int a, int b);
+    void arc(int x0, int y0, int radius, double startAngle, double endAngle);
     void floodFill(int x, int y);
     void moveTo(int x, int y);
     void lineTo(int x, int y);
@@ -29,6 +30,9 @@ public:
     }
     const RGBA& color() const {
         return m_color;
+    }
+    const Point2D<int>& cursor() const {
+        return m_cursor;
     }
 public:
     virtual void setPixel(int x, int y) = 0;

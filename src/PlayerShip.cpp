@@ -43,6 +43,7 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
             }
         }
     };
+    m_appState->properties["score"].integer = 0;
 }
 
 PlayerShip::~PlayerShip()

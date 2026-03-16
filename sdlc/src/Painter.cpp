@@ -3,11 +3,13 @@
 #include <cstdlib>
 #include <utility>
 #include <cassert>
+#include <cmath>
 
 #include <SDL3/SDL_pixels.h>
 
 #include "Painter.hpp"
 #include "Dimension.hpp"
+#include "Rect.hpp"
 
 namespace sdlc
 {
@@ -60,6 +62,17 @@ RGBA SurfacePainter::getPixel(int x, int y)
         SDL_GetRGB(pixelValue, &m_pixelFormat, nullptr, &result.r, &result.g, &result.b);
     }
     return result;
+}
+
+void Painter::moveTo(int x, int y)
+{
+    m_cursor = Point2D<int>(x, y);
+}
+
+void Painter::lineTo(int x, int y)
+{
+    line(m_cursor.x, m_cursor.y, x, y);
+    moveTo(x, y);
 }
 
 void Painter::line(int x0, int y0, int x1, int y1)
@@ -147,10 +160,46 @@ void Painter::ellipse(int xm, int ym, int a, int b)
     }
 }
 
+void Painter::arc(int x0, int y0, int radius, double startAngle, double endAngle)
+{
+    // Convert angles from degrees to radians
+    const double PI = 3.14159265358979323846;
+    double start = startAngle * PI / 180.0;
+    double end = endAngle * PI / 180.0;
+
+    // Normalize angles to [0, 2*PI)
+    while (start < 0) start += 2 * PI;
+    while (end < 0) end += 2 * PI;
+    while (start >= 2 * PI) start -= 2 * PI;
+    while (end >= 2 * PI) end -= 2 * PI;
+
+    // Handle wraparound case
+    if (end < start) {
+        end += 2 * PI;
+    }
+
+    // Calculate step size based on radius for smooth arc
+    // Smaller radius = fewer steps needed
+    double step = 1.0 / (radius > 0 ? radius : 1);
+
+    // Draw the arc
+    for (double angle = start; angle <= end; angle += step) {
+        int x = static_cast<int>(x0 + radius * cos(angle) + 0.5);
+        int y = static_cast<int>(y0 + radius * sin(angle) + 0.5);
+        setPixel(x, y);
+    }
+
+    // Ensure the end point is drawn
+    int x_end = static_cast<int>(x0 + radius * cos(end) + 0.5);
+    int y_end = static_cast<int>(y0 + radius * sin(end) + 0.5);
+    setPixel(x_end, y_end);
+    moveTo(x_end, y_end);
+}
+
 void Painter::floodFill(int x, int y)
 {
     RGBA oldColor = getPixel(x, y);
-    RGBA newColor = getPixel(x, y);
+    RGBA newColor = color();
 
     if (oldColor == newColor) {
         return; // No need to fill if colors are already the same
@@ -162,7 +211,7 @@ void Painter::floodFill(int x, int y)
     while (!pixelStack.empty()) {
         auto [x, y] = pixelStack.top();
         pixelStack.pop();
-        newColor = getPixel(x, y);
+        newColor = color();
 
         if (getPixel(x, y) == oldColor) {
             setPixel(x, y);

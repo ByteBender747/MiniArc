@@ -27,6 +27,7 @@ target_compile_definitions(sdlc PUBLIC
     RENDER_LOGICAL_WIDTH=140
     RENDER_LOGICAL_HEIGHT=224
     RENDER_VSYNC=1
+    TTF_INIT=1
 )
 
 # Add source files for MiniArc target
@@ -35,4 +36,5 @@ target_sources(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PlayerShip.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/BackgroundStars.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Enemies.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UILayer.cpp
 )   

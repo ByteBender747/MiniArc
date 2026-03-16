@@ -27,7 +27,8 @@ class SpriteRenderer
 {
 public:
     SpriteRenderer(SDL_Texture* texture);
-    void setPosition(float x, float y, SpritePositionOffset origin);
+    void setPosition(float x, float y, SpritePositionOffset offset = SpritePositionOffset::Center);
+    void setPosition(const SDL_FPoint& posRef, SpritePositionOffset offset = SpritePositionOffset::Center);
     void render(SDL_Renderer* render);
     bool isOnScreen(SDL_Renderer* renderer);
     void setScaleMode(SDL_ScaleMode mode);
@@ -65,8 +66,8 @@ public:
     }
     double rotation() const { return m_rotation; }
 private:
-    bool m_rotated;
-    double m_rotation;
+    bool m_rotated{false};
+    double m_rotation{0};
     struct {
         Uint8 alphaMod;
         SDL_Color colorMod;

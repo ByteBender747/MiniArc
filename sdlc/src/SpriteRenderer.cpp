@@ -15,13 +15,13 @@ namespace sdlc
 {
 
 SpriteRenderer::SpriteRenderer(SDL_Texture* texture)
-    : m_texture(texture), m_rotation(0), m_rotated(false)
+    : m_texture(texture)
 {
 }
 
-void SpriteRenderer::setPosition(float x, float y, SpritePositionOffset origin)
+void SpriteRenderer::setPosition(float x, float y, SpritePositionOffset offset)
 {
-    switch (origin) {
+    switch (offset) {
     case sdlc::SpritePositionOffset::TopLeft:
         setDestination(x, y, m_source.w, m_source.h);
         break;
@@ -39,6 +39,11 @@ void SpriteRenderer::setPosition(float x, float y, SpritePositionOffset origin)
         break;
     }
     m_position = {x, y};
+}
+
+void SpriteRenderer::setPosition(const SDL_FPoint& posRef, SpritePositionOffset offset)
+{
+    setPosition(posRef.x, posRef.y, offset);
 }
 
 void SpriteRenderer::setBlendMode(SDL_BlendMode mode)

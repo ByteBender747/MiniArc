@@ -11,6 +11,7 @@
 #include "SpriteRenderer.hpp"
 #include "MiniArc.hpp"
 #include "PathHelper.hpp"
+#include "UILayer.hpp"
 
 #include <SDL3/SDL_render.h>
 #include <SDL3_image/SDL_image.h>
@@ -38,6 +39,7 @@ void MiniArc_Init(sdlc::AppState* state, int argc, char** argv)
     state->properties["player"].pointer = new PlayerShip(state, assets->spriteTexture);
     state->properties["stars"].pointer = new BackgroundStars(state, assets->spriteTexture);
     state->properties["enemies"].pointer = new EnemySpawner(state);
+    state->properties["ui"].pointer = new UILayer(state);
 }
 
 void MiniArc_Exit(sdlc::AppState* state)
@@ -46,5 +48,6 @@ void MiniArc_Exit(sdlc::AppState* state)
     deleteEnemies(state, "enemies");
     deleteBackgroundStar(state, "stars");
     deletePlayerShip(state, "player");
+    deleteUI(state, "ui");
     delete assets;
 }

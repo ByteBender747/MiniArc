@@ -15,6 +15,7 @@ constexpr double spawnInterval = 2.;
 
 // Enemy Lips behavior configuration
 constexpr int lipsHitPoints = 150;
+constexpr int lipsScore = 200;
 constexpr float lipsEnemyDownSpeed = 20;
 constexpr float lipsEnemyMaxJitter = 32;
 constexpr double lipsEnemyJitterInterval = 1.5;
@@ -109,6 +110,7 @@ void EnemyLips::hitByProjectile(int damage)
         m_boomAnimation.play();
         m_sprite.stop();
         m_playDeathAnimation = true;
+        m_appState->properties["score"].integer += lipsScore;
     } else {
         m_hitFlash = true;
     }

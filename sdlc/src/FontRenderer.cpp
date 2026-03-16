@@ -38,26 +38,27 @@ FontRenderer::FontRenderer(SDL_Renderer* renderer, const char* filePath, int siz
         TTF_GetGlyphMetrics(ttf, atlasString[i], nullptr, nullptr, nullptr, nullptr, &advance);
         surfaceWith += advance;
     }
+    preserveLogicalPresentationMode();
     SDL_Surface* fontSurface = SDL_CreateSurface(surfaceWith, surfaceHeight, SDL_PIXELFORMAT_RGBA8888);
     assert(fontSurface);
     for (int i = 0; i < sizeof(atlasString) - 1; ++i) {
         SDL_Surface* glyph;
         switch (mode) {
-            case sdlc::FontRenderMode::Solid:
-                glyph = TTF_RenderGlyph_Solid(ttf, atlasString[i], white);
-                break;
-            case sdlc::FontRenderMode::Blended:
-                glyph = TTF_RenderGlyph_Blended(ttf, atlasString[i], white);
-                break;
-            case sdlc::FontRenderMode::Shaded:
-                glyph = TTF_RenderGlyph_Shaded(ttf, atlasString[i], white, black);
-                break;
-            case sdlc::FontRenderMode::LCD:
-                glyph = TTF_RenderGlyph_LCD(ttf, atlasString[i], white, black);
-                break;
-            default:
-                std::cerr << "Error: invalid font render mode" << std::endl;
-                exit(EXIT_FAILURE);
+        case sdlc::FontRenderMode::Solid:
+            glyph = TTF_RenderGlyph_Solid(ttf, atlasString[i], white);
+            break;
+        case sdlc::FontRenderMode::Blended:
+            glyph = TTF_RenderGlyph_Blended(ttf, atlasString[i], white);
+            break;
+        case sdlc::FontRenderMode::Shaded:
+            glyph = TTF_RenderGlyph_Shaded(ttf, atlasString[i], white, black);
+            break;
+        case sdlc::FontRenderMode::LCD:
+            glyph = TTF_RenderGlyph_LCD(ttf, atlasString[i], white, black);
+            break;
+        default:
+            std::cerr << "Error: invalid font render mode" << std::endl;
+            exit(EXIT_FAILURE);
         }
         assert(glyph);
         TTF_GetGlyphMetrics(ttf, atlasString[i], &minx, &maxx, &miny, &maxy, &advance);
@@ -88,7 +89,31 @@ FontRenderer::FontRenderer(SDL_Renderer* renderer, const char* filePath, int siz
     m_font.width = surfaceWith;
 }
 
-int FontRenderer::drawText(float x, float y, std::string_view text)
+void FontRenderer::preserveLogicalPresentationMode()
+{
+    SDL_GetRenderLogicalPresentation(m_renderer, &m_logicalSize.width, &m_logicalSize.height, &m_logicalMode);
+}
+
+void FontRenderer::restoreLogicalPresentationMode()
+{
+    SDL_SetRenderLogicalPresentation(m_renderer, m_logicalSize.width, m_logicalSize.height, m_logicalMode);
+}
+
+void FontRenderer::disableLogicalPresentationMode()
+{
+    SDL_SetRenderLogicalPresentation(m_renderer, 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED);
+}
+
+void FontRenderer::renderText(const SDL_FRect& src, const SDL_FRect& dst)
+{
+    disableLogicalPresentationMode();
+    SDL_SetTextureColorMod(m_fontTexture, m_textColor.r, m_textColor.g, m_textColor.b);
+    SDL_SetTextureAlphaModFloat(m_fontTexture, m_textColor.a / 255.0f);
+    SDL_RenderTexture(m_renderer, m_fontTexture, &src, &dst);
+    restoreLogicalPresentationMode();
+}
+
+int FontRenderer::renderText(float x, float y, std::string_view text)
 {
     int charCount = 0, originX = x;
     for (int i = 0; i < text.size(); ++i) {
@@ -102,19 +127,19 @@ int FontRenderer::drawText(float x, float y, std::string_view text)
         Character& fc = m_font.characters[text[i]];
         SDL_FRect src{ fc.x, fc.y, fc.width, fc.height };
         SDL_FRect dst{ x, y + fc.originY, fc.width, fc.height };
-        SDL_RenderTexture(m_renderer, m_fontTexture, &src, &dst);
+        renderText(src, dst);
         x += fc.advance - fc.originX;
     }
     return x;
 }
 
-void FontRenderer::drawFontTexture(float x, float y)
+void FontRenderer::renderFontTexture(float x, float y)
 {
     SDL_FRect src { 0, 0, m_textureSize.width, m_textureSize.height };
     SDL_FRect dst { x, y, m_textureSize.width, m_textureSize.height };
     assert(m_fontTexture);
     assert(m_textureSize.width && m_textureSize.height);
-    SDL_RenderTexture(m_renderer, m_fontTexture, &src, &dst);
+    renderText(src, dst);
 }
 
 Dimension<float> FontRenderer::measureText(std::string_view text)
