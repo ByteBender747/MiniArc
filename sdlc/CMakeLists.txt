@@ -6,7 +6,7 @@ find_package(SDL3_image REQUIRED)
 
 # Set compiler standards
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 add_library(sdlc)
 target_include_directories(sdlc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)

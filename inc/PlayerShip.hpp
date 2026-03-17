@@ -30,6 +30,9 @@ public:
     bool isSpawning() const {
         return m_spawnEffect.isPlaying();
     }
+    int getCurrentHitPointe() const {
+        return m_hitPoints;
+    }
     bool hitCheck(const SDL_FRect& rect, int damage);
 private:
     enum class MovementDirection {

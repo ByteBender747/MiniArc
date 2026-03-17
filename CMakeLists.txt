@@ -9,7 +9,7 @@ find_package(SDL3_image REQUIRED)
 
 # Set compiler standards
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(sdlc)
 
@@ -37,4 +37,5 @@ target_sources(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/BackgroundStars.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Enemies.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UILayer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/HealthBar.cpp
 )   

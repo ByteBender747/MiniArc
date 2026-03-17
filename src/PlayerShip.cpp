@@ -141,6 +141,9 @@ void PlayerShip::reSpawn()
 bool PlayerShip::hitCheck(const SDL_FRect& rect, int damage)
 {
     bool result = false;
+    if (!isAlive() || isSpawning()) {
+        return result;
+    }
     sdlc::Rect<float> shipRect = m_sprite.destination();
     if (shipRect.intersects(rect)) {
         result = true;
