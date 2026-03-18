@@ -25,7 +25,7 @@ struct Character {
 struct Font {
     int size;
     int width, height, characterCount;
-    std::array<Character, 256> characters;
+    std::array<Character, 256> characters{};
     Font();
 };
 
@@ -36,7 +36,7 @@ enum class FontRenderMode {
 class FontRenderer
 {
 public:
-    FontRenderer(SDL_Renderer* renderer, const char* filePath, int size, FontRenderMode mode);
+    FontRenderer(SDL_Renderer* renderer, const char* filePath, float size, FontRenderMode mode);
     int renderText(float x, float y, std::string_view text);
     void renderFontTexture(float x, float y);
     Dimension<float> measureText(std::string_view text);
@@ -58,15 +58,15 @@ public:
     void setTextColor(const RGBA& color) {
         m_textColor = color;
     }
-    const RGBA& getTextColor() const {
+    [[nodiscard]] const RGBA& getTextColor() const {
         return m_textColor;
     }
     ~FontRenderer();
 
 protected:
     void preserveLogicalPresentationMode();
-    void restoreLogicalPresentationMode();
-    void disableLogicalPresentationMode();
+    void restoreLogicalPresentationMode() const;
+    void disableLogicalPresentationMode() const;
     void renderText(const SDL_FRect& src, const SDL_FRect& dst);
 
 private:
@@ -76,7 +76,7 @@ private:
     RGBA m_textColor{255, 255, 255, 255};
     Dimension<int> m_logicalSize;
     Dimension<float> m_textureSize;
-    SDL_RendererLogicalPresentation m_logicalMode;
+    SDL_RendererLogicalPresentation m_logicalMode{SDL_LOGICAL_PRESENTATION_STRETCH};
     SDL_Renderer* m_renderer;
     SDL_Texture* m_fontTexture;
 };

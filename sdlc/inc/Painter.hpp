@@ -53,7 +53,7 @@ public:
     RGBA getPixel(int x, int y) override;
 private:
     SDL_Surface* m_surface;
-    SDL_PixelFormatDetails m_pixelFormat;
+    SDL_PixelFormatDetails m_pixelFormat{};
 };
 
 } // namespace sdlc

@@ -24,7 +24,7 @@ bool KeyMap::up(const std::string& keyName)
 
 void KeyMap::clearStates()
 {
-    for (auto key : m_keyMap) {
+    for (auto& key : m_keyMap) {
         key.second.previousState = false;
     }
 }

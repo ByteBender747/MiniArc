@@ -20,7 +20,7 @@ constexpr SDL_Color white = { 255, 255, 255, 255 };
 namespace sdlc
 {
 
-FontRenderer::FontRenderer(SDL_Renderer* renderer, const char* filePath, int size, FontRenderMode mode)
+FontRenderer::FontRenderer(SDL_Renderer* renderer, const char* filePath, float size, FontRenderMode mode)
     : m_renderer(renderer), m_maxCharPerLine(256)
 {
     TTF_Font* ttf = TTF_OpenFont(filePath, size);
@@ -34,8 +34,8 @@ FontRenderer::FontRenderer(SDL_Renderer* renderer, const char* filePath, int siz
     int surfaceHeight = TTF_GetFontHeight(ttf);
     int minx, maxx, miny, maxy, advance;
     int charHeight = TTF_GetFontHeight(ttf);
-    for (int i = 0; i < sizeof(atlasString); ++i) {
-        TTF_GetGlyphMetrics(ttf, atlasString[i], nullptr, nullptr, nullptr, nullptr, &advance);
+    for (char i : atlasString) {
+        TTF_GetGlyphMetrics(ttf, i, nullptr, nullptr, nullptr, nullptr, &advance);
         surfaceWith += advance;
     }
     preserveLogicalPresentationMode();
@@ -94,12 +94,12 @@ void FontRenderer::preserveLogicalPresentationMode()
     SDL_GetRenderLogicalPresentation(m_renderer, &m_logicalSize.width, &m_logicalSize.height, &m_logicalMode);
 }
 
-void FontRenderer::restoreLogicalPresentationMode()
+void FontRenderer::restoreLogicalPresentationMode() const
 {
     SDL_SetRenderLogicalPresentation(m_renderer, m_logicalSize.width, m_logicalSize.height, m_logicalMode);
 }
 
-void FontRenderer::disableLogicalPresentationMode()
+void FontRenderer::disableLogicalPresentationMode() const
 {
     SDL_SetRenderLogicalPresentation(m_renderer, 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED);
 }

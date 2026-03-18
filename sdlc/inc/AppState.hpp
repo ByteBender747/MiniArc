@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Keyboard.hpp"
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
@@ -8,8 +7,14 @@
 #include <map>
 #include <string>
 #include <cstdint>
+#include <memory>
 #include <functional>
 #include <unordered_map>
+
+#include "Keyboard.hpp"
+#include "AudioDevice.hpp"
+#include "AudioStream.hpp"
+#include "Config.hpp"
 
 namespace sdlc
 {
@@ -38,6 +43,13 @@ struct AppState {
     struct {
         KeyMap keys;
     } input;
+#ifdef AUDIO_FORMAT
+    struct {
+        AudioDevice device;
+        SDL_AudioSpec audioSpec{};
+        std::array<std::unique_ptr<AudioStream>, AUDIO_NUM_STREAMS> stream;
+    } audio;
+#endif
 };
 
 } // namespace sdlc

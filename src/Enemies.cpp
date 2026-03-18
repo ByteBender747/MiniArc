@@ -1,4 +1,5 @@
 #include <cassert>
+#include <memory>
 
 #include "Enemies.hpp"
 #include "AnimatedSprite.hpp"
@@ -43,12 +44,11 @@ EnemySpawner::EnemySpawner(sdlc::AppState* appState)
         m_spawnTimer += appState->deltaTime;
         if (m_spawnTimer > spawnInterval) {
             m_spawnTimer = 0;
-            auto item = m_enemies.acquire();
-            if (item) {
-                item->reset(new EnemyLips(appState));
+            if (auto item = m_enemies.acquire()) {
+                *item = std::make_unique<EnemyLips>(appState);
             }
         }
-        m_enemies.foreachAcquired([this](sdlc::PoolItem<std::unique_ptr<Enemy>>& item) {
+        m_enemies.foreachAcquired([](sdlc::PoolItem<std::unique_ptr<Enemy>>& item) {
             if (!item.value->isAlive()) {
                 item.acquired = false;
             } else {
@@ -67,7 +67,7 @@ bool EnemySpawner::createProjectile(const sdlc::Vec2f& pos, const sdlc::Vec2f& t
 {
     auto item = m_enemies.acquire();
     if (item) {
-        item->reset(new EnemyProjectile(m_appState, pos, target));
+        *item = std::make_unique<EnemyProjectile>(m_appState, pos, target);
         return true;
     }
     return false;
@@ -95,9 +95,9 @@ Enemy::Enemy(sdlc::AppState* appState)
     m_viewPort = sdlc::Rect<float>(0, 0, RENDER_LOGICAL_WIDTH, RENDER_LOGICAL_HEIGHT);
 }
 
-PlayerShip* Enemy::getPlayer()
+PlayerShip* Enemy::getPlayer() const
 {
-    PlayerShip* player = static_cast<PlayerShip*>(m_appState->properties["player"].pointer);
+    auto player = static_cast<PlayerShip*>(m_appState->properties["player"].pointer);
     assert(player);
     return player;
 }
@@ -163,7 +163,7 @@ EnemyLips::EnemyLips(sdlc::AppState* appState)
 
 sdlc::Rect<float> EnemyLips::getPositionRect()
 {
-    return sdlc::Rect<float>(m_sprite.destination());
+    return {m_sprite.destination()};
 }
 
 bool EnemyLips::hitByProjectile(int damage)
@@ -212,7 +212,7 @@ void EnemyLips::updateAndRender()
 
 void deleteEnemies(sdlc::AppState* state, const std::string& name)
 {
-    EnemySpawner* ptr = static_cast<EnemySpawner*>(state->properties[name].pointer);
+    auto ptr = static_cast<EnemySpawner*>(state->properties[name].pointer);
     if (ptr) {
         delete ptr;
         state->properties[name].pointer = nullptr;

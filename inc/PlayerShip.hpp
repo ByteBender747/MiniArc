@@ -51,7 +51,7 @@ private:
     void iteratePlayerShip();
 private:
     bool m_isAlive{false};
-    float m_posLimits[4];
+    float m_posLimits[4]{};
     uint8_t m_flameType{0};
     double m_flameTimer{0};
     bool m_triggerState{false};

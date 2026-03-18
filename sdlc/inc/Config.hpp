@@ -4,6 +4,10 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #endif
 
+#ifndef AUDIO_NUM_STREAMS
+#define AUDIO_NUM_STREAMS 1
+#endif
+
 #ifndef WINDOW_WIDTH
 #define WINDOW_WIDTH 640
 #endif

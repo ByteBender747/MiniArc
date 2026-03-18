@@ -28,7 +28,7 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     , m_spawnEffect(texture)
 {
     m_assets = static_cast<GameAssets*>(state->properties["assets"].pointer);
-    m_sprite.setScaleMode(SDL_SCALEMODE_PIXELART);
+    m_sprite.setScaleMode(SDL_SCALEMODE_NEAREST);
     m_sprite.setSource(m_assets->sprites["PlayerCenter"]);
     m_flames.setSource(m_assets->sprites["FlameLeft1"]);
     m_position = sdlc::Vec2f(RENDER_LOGICAL_WIDTH / 2., RENDER_LOGICAL_HEIGHT - 20.);
@@ -65,15 +65,16 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
         reSpawn();
     });
 
-    sdlc::SpriteImageDistribution dist;
-    dist.spriteCount = 8;
-    dist.spriteHeight = 14;
-    dist.spriteWidth = 14;
-    dist.marginX = 2;
-    dist.marginY = 0;
-    dist.startX = 3;
-    dist.startY = 71;
-    dist.spritesPerLine = 8;
+    sdlc::SpriteImageDistribution dist {
+        .startX = 3,
+        .startY = 71,
+        .spriteWidth = 14,
+        .spriteHeight = 14,
+        .marginX = 2,
+        .marginY = 0,
+        .spritesPerLine = 8,
+        .spriteCount = 8
+    };
     m_spawnEffect.addFrames(dist);
     m_spawnEffect.setDuration(1.5);
     m_spawnEffect.setRepeat(false);
@@ -240,7 +241,7 @@ void PlayerShip::shipMovement()
 
 void deletePlayerShip(AppState* state, const std::string& name)
 {
-    PlayerShip* player = static_cast<PlayerShip*>(state->properties[name].pointer);
+    auto* player = static_cast<PlayerShip*>(state->properties[name].pointer);
     if (player) {
         delete player;
         state->properties[name].pointer = nullptr;

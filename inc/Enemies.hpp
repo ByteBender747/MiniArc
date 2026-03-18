@@ -31,7 +31,7 @@ public:
         None, Alan, Lips, Bon
     };
 protected:
-    PlayerShip* getPlayer();
+    PlayerShip* getPlayer() const;
 protected:
     int m_hitPoints{1};
     GameAssets* m_assets;

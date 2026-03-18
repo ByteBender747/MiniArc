@@ -28,6 +28,10 @@ target_compile_definitions(sdlc PUBLIC
     RENDER_LOGICAL_HEIGHT=224
     RENDER_VSYNC=1
     TTF_INIT=1
+    AUDIO_FORMAT=SDL_AUDIO_F32LE
+    AUDIO_FREQ=8000
+    AUDIO_CHANNELS=1
+    AUDIO_NUM_STREAMS=4
 )
 
 # Add source files for MiniArc target

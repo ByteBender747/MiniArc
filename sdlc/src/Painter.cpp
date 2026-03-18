@@ -218,16 +218,16 @@ void Painter::floodFill(int x, int y)
 
             // Push neighboring pixels to the stack
             if (x > 0 && getPixel(x - 1, y) == oldColor) {
-                pixelStack.push({ x - 1, y });
+                pixelStack.emplace( x - 1, y );
             }
             if (x < m_dimension.width && getPixel(x + 1, y) == oldColor) {
-                pixelStack.push({ x + 1, y });
+                pixelStack.emplace( x + 1, y );
             }
             if (y > 0 && getPixel(x, y - 1) == oldColor) {
-                pixelStack.push({ x, y - 1 });
+                pixelStack.emplace( x, y - 1 );
             }
             if (y < m_dimension.height && getPixel(x, y + 1) == oldColor) {
-                pixelStack.push({ x, y + 1 });
+                pixelStack.emplace( x, y + 1 );
             }
         }
     }

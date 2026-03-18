@@ -58,7 +58,7 @@ void UILayer::renderShipCount()
     int shipCount = m_appState->properties["playerShips"].integer;
     sdlc::SpriteRenderer sprite(m_assets->spriteTexture);
     sprite.setSource(m_assets->sprites["PlayerSmall"]);
-    m_font->renderText(m_renderWidth - 80, m_renderHeight -60, std::format("x{}", shipCount));
+    m_font->renderText(m_renderWidth - 80, m_renderHeight - 60, std::format("x{}", shipCount));
     sprite.setPosition(RENDER_LOGICAL_WIDTH - 33, RENDER_LOGICAL_HEIGHT - 14, sdlc::SpritePositionOffset::TopLeft);
     sprite.render(m_appState->renderer);
 }
