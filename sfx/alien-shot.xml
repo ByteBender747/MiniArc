@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sonar version="0.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/ByteBender747/sonar/refs/heads/main/xsd/sonar-script.xsd">
+    <synthesis id="base" duration=".3">
+        <initialize>
+            <hull attack="50%" sustain="20%" sustain-level="1" min="1800" max="0.1"/>
+        </initialize>
+        <mod-freq>
+            <waveform type="sine" frequency="125" amplitude="-35dB"/>
+            <waveform type="sine" frequency="225" amplitude="-56dB"/>
+            <waveform type="rect" frequency="326" amplitude="-48dB"/>
+            <waveform type="sawtooth" frequency="422" amplitude="-67dB"/>
+            <waveform type="sawtooth" frequency="638" amplitude="-76dB"/>
+        </mod-freq>
+    </synthesis>
+    <synthesis id="output" duration=".3" normalize="true">
+        <initialize>
+            <import id="base" />
+        </initialize>
+        <mod-amp method="multiply">
+            <hull attack="10%" sustain="10%" sustain-level="-1dB" min="-60dB" max="0dB"/>
+        </mod-amp>
+        <echo delay="0.1" decay="0.3" wet="0.5" />
+    </synthesis>
+</sonar>

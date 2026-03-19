@@ -215,6 +215,8 @@ void PlayerShip::handleInputs()
     if (m_appState->input.keys.fallingEdge("fireBeam")) {
         fireProjectile(m_position.x - 4, m_position.y);
         fireProjectile(m_position.x + 4, m_position.y);
+        m_appState->audio.stream[strmPlayerGun]->clear();
+        m_appState->audio.stream[strmPlayerGun]->put(*m_assets->laserShot);
     }
 }
 

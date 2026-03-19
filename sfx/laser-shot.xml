@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sonar version="0.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/ByteBender747/sonar/refs/heads/main/xsd/sonar-script.xsd">
+    <synthesis id="output" duration="0.35" normalize="true">
+        <!-- Steep frequency sweep: ~2500Hz down to ~100Hz -->
+        <initialize>
+            <linear min="2200" max="-200" />
+        </initialize>
+        <!-- Rect and sawtooth carriers for harsh laser buzz, noise for zap texture -->
+        <mod-freq>
+            <waveform type="noise" frequency="1" amplitude="0.8"/>
+            <waveform type="rect" frequency="300" amplitude="1.0"/>
+            <waveform type="rect" frequency="400" amplitude="0.6"/>
+            <waveform type="sawtooth" frequency="200" amplitude="0.7"/>
+        </mod-freq>
+        <!-- Sharp attack, brief sustain, fast decay -->
+        <mod-amp method="multiply">
+            <hull attack="10%" sustain="10%" sustain-level="-1dB" min="-60dB" max="0dB"/>
+        </mod-amp>
+        <hall room-size="0.5" decay="1.5" wet="0" />
+    </synthesis>
+</sonar>

@@ -8,10 +8,8 @@ find_package(SDL3_image REQUIRED)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
 
-add_library(sdlc
-        inc/AudioStream.hpp
-        src/AudioStream.cpp
-        inc/AudioDevice.hpp)
+add_library(sdlc)
+
 target_include_directories(sdlc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
 target_sources(sdlc PRIVATE
@@ -24,4 +22,5 @@ target_sources(sdlc PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Keyboard.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Painter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/AudioStream.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/AudioDataBuffer.cpp
 )

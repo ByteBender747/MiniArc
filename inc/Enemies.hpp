@@ -16,6 +16,7 @@ constexpr double maxProjectileLifeTime = 5;
 class Enemy
 {
 public:
+    virtual ~Enemy() = default;
     Enemy(sdlc::AppState* appState);
     virtual void updateAndRender() = 0;
     virtual bool hitByProjectile(int damage) { return false; };
@@ -84,6 +85,7 @@ public:
     bool createProjectile(const sdlc::Vec2f& pos, const sdlc::Vec2f& target);
 private:
     double m_spawnTimer{0};
+    GameAssets* m_assets;
     sdlc::AppState* m_appState;
     sdlc::DynamicPool<std::unique_ptr<Enemy>> m_enemies;
 };

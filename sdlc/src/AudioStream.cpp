@@ -28,6 +28,14 @@ AudioStream::~AudioStream()
     }
 }
 
+int AudioStream::bytesQueued() const
+{
+    if (m_stream) {
+        return SDL_GetAudioStreamQueued(m_stream);
+    }
+    return 0;
+}
+
 void AudioStream::put(const void *data, int len)
 {
     if (m_stream) {

@@ -3,6 +3,8 @@
 #include <functional>
 #include <SDL3/SDL_audio.h>
 
+#include "AudioDataBuffer.hpp"
+
 namespace sdlc
 {
 
@@ -19,6 +21,13 @@ public:
     void emplace(const void* data, int len);
     void setGain(float gain);
     void clear();
+    void put(const AudioDataBuffer& buffer) {
+        put(buffer.data(), buffer.size());
+    }
+    void emplace(const AudioDataBuffer& buffer) {
+        emplace(buffer.data(), buffer.size());
+    }
+    [[nodiscard]] int bytesQueued() const;
     [[nodiscard]] float gain() const {
         return m_gain;
     }

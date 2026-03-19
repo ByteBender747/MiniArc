@@ -40,6 +40,8 @@ EnemySpawner::EnemySpawner(sdlc::AppState* appState)
     : m_appState(appState)
 {
     assert(m_appState);
+    m_assets = static_cast<GameAssets*>(m_appState->properties["assets"].pointer);
+    assert(m_assets);
     m_appState->iterateHandler[enemyZIndex] = [this](sdlc::AppState* appState) {
         m_spawnTimer += appState->deltaTime;
         if (m_spawnTimer > spawnInterval) {
@@ -68,6 +70,8 @@ bool EnemySpawner::createProjectile(const sdlc::Vec2f& pos, const sdlc::Vec2f& t
     auto item = m_enemies.acquire();
     if (item) {
         *item = std::make_unique<EnemyProjectile>(m_appState, pos, target);
+        m_appState->audio.stream[strmAlienGun]->clear();
+        m_appState->audio.stream[strmAlienGun]->put(*m_assets->alienShot);
         return true;
     }
     return false;
