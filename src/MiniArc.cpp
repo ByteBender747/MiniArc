@@ -14,6 +14,11 @@
 
 #include <SDL3_image/SDL_image.h>
 
+sdlc::AudioDataBuffer* loadWave(sdlc::AppState* state,  std::filesystem::path filePath)
+{
+    return new sdlc::AudioDataBuffer(state->audio.audioSpec, sdlc::resolveRelativeToExe(filePath).c_str());
+}
+
 void MiniArc_Init(sdlc::AppState *state, int argc, char **argv)
 {
     auto assets = new GameAssets();
@@ -27,12 +32,10 @@ void MiniArc_Init(sdlc::AppState *state, int argc, char **argv)
         std::cerr << "Error: Could not load Assets/arcade.png" << std::endl;
         goto ErrorExit;
     }
-    assets->alienShot = std::make_unique<sdlc::AudioDataBuffer>(state->audio.audioSpec,
-                                                                sdlc::resolveRelativeToExe("../Assets/alien-shot.wav").
-                                                                c_str());
-    assets->laserShot = std::make_unique<sdlc::AudioDataBuffer>(state->audio.audioSpec,
-                                                                sdlc::resolveRelativeToExe("../Assets/laser-shot.wav").
-                                                                c_str());
+    assets->alienShot = std::unique_ptr<sdlc::AudioDataBuffer>(loadWave(state, "../Assets/alien-shot.wav"));
+    assets->laserShot = std::unique_ptr<sdlc::AudioDataBuffer>(loadWave(state, "../Assets/laser-shot.wav"));
+    assets->explosion = std::unique_ptr<sdlc::AudioDataBuffer>(loadWave(state, "../Assets/explosion.wav"));
+    assets->spawnEffect = std::unique_ptr<sdlc::AudioDataBuffer>(loadWave(state, "../Assets/spawn-effect.wav"));
     state->input.keys.mapKey("shipUp", SDL_SCANCODE_W);
     state->input.keys.mapKey("shipDown", SDL_SCANCODE_S);
     state->input.keys.mapKey("shipLeft", SDL_SCANCODE_A);

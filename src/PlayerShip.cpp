@@ -61,8 +61,8 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_deathAnimation.addFrame(m_assets->sprites["Boom5"]);
     m_deathAnimation.setFPS(20);
     m_deathAnimation.setRepeat(false);
-    m_deathAnimation.animationFinished([this](sdlc::AnimatedSprite& sprite) {
-        reSpawn();
+    m_deathAnimation.setCallback([this](sdlc::AnimatedSprite& sprite, sdlc::AnimationEvent event) {
+        if (event == AnimationEvent::finished) reSpawn();
     });
 
     sdlc::SpriteImageDistribution dist {
@@ -78,10 +78,13 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_spawnEffect.addFrames(dist);
     m_spawnEffect.setDuration(1.5);
     m_spawnEffect.setRepeat(false);
-    m_spawnEffect.play();
-    m_spawnEffect.animationFinished([this](sdlc::AnimatedSprite& sprite) {
-        m_isAlive = true;
+    m_spawnEffect.setCallback([this](sdlc::AnimatedSprite& sprite, sdlc::AnimationEvent event) {
+        if (event == AnimationEvent::finished) m_isAlive = true;
+        if (event == AnimationEvent::start) {
+            m_appState->audio.stream[strmPlayerEffects]->put(*m_assets->spawnEffect);
+        }
     });
+    m_spawnEffect.play();
 }
 
 PlayerShip::~PlayerShip()
@@ -110,6 +113,8 @@ void PlayerShip::iteratePlayerShip()
         if (m_isAlive) {
             m_deathAnimation.play();
             m_isAlive = false;
+            m_appState->audio.stream[strmExplosions]->clear();
+            m_appState->audio.stream[strmExplosions]->put(*m_assets->explosion);
         }
         m_deathAnimation.setPosition(m_position.x, m_position.y);
         m_deathAnimation.update(m_appState->deltaTime);

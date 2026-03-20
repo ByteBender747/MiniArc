@@ -15,7 +15,7 @@ namespace sdlc
 {
 
 SpriteRenderer::SpriteRenderer(SDL_Texture* texture)
-    : m_texture(texture)
+    : m_savedState(), m_texture(texture)
 {
     SDL_GetTextureSize(texture, &m_source.w, &m_source.h);
 }
@@ -23,19 +23,19 @@ SpriteRenderer::SpriteRenderer(SDL_Texture* texture)
 void SpriteRenderer::setPosition(float x, float y, SpritePositionOffset offset)
 {
     switch (offset) {
-    case sdlc::SpritePositionOffset::TopLeft:
+    case SpritePositionOffset::TopLeft:
         setDestination(x, y, m_source.w, m_source.h);
         break;
-    case sdlc::SpritePositionOffset::TopRight:
+    case SpritePositionOffset::TopRight:
         setDestination(x - m_source.w, y, m_source.w, m_source.h);
         break;
-    case sdlc::SpritePositionOffset::BottomLeft:
+    case SpritePositionOffset::BottomLeft:
         setDestination(x, y - m_source.h, m_source.w, m_source.h);
         break;
-    case sdlc::SpritePositionOffset::BottomRight:
+    case SpritePositionOffset::BottomRight:
         setDestination(x - m_source.w, y - m_source.h, m_source.w, m_source.h);
         break;
-    case sdlc::SpritePositionOffset::Center:
+    case SpritePositionOffset::Center:
         setDestination(x - m_source.w / 2.0f, y - m_source.h / 2.0f, m_source.w, m_source.h);
         break;
     }
@@ -113,7 +113,7 @@ void SpriteRenderer::restoreTextureState()
 
 void SpriteRenderer::render(SDL_Renderer* renderer)
 {
-    if (m_source.w && m_source.h && m_destination.w && m_destination.h) {
+    if (m_source.w > 0 && m_source.h > 0 && m_destination.w > 0 && m_destination.h > 0) {
         if (m_rotated) {
             SDL_FPoint center{m_destination.x + m_destination.w / 2, m_destination.y + m_destination.h / 2};
             SDL_RenderTextureRotated(renderer, m_texture, &m_source, &m_destination, m_rotation, &center, SDL_FLIP_NONE);

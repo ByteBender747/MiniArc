@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:simpleType name="version-type">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9].[0-9].[0-9]" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="amplitude-type">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[\-+]{0,1}[0-9]*[.]{0,1}[0-9]*dB" />
+            <xs:pattern value="[\-+]{0,1}[0-9]*[.]{0,1}[0-9]*" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="time-type">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]*[.]{0,1}[0-9]*%" />
+            <xs:pattern value="[\-+]{0,1}[0-9]*[.]{0,1}[0-9]*" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="octave-type">
+        <xs:restriction base="xs:integer">
+            <xs:minInclusive value="-1" />
+            <xs:maxInclusive value="9" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="wavefrom-type">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="sine" />
+            <xs:enumeration value="rect" />
+            <xs:enumeration value="sawtooth" />
+            <xs:enumeration value="rect" />
+            <xs:enumeration value="noise" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="modulation-method">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="add" />
+            <xs:enumeration value="subtract" />
+            <xs:enumeration value="multiply" />
+            <xs:enumeration value="divide" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="waveform-ctype">
+        <xs:attribute name="type" type="wavefrom-type" use="required" />
+        <xs:attribute name="frequency" type="xs:double" use="required" />
+        <xs:attribute name="amplitude" type="amplitude-type" use="optional" default="1" />
+        <xs:attribute name="offset" type="xs:double" use="optional" default="0" />
+        <xs:attribute name="phase" type="xs:double" use="optional" default="0" />
+    </xs:complexType>
+    <xs:complexType name="base-noise-ctype">
+        <xs:attribute name="type" type="wavefrom-type" use="required" />
+        <xs:attribute name="min-freq" type="xs:double" use="required" />
+        <xs:attribute name="max-freq" type="xs:double" use="required" />
+        <xs:attribute name="overlays" type="xs:positiveInteger" use="required" />
+    </xs:complexType>
+    <xs:complexType name="white-noise-ctype">
+        <xs:complexContent>
+            <xs:extension base="base-noise-ctype">
+                <xs:attribute name="min-amp" type="amplitude-type" use="optional" default="0" />
+                <xs:attribute name="max-amp" type="amplitude-type" use="optional" default="1" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="import-ctype">
+        <xs:attribute name="id" type="xs:string" use="required" />
+        <xs:attribute name="normalize" type="xs:boolean" use="optional" default="false" />
+        <xs:attribute name="scale" type="xs:double" use="optional" default="1" />
+        <xs:attribute name="offset" type="xs:double" use="optional" default="0" />
+    </xs:complexType>
+    <xs:complexType name="hull-ctype">
+        <xs:attribute name="attack" type="time-type" use="required" />
+        <xs:attribute name="sustain" type="time-type" use="required" />
+        <xs:attribute name="sustain-level" type="amplitude-type" use="required" />
+        <xs:attribute name="min" type="amplitude-type" use="optional" default="-60" />
+        <xs:attribute name="max" type="amplitude-type" use="optional" default="0" />
+    </xs:complexType>
+    <xs:complexType name="linear-ctype">
+        <xs:attribute name="min" type="xs:double" use="optional" default="0" />
+        <xs:attribute name="max" type="xs:double" use="optional" default="1" />
+    </xs:complexType>
+    <xs:complexType name="echo-ctype">
+        <xs:attribute name="delay" type="xs:double" use="required" />
+        <xs:attribute name="decay" type="xs:double" use="required" />
+        <xs:attribute name="wet" type="xs:double" use="optional" default="0.5" />
+    </xs:complexType>
+    <xs:complexType name="hall-ctype">
+        <xs:attribute name="room-size" type="xs:double" use="required" />
+        <xs:attribute name="decay" type="xs:double" use="required" />
+        <xs:attribute name="wet" type="xs:double" use="optional" default="0.3" />
+    </xs:complexType>
+    <xs:complexType name="gauss-ctype">
+        <xs:attribute name="sigma" type="xs:double" use="required" />
+        <xs:attribute name="my" type="xs:double" use="optional" default="0" />
+        <xs:attribute name="scale" type="xs:double" use="optional" default="1" />
+    </xs:complexType>
+    <xs:complexType name="sequence-ctype">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="import" type="xs:string" use="required" />
+                <xs:attribute name="octave" type="octave-type" use="optional" default="0" />
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:element name="sonar">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element name="synthesis">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="initialize" minOccurs="0" maxOccurs="1">
+                                <xs:complexType>
+                                    <xs:choice>
+                                        <xs:element name="waveform" type="waveform-ctype" />
+                                        <xs:element name="pink-noise" type="base-noise-ctype" />
+                                        <xs:element name="red-noise" type="base-noise-ctype" />
+                                        <xs:element name="blue-noise" type="base-noise-ctype" />
+                                        <xs:element name="white-noise" type="white-noise-ctype" />
+                                        <xs:element name="import" type="import-ctype" />
+                                        <xs:element name="hull" type="hull-ctype" />
+                                        <xs:element name="linear" type="linear-ctype" />
+                                        <xs:element name="gauss" type="gauss-ctype" />
+                                        <xs:element name="sequence" type="sequence-ctype" />
+                                    </xs:choice>
+                                    <xs:attribute name="seed" type="xs:integer" use="optional"
+                                        default="0" />
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                <xs:element name="mod-amp">
+                                    <xs:complexType>
+                                        <xs:choice maxOccurs="unbounded">
+                                            <xs:element name="waveform" type="waveform-ctype"
+                                                maxOccurs="unbounded" />
+                                            <xs:element name="pink-noise" type="base-noise-ctype"
+                                                maxOccurs="unbounded" />
+                                            <xs:element name="red-noise" type="base-noise-ctype"
+                                                maxOccurs="unbounded" />
+                                            <xs:element name="blue-noise" type="base-noise-ctype"
+                                                maxOccurs="unbounded" />
+                                            <xs:element name="white-noise" type="white-noise-ctype"
+                                                maxOccurs="unbounded" />
+                                            <xs:element name="hull" type="hull-ctype"
+                                                maxOccurs="unbounded" />
+                                            <xs:element name="import" type="import-ctype"
+                                                maxOccurs="unbounded" />
+                                            <xs:element name="linear" type="linear-ctype"
+                                                maxOccurs="unbounded" />
+                                            <xs:element name="gauss" type="gauss-ctype"
+                                                maxOccurs="unbounded" />
+                                        </xs:choice>
+                                        <xs:attribute name="method" type="modulation-method"
+                                            use="required" />
+                                        <xs:attribute name="normalize" type="xs:boolean"
+                                            use="optional"
+                                            default="true" />
+                                        <xs:attribute name="seed" type="xs:integer" use="optional"
+                                            default="0" />
+                                    </xs:complexType>
+                                </xs:element>
+                                <xs:element name="mod-freq">
+                                    <xs:complexType>
+                                        <xs:choice>
+                                            <xs:element name="waveform" type="waveform-ctype"
+                                                minOccurs="1"
+                                                maxOccurs="unbounded" />
+                                        </xs:choice>
+                                    </xs:complexType>
+                                </xs:element>
+                            </xs:choice>
+                            <xs:element name="echo" type="echo-ctype" minOccurs="0" maxOccurs="1" />
+                            <xs:element name="hall" type="hall-ctype" minOccurs="0" maxOccurs="1" />
+                        </xs:sequence>
+                        <xs:attribute name="id" type="xs:string" use="required" />
+                        <xs:attribute name="duration" type="xs:double" use="required" />
+                        <xs:attribute name="normalize" type="xs:boolean" use="optional"
+                            default="true" />
+                        <xs:attribute name="private" type="xs:boolean" use="optional"
+                            default="false" />
+                        <xs:attribute name="repeat" type="xs:positiveInteger" use="optional"
+                            default="1" />
+                    </xs:complexType>
+                </xs:element>
+            </xs:choice>
+            <xs:attribute name="version" use="required" type="version-type" />
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

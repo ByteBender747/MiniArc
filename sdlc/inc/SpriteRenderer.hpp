@@ -57,14 +57,14 @@ public:
         m_destination.x = x;
         m_destination.y = y;
     }
-    const SDL_FRect& source() const { return m_source; }
-    const SDL_FRect& destination() const { return m_destination; }
-    const SDL_FPoint& position() const { return m_position; }
+    [[nodiscard]] const SDL_FRect& source() const { return m_source; }
+    [[nodiscard]] const SDL_FRect& destination() const { return m_destination; }
+    [[nodiscard]] const SDL_FPoint& position() const { return m_position; }
     void setRotation(double angle) {
         m_rotation = angle;
         m_rotated = true;
     }
-    double rotation() const { return m_rotation; }
+    [[nodiscard]] double rotation() const { return m_rotation; }
 private:
     bool m_rotated{false};
     double m_rotation{0};

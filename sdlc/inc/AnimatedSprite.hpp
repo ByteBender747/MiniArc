@@ -10,6 +10,11 @@
 namespace sdlc
 {
 
+enum class AnimationEvent
+{
+    start, paused, stopped, finished
+};
+
 struct SpriteImageDistribution {
     int startX;
     int startY;
@@ -24,7 +29,7 @@ struct SpriteImageDistribution {
 class AnimatedSprite : public SpriteRenderer
 {
 public:
-    using FinishedCallback = std::function<void(AnimatedSprite& ref)>;
+    using AnimationCallback = std::function<void(AnimatedSprite&, AnimationEvent)>;
 
     AnimatedSprite(SDL_Texture* texture);
     void update(double deltaTime);
@@ -33,14 +38,14 @@ public:
     void setDuration(double time);
     void setFPS(double fps);
     void setFrame(unsigned int number);
-    void play() { m_running = true; }
-    void pause() { m_running = false; }
+    void play();
+    void pause();
     void stop();
     bool isPlaying() const {
         return m_running;
     }
-    void animationFinished(FinishedCallback cb) {
-        m_animationFinished = cb;
+    void setCallback(const AnimationCallback &cb) {
+        m_callback = cb;
     }
     bool isFinished() const { return !m_repeat && !m_running; }
     void setRepeat(bool state) { m_repeat = state; }
@@ -51,7 +56,7 @@ private:
     double m_time{0};
     double m_interval{1};
     uint32_t m_currentFrame{0};
-    FinishedCallback m_animationFinished;
+    AnimationCallback m_callback;
     std::vector<SDL_FRect> m_frames;
 };
 

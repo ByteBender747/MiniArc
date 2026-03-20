@@ -152,8 +152,8 @@ EnemyLips::EnemyLips(sdlc::AppState* appState)
     m_sprite.setPosition(spawnXMargin + (m_rng.next() % (RENDER_LOGICAL_WIDTH - spawnXMargin)), 0,
                          sdlc::SpritePositionOffset::Center);
     m_sprite.setDuration(lipsAnimationSpeed);
-    m_sprite.animationFinished([this](sdlc::AnimatedSprite& ref) {
-        if (getPlayer()->isAlive()) {
+    m_sprite.setCallback([this](sdlc::AnimatedSprite& ref, sdlc::AnimationEvent event) {
+        if (getPlayer()->isAlive() && event == sdlc::AnimationEvent::finished) {
             EnemySpawner* spawner = static_cast<EnemySpawner*>(m_appState->properties["enemies"].pointer);
             spawner->createProjectile(m_sprite.position(), getPlayer()->getPosition());
         }
@@ -173,11 +173,13 @@ sdlc::Rect<float> EnemyLips::getPositionRect()
 bool EnemyLips::hitByProjectile(int damage)
 {
     m_hitPoints -= damage;
-    if (m_hitPoints <= 0) {
+    if (m_hitPoints <= 0 && !m_playDeathAnimation) {
         m_boomAnimation.play();
         m_sprite.stop();
         m_playDeathAnimation = true;
         m_appState->properties["score"].integer += lipsScore;
+        m_appState->audio.stream[strmExplosions]->clear();
+        m_appState->audio.stream[strmExplosions]->put(*m_assets->explosion);
     } else {
         m_hitFlash = 3;
     }

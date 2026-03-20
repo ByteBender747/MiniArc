@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sonar version="0.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="sonar-script.xsd">
+    <synthesis id="output" duration="1.5" normalize="true">
+        <initialize>
+            <linear min="50" max="250" />
+        </initialize>
+        <mod-freq>
+            <waveform type="rect" frequency="0" amplitude="0.3"/>
+            <waveform type="sawtooth" frequency="0" amplitude="0.3"/>
+            <waveform type="rect" frequency="0" amplitude="0.2"/>
+        </mod-freq>
+        <mod-amp method="add">
+            <white-noise type="sine" min-freq="100" max-freq="500" overlays="16" min-amp="0.1" max-amp="0.5"/>
+        </mod-amp>
+    </synthesis>
+</sonar>

@@ -6,7 +6,7 @@ namespace sdlc
 
 AnimatedSprite::AnimatedSprite(SDL_Texture* texture)
     : SpriteRenderer(texture)
-    , m_animationFinished(nullptr)
+    , m_callback(nullptr)
 {
 }
 
@@ -16,6 +16,23 @@ void AnimatedSprite::stop()
     m_currentFrame = 0;
     m_time = 0;
     setSource(0, 0, 0, 0);
+    if (m_callback) m_callback(*this, AnimationEvent::stopped);
+}
+
+void AnimatedSprite::play()
+{
+    if (!m_running) {
+        m_running = true;
+        if (m_callback) m_callback(*this, AnimationEvent::start);
+    }
+}
+
+void AnimatedSprite::pause()
+{
+    if (m_running) {
+        m_running = false;
+        if (m_callback) m_callback(*this, AnimationEvent::paused);
+    }
 }
 
 void AnimatedSprite::update(double deltaTime)
@@ -27,7 +44,7 @@ void AnimatedSprite::update(double deltaTime)
             m_currentFrame = (m_currentFrame + 1) % m_frames.size();
             setSource(m_frames[m_currentFrame]);
             if (!m_currentFrame) {
-                if (m_animationFinished) m_animationFinished(*this);
+                if (m_callback) m_callback(*this, AnimationEvent::finished);
                 if (!m_repeat) stop();
             }
         }

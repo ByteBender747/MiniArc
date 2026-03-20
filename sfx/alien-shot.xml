@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sonar version="0.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/ByteBender747/sonar/refs/heads/main/xsd/sonar-script.xsd">
+<sonar version="0.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="sonar-script.xsd">
     <synthesis id="base" duration=".3">
         <initialize>
             <hull attack="50%" sustain="20%" sustain-level="1" min="1800" max="0.1"/>
