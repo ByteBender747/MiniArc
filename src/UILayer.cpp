@@ -33,6 +33,11 @@ UILayer::UILayer(sdlc::AppState* appState)
             sdlc::SpriteRenderer sr(m_gameOverImage);
             sr.setPosition(RENDER_LOGICAL_WIDTH / 2., RENDER_LOGICAL_HEIGHT / 2.);
             sr.render(m_appState->renderer);
+            if (!m_gameOverSfxFlag) {
+                m_appState->audio.stream[strmPlayerEffects]->setGain(.35f);
+                m_appState->audio.stream[strmPlayerEffects]->put(*m_assets->gameOver);
+                m_gameOverSfxFlag = true;
+            }
         }
     };
     m_assets = static_cast<GameAssets*>(m_appState->properties["assets"].pointer);

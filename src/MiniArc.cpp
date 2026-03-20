@@ -36,6 +36,8 @@ void MiniArc_Init(sdlc::AppState *state, int argc, char **argv)
     assets->laserShot = std::unique_ptr<sdlc::AudioDataBuffer>(loadWave(state, "../Assets/laser-shot.wav"));
     assets->explosion = std::unique_ptr<sdlc::AudioDataBuffer>(loadWave(state, "../Assets/explosion.wav"));
     assets->spawnEffect = std::unique_ptr<sdlc::AudioDataBuffer>(loadWave(state, "../Assets/spawn-effect.wav"));
+    assets->hitEffect = std::unique_ptr<sdlc::AudioDataBuffer>(loadWave(state, "../Assets/hit-effect.wav"));
+    assets->gameOver = std::unique_ptr<sdlc::AudioDataBuffer>(loadWave(state, "../Assets/game-over.wav"));
     state->input.keys.mapKey("shipUp", SDL_SCANCODE_W);
     state->input.keys.mapKey("shipDown", SDL_SCANCODE_S);
     state->input.keys.mapKey("shipLeft", SDL_SCANCODE_A);

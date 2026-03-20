@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sonar version="0.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="sonar-script.xsd">
+    <synthesis id="tone" duration="0" normalize="true">
+        <initialize>
+            <waveform type="sine" frequency="320" amplitude="-5dB"/>
+        </initialize>
+        <mod-amp method="add">
+            <waveform type="rect" frequency="100"/>
+            <waveform type="sawtooth" frequency="250" amplitude="-10dB"/>
+        </mod-amp>
+    </synthesis>
+    <synthesis id="output" duration="0">
+        <initialize>
+            <sequence import="tone" octave="1">CBAA</sequence>
+        </initialize>
+    </synthesis>
+</sonar>

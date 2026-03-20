@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sonar version="0.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="sonar-script.xsd">
+    <synthesis id="output" duration="0.1" normalize="true">
+        <initialize>
+            <pink-noise type="sine" min-freq="50" max-freq="3000" overlays="512"/>
+        </initialize>
+        <mod-amp method="multiply">
+            <waveform type="rect" frequency="225" offset="1"/>
+        </mod-amp>
+        <mod-amp method="add">
+            <waveform type="noise" frequency="1" amplitude="-36dB"/>
+        </mod-amp>
+    </synthesis>
+</sonar>

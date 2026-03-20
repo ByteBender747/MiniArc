@@ -155,6 +155,8 @@ bool PlayerShip::hitCheck(const SDL_FRect& rect, int damage)
         result = true;
         m_hitPoints -= damage;
         m_hitFlash = 5;
+        m_appState->audio.stream[strmPlayerEffects]->clear();
+        m_appState->audio.stream[strmPlayerEffects]->put(*m_assets->hitEffect);
     }
     return result;
 }

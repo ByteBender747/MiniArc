@@ -15,6 +15,8 @@ struct GameAssets
     std::unique_ptr<sdlc::AudioDataBuffer> alienShot;
     std::unique_ptr<sdlc::AudioDataBuffer> explosion;
     std::unique_ptr<sdlc::AudioDataBuffer> spawnEffect;
+    std::unique_ptr<sdlc::AudioDataBuffer> hitEffect;
+    std::unique_ptr<sdlc::AudioDataBuffer> gameOver;
 };
 
 // Audio stream assignment

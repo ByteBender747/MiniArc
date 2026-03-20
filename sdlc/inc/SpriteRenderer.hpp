@@ -23,6 +23,16 @@ enum class SpritePositionOffset {
     Center
 };
 
+class SpriteRenderer;
+
+class SpriteRenderModifier
+{
+public:
+    virtual ~SpriteRenderModifier() = default;
+    virtual void renderBegin(SDL_Renderer* renderer, SpriteRenderer& spriteRenderer) = 0;
+    virtual void renderEnd(SDL_Renderer* renderer, SpriteRenderer& spriteRenderer) = 0;
+};
+
 class SpriteRenderer
 {
 public:
@@ -34,38 +44,28 @@ public:
     void setScaleMode(SDL_ScaleMode mode);
     void setAlphaMod(Uint8 alpha);
     void setColorMod(Uint8 r, Uint8 g, Uint8 b);
-    SDL_Color getColorMod();
+    [[nodiscard]] SDL_Color getColorMod() const;
     void setBlendMode(SDL_BlendMode mode);
-    SDL_ScaleMode getSaleMode();
-    SDL_BlendMode getBlendMode();
-    Uint8 getAlphaMod();
+    [[nodiscard]] SDL_ScaleMode getSaleMode() const;
+    [[nodiscard]] SDL_BlendMode getBlendMode() const;
+    [[nodiscard]] Uint8 getAlphaMod() const;
     void saveTextureState();
     void restoreTextureState();
+    void setRotation(double angle);
+    void setSource(float x, float y, float w, float h);
+    void setDestination(float x, float y, float w, float h);
     void setSource(const SDL_FRect& rect) { m_source = rect; }
-    void setSource(float x, float y, float w, float h) {
-        m_source.h = h;
-        m_source.w = w;
-        m_source.x = x;
-        m_source.y = y;
-    }
-    void setDestination(const SDL_FRect& rect) {
-        m_destination = rect;
-    }
-    void setDestination(float x, float y, float w, float h) {
-        m_destination.h = h;
-        m_destination.w = w;
-        m_destination.x = x;
-        m_destination.y = y;
-    }
+    void setDestination(const SDL_FRect& rect) { m_destination = rect; }
+    void setModifier(SpriteRenderModifier *modifier) { m_modifier = modifier; }
+    void setVisible(bool visible) { m_visible = visible; }
+    [[nodiscard]] bool visible() const { return m_visible; }
+    [[nodiscard]] SpriteRenderModifier * modifier() const { return m_modifier; }
     [[nodiscard]] const SDL_FRect& source() const { return m_source; }
     [[nodiscard]] const SDL_FRect& destination() const { return m_destination; }
     [[nodiscard]] const SDL_FPoint& position() const { return m_position; }
-    void setRotation(double angle) {
-        m_rotation = angle;
-        m_rotated = true;
-    }
     [[nodiscard]] double rotation() const { return m_rotation; }
 private:
+    bool m_visible{true};
     bool m_rotated{false};
     double m_rotation{0};
     struct {
@@ -74,6 +74,7 @@ private:
         SDL_ScaleMode scaleMode;
         SDL_BlendMode blendMode;
     } m_savedState;
+    SpriteRenderModifier* m_modifier{nullptr};
     SDL_Texture* m_texture;
     SDL_FRect m_source{0, 0, 0, 0};
     SDL_FRect m_destination{0, 0, 0, 0};

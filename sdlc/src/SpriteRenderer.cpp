@@ -52,7 +52,7 @@ void SpriteRenderer::setBlendMode(SDL_BlendMode mode)
     SDL_SetTextureBlendMode(m_texture, mode);
 }
 
-SDL_BlendMode SpriteRenderer::getBlendMode()
+SDL_BlendMode SpriteRenderer::getBlendMode() const
 {
     SDL_BlendMode blendMode;
     SDL_GetTextureBlendMode(m_texture, &blendMode);
@@ -64,7 +64,7 @@ void SpriteRenderer::setScaleMode(SDL_ScaleMode mode)
     SDL_SetTextureScaleMode(m_texture, mode);
 }
 
-SDL_ScaleMode SpriteRenderer::getSaleMode()
+SDL_ScaleMode SpriteRenderer::getSaleMode() const
 {
     SDL_ScaleMode scaleMode;
     SDL_GetTextureScaleMode(m_texture, &scaleMode);
@@ -76,7 +76,7 @@ void SpriteRenderer::setAlphaMod(Uint8 alpha)
     SDL_SetTextureAlphaMod(m_texture, alpha);
 }
 
-Uint8 SpriteRenderer::getAlphaMod()
+Uint8 SpriteRenderer::getAlphaMod() const
 {
     Uint8 alphaMod;
     SDL_GetTextureAlphaMod(m_texture, &alphaMod);
@@ -88,9 +88,9 @@ void SpriteRenderer::setColorMod(Uint8 r, Uint8 g, Uint8 b)
     SDL_SetTextureColorMod(m_texture, r, g, b);
 }
 
-SDL_Color SpriteRenderer::getColorMod()
+SDL_Color SpriteRenderer::getColorMod() const
 {
-    SDL_Color color;
+    SDL_Color color{0, 0, 0, 255};
     SDL_GetTextureColorMod(m_texture, &color.r, &color.g, &color.b);
     return color;
 }
@@ -111,14 +111,42 @@ void SpriteRenderer::restoreTextureState()
     setColorMod(m_savedState.colorMod.r, m_savedState.colorMod.g, m_savedState.colorMod.b);
 }
 
+void SpriteRenderer::setRotation(double angle)
+{
+    m_rotation = angle;
+    m_rotated = true;
+}
+
+void SpriteRenderer::setSource(float x, float y, float w, float h)
+{
+    m_source.h = h;
+    m_source.w = w;
+    m_source.x = x;
+    m_source.y = y;
+}
+
+void SpriteRenderer::setDestination(float x, float y, float w, float h)
+{
+    m_destination.h = h;
+    m_destination.w = w;
+    m_destination.x = x;
+    m_destination.y = y;
+}
+
 void SpriteRenderer::render(SDL_Renderer* renderer)
 {
-    if (m_source.w > 0 && m_source.h > 0 && m_destination.w > 0 && m_destination.h > 0) {
+    if (m_visible && m_source.w > 0 && m_source.h > 0 && m_destination.w > 0 && m_destination.h > 0) {
+        if (m_modifier) {
+            m_modifier->renderBegin(renderer, *this);
+        }
         if (m_rotated) {
             SDL_FPoint center{m_destination.x + m_destination.w / 2, m_destination.y + m_destination.h / 2};
             SDL_RenderTextureRotated(renderer, m_texture, &m_source, &m_destination, m_rotation, &center, SDL_FLIP_NONE);
         } else {
             SDL_RenderTexture(renderer, m_texture, &m_source, &m_destination);
+        }
+        if (m_modifier) {
+            m_modifier->renderEnd(renderer, *this);
         }
     }
 }
