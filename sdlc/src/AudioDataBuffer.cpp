@@ -1,10 +1,36 @@
 #include "AudioDataBuffer.hpp"
+#include "PathHelper.hpp"
+#include "AppState.hpp"
 
 #include <iostream>
 #include <SDL3/SDL_audio.h>
 
 namespace sdlc
 {
+
+AudioDataBufferPtr loadWave(sdlc::AppState* state, const std::filesystem::path &filePath)
+{
+    return std::make_unique<sdlc::AudioDataBuffer>(
+        AudioDataBuffer(state->audio.audioSpec,
+            resolveRelativeToExe(filePath).c_str()));
+}
+
+AudioDataBuffer::AudioDataBuffer(const AudioDataBuffer &other)
+    : m_useSDL_free(false),
+      m_size(other.m_size)
+{
+    m_data = new uint8_t[other.m_size];
+    memcpy(m_data, other.m_data, m_size);
+}
+
+AudioDataBuffer::AudioDataBuffer(AudioDataBuffer &&other) noexcept
+    : m_useSDL_free(other.m_useSDL_free),
+      m_data(other.m_data),
+      m_size(other.m_size)
+{
+    other.m_data = nullptr;
+    other.m_size = 0;
+}
 
 AudioDataBuffer::AudioDataBuffer(uint32_t size)
     : m_useSDL_free(false), m_size(size)

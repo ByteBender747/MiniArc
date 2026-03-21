@@ -12,7 +12,7 @@ namespace sdlc
 
 enum class AnimationEvent
 {
-    start, paused, stopped, finished
+    start, paused, stopped, finished, update
 };
 
 struct SpriteImageDistribution {
@@ -29,34 +29,41 @@ struct SpriteImageDistribution {
 class AnimatedSprite : public SpriteRenderer
 {
 public:
-    using AnimationCallback = std::function<void(AnimatedSprite&, AnimationEvent)>;
+    using Callback = std::function<void(AnimatedSprite&, AnimationEvent)>;
 
-    AnimatedSprite(SDL_Texture* texture);
+    AnimatedSprite(SDL_Texture* texture, Callback callback = nullptr);
+    AnimatedSprite(const AnimatedSprite &other);
+    AnimatedSprite(AnimatedSprite &&other) noexcept;
+
     void update(double deltaTime);
-    void addFrame(const SDL_FRect& rect);
-    void addFrames(const SpriteImageDistribution& dist);
+    int addFrame(const SDL_FRect& rect);
+    int addFrames(const SpriteImageDistribution& dist);
     void setDuration(double time);
     void setFPS(double fps);
     void setFrame(unsigned int number);
-    void play();
+    void play(int frameCount = -1);
     void pause();
     void stop();
-    bool isPlaying() const {
+    [[nodiscard]] bool playing() const {
         return m_running;
     }
-    void setCallback(const AnimationCallback &cb) {
+    void setCallback(const Callback &cb) {
         m_callback = cb;
     }
-    bool isFinished() const { return !m_repeat && !m_running; }
+    [[nodiscard]] bool finished() const { return !m_repeat && !m_running; }
     void setRepeat(bool state) { m_repeat = state; }
-    bool repeating() const { return m_repeat; }
+    [[nodiscard]] bool repeating() const { return m_repeat; }
+    [[nodiscard]] std::size_t frameCount() const { return m_frames.size(); }
+protected:
+    virtual void handleAnimationEvent(AnimationEvent event);
 private:
+    int m_frameCount{0};
     bool m_running{false};
     bool m_repeat{true};
     double m_time{0};
     double m_interval{1};
     uint32_t m_currentFrame{0};
-    AnimationCallback m_callback;
+    Callback m_callback;
     std::vector<SDL_FRect> m_frames;
 };
 

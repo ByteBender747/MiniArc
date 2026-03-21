@@ -37,6 +37,7 @@ class SpriteRenderer
 {
 public:
     SpriteRenderer(SDL_Texture* texture);
+    virtual ~SpriteRenderer() = default;
     void setPosition(float x, float y, SpritePositionOffset offset = SpritePositionOffset::Center);
     void setPosition(const SDL_FPoint& posRef, SpritePositionOffset offset = SpritePositionOffset::Center);
     void render(SDL_Renderer* render);

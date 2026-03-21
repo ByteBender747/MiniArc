@@ -12,7 +12,10 @@ class AudioStream
 {
 public:
     using AudioStreamFinishedCallback = std::function<void(AudioStream&, const void *, int len)>;
+
 public:
+    AudioStream(const AudioStream &other);
+    AudioStream(AudioStream &&other) noexcept;
     AudioStream(const SDL_AudioSpec& inputFmt, const SDL_AudioSpec& outputFmt);
     virtual ~AudioStream();
     virtual void audioStreamFinished(const void* buf, int len);

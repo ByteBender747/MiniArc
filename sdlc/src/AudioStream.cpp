@@ -12,6 +12,30 @@ static void streamCallback(void *userdata, const void *buf, int buflen)
     stream->audioStreamFinished(buf, buflen);
 }
 
+AudioStream::AudioStream(const AudioStream &other)
+    : m_gain(other.m_gain)
+    , m_hasData(other.m_hasData)
+    , m_callback(other.m_callback)
+    , m_inputFmt(other.m_inputFmt)
+    , m_outputFmt(other.m_outputFmt)
+{
+    m_stream = SDL_CreateAudioStream(&m_inputFmt, &m_outputFmt);
+    if (!m_stream) {
+        std::cerr << "Error: AudioStream::AudioStream(): could not create audio stream" << std::endl;
+    }
+}
+
+AudioStream::AudioStream(AudioStream &&other) noexcept
+    : m_gain(other.m_gain)
+    , m_hasData(other.m_hasData)
+    , m_callback(std::move(other.m_callback))
+    , m_inputFmt(other.m_inputFmt)
+    , m_outputFmt(other.m_outputFmt)
+{
+    m_stream = other.m_stream;
+    other.m_stream = nullptr;
+}
+
 AudioStream::AudioStream(const SDL_AudioSpec &inputFmt, const SDL_AudioSpec &outputFmt)
     : m_inputFmt(inputFmt), m_outputFmt(outputFmt)
 {

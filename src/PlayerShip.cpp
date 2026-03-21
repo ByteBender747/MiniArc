@@ -38,7 +38,7 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_posLimits[3] = RENDER_LOGICAL_HEIGHT - 8;
     m_shotSprite.setSource(m_assets->sprites["Laser"]);
     m_appState->iterateHandler[playerZIndex] = [this](AppState* appState) {
-        if (!m_spawnEffect.isFinished()) {
+        if (!m_spawnEffect.finished()) {
             m_spawnEffect.setPosition(m_position.x, m_position.y);
             m_spawnEffect.update(appState->deltaTime);
             m_spawnEffect.render(appState->renderer);

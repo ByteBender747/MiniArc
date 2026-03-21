@@ -28,7 +28,7 @@ public:
         return m_isAlive;
     }
     bool isSpawning() const {
-        return m_spawnEffect.isPlaying();
+        return m_spawnEffect.playing();
     }
     int getCurrentHitPointe() const {
         return m_hitPoints;

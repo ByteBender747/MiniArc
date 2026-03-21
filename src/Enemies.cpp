@@ -192,7 +192,7 @@ void EnemyLips::updateAndRender()
         m_boomAnimation.setPosition(m_sprite.position().x, m_sprite.position().y, sdlc::SpritePositionOffset::Center);
         m_boomAnimation.update(m_appState->deltaTime);
         m_boomAnimation.render(m_appState->renderer);
-        if (m_boomAnimation.isFinished()) kill();
+        if (m_boomAnimation.finished()) kill();
         return;
     }
     sdlc::Vec2f pos(m_sprite.position());
