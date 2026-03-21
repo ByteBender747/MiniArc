@@ -35,7 +35,7 @@ public:
     AnimatedSprite(const AnimatedSprite &other);
     AnimatedSprite(AnimatedSprite &&other) noexcept;
 
-    void update(double deltaTime);
+    void render(SDL_Renderer* renderer, double deltaTime) override;
     int addFrame(const SDL_FRect& rect);
     int addFrames(const SpriteImageDistribution& dist);
     void setDuration(double time);
@@ -54,6 +54,7 @@ public:
     void setRepeat(bool state) { m_repeat = state; }
     [[nodiscard]] bool repeating() const { return m_repeat; }
     [[nodiscard]] std::size_t frameCount() const { return m_frames.size(); }
+    [[nodiscard]] int currentFrame() const { return m_currentFrame; }
 protected:
     virtual void handleAnimationEvent(AnimationEvent event);
 private:
@@ -62,7 +63,7 @@ private:
     bool m_repeat{true};
     double m_time{0};
     double m_interval{1};
-    uint32_t m_currentFrame{0};
+    int m_currentFrame{0};
     Callback m_callback;
     std::vector<SDL_FRect> m_frames;
 };

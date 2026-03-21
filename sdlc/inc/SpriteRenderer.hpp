@@ -29,8 +29,8 @@ class SpriteRenderModifier
 {
 public:
     virtual ~SpriteRenderModifier() = default;
-    virtual void renderBegin(SDL_Renderer* renderer, SpriteRenderer& spriteRenderer) = 0;
-    virtual void renderEnd(SDL_Renderer* renderer, SpriteRenderer& spriteRenderer) = 0;
+    virtual void renderBegin(SDL_Renderer* renderer, SpriteRenderer& spriteRenderer, double deltaTime) = 0;
+    virtual void renderEnd(SDL_Renderer* renderer, SpriteRenderer& spriteRenderer, double deltaTime) = 0;
 };
 
 class SpriteRenderer
@@ -40,16 +40,17 @@ public:
     virtual ~SpriteRenderer() = default;
     void setPosition(float x, float y, SpritePositionOffset offset = SpritePositionOffset::Center);
     void setPosition(const SDL_FPoint& posRef, SpritePositionOffset offset = SpritePositionOffset::Center);
-    void render(SDL_Renderer* render);
+    virtual void render(SDL_Renderer* renderer, double deltaTime);
+    void render(SDL_Renderer* renderer) { render(renderer, 0); }
     bool isOnScreen(SDL_Renderer* renderer);
     void setScaleMode(SDL_ScaleMode mode);
     void setAlphaMod(Uint8 alpha);
     void setColorMod(Uint8 r, Uint8 g, Uint8 b);
-    [[nodiscard]] SDL_Color getColorMod() const;
     void setBlendMode(SDL_BlendMode mode);
-    [[nodiscard]] SDL_ScaleMode getSaleMode() const;
-    [[nodiscard]] SDL_BlendMode getBlendMode() const;
-    [[nodiscard]] Uint8 getAlphaMod() const;
+    [[nodiscard]] SDL_Color colorMod() const;
+    [[nodiscard]] SDL_ScaleMode scaleMode() const;
+    [[nodiscard]] SDL_BlendMode blendMode() const;
+    [[nodiscard]] Uint8 alphaMod() const;
     void saveTextureState();
     void restoreTextureState();
     void setRotation(double angle);
@@ -58,7 +59,8 @@ public:
     void setSource(const SDL_FRect& rect) { m_source = rect; }
     void setDestination(const SDL_FRect& rect) { m_destination = rect; }
     void setModifier(SpriteRenderModifier *modifier) { m_modifier = modifier; }
-    void setVisible(bool visible) { m_visible = visible; }
+    void hide() { m_visible = false; }
+    void show() { m_visible = true; }
     [[nodiscard]] bool visible() const { return m_visible; }
     [[nodiscard]] SpriteRenderModifier * modifier() const { return m_modifier; }
     [[nodiscard]] const SDL_FRect& source() const { return m_source; }

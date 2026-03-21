@@ -61,10 +61,28 @@ private:
     sdlc::AnimatedSprite m_boomAnimation;
 };
 
+class EnemyBon : public Enemy
+{
+public:
+    EnemyBon(sdlc::AppState* appState);
+    void updateAndRender() override;
+    bool hitByProjectile(int damage) override;
+    sdlc::Rect<float> getPositionRect() override;
+private:
+    int m_posX;
+    int m_posY;
+    int m_hitPoints;
+    int m_hitFlash{0};
+    bool m_arrived{false};
+    double m_stayTimer;
+    sdlc::AnimatedSprite m_explosion;
+    sdlc::AnimatedSprite m_bonSprite;
+};
+
 class EnemyProjectile : public Enemy
 {
 public:
-    EnemyProjectile(sdlc::AppState* appState, const sdlc::Vec2f& pos, const sdlc::Vec2f& target);
+    EnemyProjectile(sdlc::AppState* appState, const sdlc::Vec2f& pos, const sdlc::Vec2f& dir);
     void updateAndRender() override;
     sdlc::Rect<float> getPositionRect() override;
 private:
@@ -82,10 +100,12 @@ public:
     EnemySpawner(sdlc::AppState* appState);
     virtual ~EnemySpawner();
     bool hitCheckAllEnemies(const sdlc::Rect<float>& projectileRect, int damage);
-    bool createProjectile(const sdlc::Vec2f& pos, const sdlc::Vec2f& target);
+    bool fireProjectileAtTarget(const sdlc::Vec2f& pos, const sdlc::Vec2f& target);
+    bool fireProjectileAtDirection(const sdlc::Vec2f& pos, const sdlc::Vec2f& dir);
 private:
     double m_spawnTimer{0};
     GameAssets* m_assets;
+    sdlc::Random m_rng;
     sdlc::AppState* m_appState;
     sdlc::DynamicPool<std::unique_ptr<Enemy>> m_enemies;
 };

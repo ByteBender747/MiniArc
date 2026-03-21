@@ -22,6 +22,13 @@ constexpr float lipsEnemyMaxJitter       = 32;
 constexpr double lipsEnemyJitterInterval = 1.5;
 constexpr double lipsAnimationSpeed      = 1.2;
 
+// Enemy Bon behavior configuration
+constexpr int bonHitPoints           = 280;
+constexpr int bonScore               = 250;
+constexpr double bonStayTime         = 1.5;
+constexpr double bonSpawnProbability = 0.4;
+constexpr double bonAnimationSpeed   = 2.2;
+
 // Enemy projectiles
 constexpr float enemyProjectileSpeed       = 150;
 constexpr int enemyProjectileDamage        = 250;
@@ -47,7 +54,11 @@ EnemySpawner::EnemySpawner(sdlc::AppState* appState)
         if (m_spawnTimer > spawnInterval) {
             m_spawnTimer = 0;
             if (auto item = m_enemies.acquire()) {
-                *item = std::make_unique<EnemyLips>(appState);
+                if (m_rng.chance(bonSpawnProbability)) {
+                    *item = std::make_unique<EnemyBon>(appState);
+                } else {
+                    *item = std::make_unique<EnemyLips>(appState);
+                }
             }
         }
         m_enemies.foreachAcquired([](sdlc::PoolItem<std::unique_ptr<Enemy>>& item) {
@@ -65,11 +76,23 @@ EnemySpawner::~EnemySpawner()
     m_appState->iterateHandler[enemyZIndex] = nullptr;
 }
 
-bool EnemySpawner::createProjectile(const sdlc::Vec2f& pos, const sdlc::Vec2f& target)
+bool EnemySpawner::fireProjectileAtTarget(const sdlc::Vec2f& pos, const sdlc::Vec2f& target)
 {
     auto item = m_enemies.acquire();
     if (item) {
-        *item = std::make_unique<EnemyProjectile>(m_appState, pos, target);
+        *item = std::make_unique<EnemyProjectile>(m_appState, pos, normalized((target - pos)));
+        m_appState->audio.stream[strmAlienGun]->clear();
+        m_appState->audio.stream[strmAlienGun]->put(*m_assets->alienShot);
+        return true;
+    }
+    return false;
+}
+
+bool EnemySpawner::fireProjectileAtDirection(const sdlc::Vec2f& pos, const sdlc::Vec2f& dir)
+{
+    auto item = m_enemies.acquire();
+    if (item) {
+        *item = std::make_unique<EnemyProjectile>(m_appState, pos, normalized((dir)));
         m_appState->audio.stream[strmAlienGun]->clear();
         m_appState->audio.stream[strmAlienGun]->put(*m_assets->alienShot);
         return true;
@@ -106,7 +129,7 @@ PlayerShip* Enemy::getPlayer() const
     return player;
 }
 
-EnemyProjectile::EnemyProjectile(sdlc::AppState* appState, const sdlc::Vec2f& pos, const sdlc::Vec2f& target)
+EnemyProjectile::EnemyProjectile(sdlc::AppState* appState, const sdlc::Vec2f& pos, const sdlc::Vec2f& dir)
     : Enemy(appState), m_projectileSprite(m_assets->spriteTexture)
 {
     m_projectileSprite.addFrame(m_assets->sprites["AlienShot11"]);
@@ -114,7 +137,7 @@ EnemyProjectile::EnemyProjectile(sdlc::AppState* appState, const sdlc::Vec2f& po
     m_projectileSprite.setFPS(30);
     m_projectileSprite.play();
     m_projectile.position = pos;
-    m_projectile.velocity = sdlc::normalized(target - pos) * sdlc::Vec2f(enemyProjectileSpeed);
+    m_projectile.velocity = dir * sdlc::Vec2f(enemyProjectileSpeed);
 }
 
 sdlc::Rect<float> EnemyProjectile::getPositionRect()
@@ -128,8 +151,7 @@ void EnemyProjectile::updateAndRender()
         m_projectileSprite.setPosition(m_projectile.position.x, m_projectile.position.y);
         m_projectile.position += m_projectile.velocity * sdlc::Vec2f(m_appState->deltaTime);
         m_projectile.lifeTime -= m_appState->deltaTime;
-        m_projectileSprite.update(m_appState->deltaTime);
-        m_projectileSprite.render(m_appState->renderer);
+        m_projectileSprite.render(m_appState->renderer, m_appState->deltaTime);
         if (getPlayer()->hitCheck(m_projectileSprite.destination(), enemyProjectileDamage)) {
             kill();
         }
@@ -155,7 +177,7 @@ EnemyLips::EnemyLips(sdlc::AppState* appState)
     m_sprite.setCallback([this](sdlc::AnimatedSprite& ref, sdlc::AnimationEvent event) {
         if (getPlayer()->isAlive() && event == sdlc::AnimationEvent::finished) {
             EnemySpawner* spawner = static_cast<EnemySpawner*>(m_appState->properties["enemies"].pointer);
-            spawner->createProjectile(m_sprite.position(), getPlayer()->getPosition());
+            spawner->fireProjectileAtTarget(m_sprite.position(), getPlayer()->getPosition());
         }
     });
     m_sprite.play();
@@ -190,8 +212,7 @@ void EnemyLips::updateAndRender()
 {
     if (m_playDeathAnimation && isAlive()) {
         m_boomAnimation.setPosition(m_sprite.position().x, m_sprite.position().y, sdlc::SpritePositionOffset::Center);
-        m_boomAnimation.update(m_appState->deltaTime);
-        m_boomAnimation.render(m_appState->renderer);
+        m_boomAnimation.render(m_appState->renderer, m_appState->deltaTime);
         if (m_boomAnimation.finished()) kill();
         return;
     }
@@ -208,12 +229,95 @@ void EnemyLips::updateAndRender()
             SDL_SetRenderColorScale(m_appState->renderer, 255);
             --m_hitFlash;
         }
-        m_sprite.update(m_appState->deltaTime);
-        m_sprite.render(m_appState->renderer);
+        m_sprite.render(m_appState->renderer, m_appState->deltaTime);
         SDL_SetRenderColorScale(m_appState->renderer, 1);
     } else {
         kill(); // Runs out of visible area
     }
+}
+
+EnemyBon::EnemyBon(sdlc::AppState *appState)
+    : Enemy(appState)
+    , m_bonSprite(m_assets->spriteTexture)
+    , m_explosion((m_assets->spriteTexture))
+    , m_hitPoints(bonHitPoints)
+    , m_stayTimer(bonStayTime)
+{
+    m_bonSprite.addFrame(m_assets->sprites["Bon1"]);
+    m_bonSprite.addFrame(m_assets->sprites["Bon2"]);
+    m_bonSprite.addFrame(m_assets->sprites["Bon3"]);
+    m_bonSprite.addFrame(m_assets->sprites["Bon4"]);
+    initBoom(m_assets, m_explosion);
+    sdlc::Rect<int> spawnArea(0, 0, RENDER_LOGICAL_WIDTH, RENDER_LOGICAL_HEIGHT);
+    spawnArea = spawnArea.offset(20, 20);
+    m_posX = m_rng.next() % spawnArea.width() + spawnArea.t.x;
+    m_posY = m_rng.next() % spawnArea.height() + spawnArea.t.y;
+    m_bonSprite.setDuration(bonAnimationSpeed);
+    m_bonSprite.play();
+    m_bonSprite.setCallback([this](sdlc::AnimatedSprite& ref, sdlc::AnimationEvent event) {
+        if (event == sdlc::AnimationEvent::finished) {
+            EnemySpawner* spawner = static_cast<EnemySpawner*>(m_appState->properties["enemies"].pointer);
+            sdlc::Vec2f pos = { ref.position().x, ref.position().y };
+            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, -1));
+            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(1, -1));
+            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, 1));
+            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(1, 1));
+            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, 0));
+            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(1, 0));
+            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(0, -1));
+            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(0, 1));
+            m_arrived = true;
+        }
+    });
+    m_explosion.setFPS(20);
+    m_explosion.setRepeat(false);
+    m_explosion.hide();
+    m_explosion.setCallback([this](sdlc::AnimatedSprite& ref, sdlc::AnimationEvent event) {
+        if (event == sdlc::AnimationEvent::finished) {
+            kill();
+        }
+    });
+}
+
+void EnemyBon::updateAndRender()
+{
+    if (m_hitFlash > 0) {
+        SDL_SetRenderColorScale(m_appState->renderer, 255);
+        --m_hitFlash;
+    }
+    m_bonSprite.setPosition(m_posX, m_posY, sdlc::SpritePositionOffset::Center);
+    m_bonSprite.render(m_appState->renderer, m_appState->deltaTime);
+    SDL_SetRenderColorScale(m_appState->renderer, 1);
+    m_explosion.setPosition(m_posX, m_posY, sdlc::SpritePositionOffset::Center);
+    m_explosion.render(m_appState->renderer, m_appState->deltaTime);
+    if (m_arrived && !m_explosion.playing()) {
+        m_stayTimer -= m_appState->deltaTime;
+        if (m_stayTimer <= 0) {
+            kill();
+        }
+    }
+}
+
+bool EnemyBon::hitByProjectile(int damage)
+{
+    if (!m_explosion.playing() && m_bonSprite.currentFrame() >= 2) {
+        m_hitPoints -= damage;
+        m_hitFlash = 3;
+        if (m_hitPoints <= 0) {
+            m_explosion.play();
+            m_explosion.show();
+            m_bonSprite.hide();
+            m_appState->audio.stream[strmExplosions]->clear();
+            m_appState->audio.stream[strmExplosions]->put(*m_assets->explosion);
+        }
+        return true;
+    }
+    return false;
+}
+
+sdlc::Rect<float> EnemyBon::getPositionRect()
+{
+    return m_bonSprite.destination();
 }
 
 void deleteEnemies(sdlc::AppState* state, const std::string& name)

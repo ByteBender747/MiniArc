@@ -70,7 +70,7 @@ void AnimatedSprite::pause()
     }
 }
 
-void AnimatedSprite::update(double deltaTime)
+void AnimatedSprite::render(SDL_Renderer *renderer, double deltaTime)
 {
     if (m_running) {
         m_time += deltaTime;
@@ -85,6 +85,7 @@ void AnimatedSprite::update(double deltaTime)
             }
         }
     }
+    SpriteRenderer::render(renderer, deltaTime);
 }
 
 void AnimatedSprite::handleAnimationEvent(AnimationEvent event)

@@ -52,7 +52,7 @@ void SpriteRenderer::setBlendMode(SDL_BlendMode mode)
     SDL_SetTextureBlendMode(m_texture, mode);
 }
 
-SDL_BlendMode SpriteRenderer::getBlendMode() const
+SDL_BlendMode SpriteRenderer::blendMode() const
 {
     SDL_BlendMode blendMode;
     SDL_GetTextureBlendMode(m_texture, &blendMode);
@@ -64,7 +64,7 @@ void SpriteRenderer::setScaleMode(SDL_ScaleMode mode)
     SDL_SetTextureScaleMode(m_texture, mode);
 }
 
-SDL_ScaleMode SpriteRenderer::getSaleMode() const
+SDL_ScaleMode SpriteRenderer::scaleMode() const
 {
     SDL_ScaleMode scaleMode;
     SDL_GetTextureScaleMode(m_texture, &scaleMode);
@@ -76,7 +76,7 @@ void SpriteRenderer::setAlphaMod(Uint8 alpha)
     SDL_SetTextureAlphaMod(m_texture, alpha);
 }
 
-Uint8 SpriteRenderer::getAlphaMod() const
+Uint8 SpriteRenderer::alphaMod() const
 {
     Uint8 alphaMod;
     SDL_GetTextureAlphaMod(m_texture, &alphaMod);
@@ -88,7 +88,7 @@ void SpriteRenderer::setColorMod(Uint8 r, Uint8 g, Uint8 b)
     SDL_SetTextureColorMod(m_texture, r, g, b);
 }
 
-SDL_Color SpriteRenderer::getColorMod() const
+SDL_Color SpriteRenderer::colorMod() const
 {
     SDL_Color color{0, 0, 0, 255};
     SDL_GetTextureColorMod(m_texture, &color.r, &color.g, &color.b);
@@ -97,10 +97,10 @@ SDL_Color SpriteRenderer::getColorMod() const
 
 void SpriteRenderer::saveTextureState()
 {
-    m_savedState.alphaMod = getAlphaMod();
-    m_savedState.blendMode = getBlendMode();
-    m_savedState.scaleMode = getSaleMode();
-    m_savedState.colorMod = getColorMod();
+    m_savedState.alphaMod = alphaMod();
+    m_savedState.blendMode = blendMode();
+    m_savedState.scaleMode = scaleMode();
+    m_savedState.colorMod = colorMod();
 }
 
 void SpriteRenderer::restoreTextureState()
@@ -133,11 +133,11 @@ void SpriteRenderer::setDestination(float x, float y, float w, float h)
     m_destination.y = y;
 }
 
-void SpriteRenderer::render(SDL_Renderer* renderer)
+void SpriteRenderer::render(SDL_Renderer* renderer, double deltaTime)
 {
     if (m_visible && m_source.w > 0 && m_source.h > 0 && m_destination.w > 0 && m_destination.h > 0) {
         if (m_modifier) {
-            m_modifier->renderBegin(renderer, *this);
+            m_modifier->renderBegin(renderer, *this, deltaTime);
         }
         if (m_rotated) {
             SDL_FPoint center{m_destination.x + m_destination.w / 2, m_destination.y + m_destination.h / 2};
@@ -146,7 +146,7 @@ void SpriteRenderer::render(SDL_Renderer* renderer)
             SDL_RenderTexture(renderer, m_texture, &m_source, &m_destination);
         }
         if (m_modifier) {
-            m_modifier->renderEnd(renderer, *this);
+            m_modifier->renderEnd(renderer, *this, deltaTime);
         }
     }
 }

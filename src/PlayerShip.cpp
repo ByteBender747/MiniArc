@@ -40,8 +40,7 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_appState->iterateHandler[playerZIndex] = [this](AppState* appState) {
         if (!m_spawnEffect.finished()) {
             m_spawnEffect.setPosition(m_position.x, m_position.y);
-            m_spawnEffect.update(appState->deltaTime);
-            m_spawnEffect.render(appState->renderer);
+            m_spawnEffect.render(appState->renderer, appState->deltaTime);
         } else {
             iteratePlayerShip();
         }
@@ -117,8 +116,7 @@ void PlayerShip::iteratePlayerShip()
             m_appState->audio.stream[strmExplosions]->put(*m_assets->explosion);
         }
         m_deathAnimation.setPosition(m_position.x, m_position.y);
-        m_deathAnimation.update(m_appState->deltaTime);
-        m_deathAnimation.render(m_appState->renderer);
+        m_deathAnimation.render(m_appState->renderer, m_appState->deltaTime);
     }
 }
 
