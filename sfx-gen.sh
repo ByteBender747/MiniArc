@@ -7,3 +7,4 @@ sonar -i ./sfx/explosion.xml -b${FORMAT} -s${FREQ} output:./Assets/explosion.wav
 sonar -i ./sfx/spawn-effect.xml -b${FORMAT} -s${FREQ} output:./Assets/spawn-effect.wav
 sonar -i ./sfx/hit-effect.xml -b${FORMAT} -s${FREQ} output:./Assets/hit-effect.wav
 sonar -i ./sfx/game-over.xml -b${FORMAT} -s${FREQ} output:./Assets/game-over.wav
+sonar -i ./sfx/pickup.xml -b${FORMAT} -s${FREQ} output:./Assets/pickup.wav

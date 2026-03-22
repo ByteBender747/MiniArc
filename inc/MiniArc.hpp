@@ -17,6 +17,7 @@ struct GameAssets
     sdlc::AudioDataBufferPtr spawnEffect;
     sdlc::AudioDataBufferPtr hitEffect;
     sdlc::AudioDataBufferPtr gameOver;
+    sdlc::AudioDataBufferPtr pickup;
 };
 
 // Audio stream assignment

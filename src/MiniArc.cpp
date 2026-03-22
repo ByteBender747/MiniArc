@@ -33,6 +33,7 @@ void MiniArc_Init(sdlc::AppState *state, int argc, char **argv)
     assets->spawnEffect = sdlc::loadWave(state, "../Assets/spawn-effect.wav");
     assets->hitEffect = sdlc::loadWave(state, "../Assets/hit-effect.wav");
     assets->gameOver = sdlc::loadWave(state, "../Assets/game-over.wav");
+    assets->pickup = sdlc::loadWave(state, "../Assets/pickup.wav");
     state->input.keys.mapKey("shipUp", SDL_SCANCODE_W);
     state->input.keys.mapKey("shipDown", SDL_SCANCODE_S);
     state->input.keys.mapKey("shipLeft", SDL_SCANCODE_A);

@@ -15,6 +15,9 @@ public:
     void updateAndRender() override;
     bool hitByProjectile(int damage) override;
     sdlc::Rect<float> getPositionRect() override;
+protected:
+    void addScore(int points);
+    void playPickupSound();
     void getItemSprite(sdlc::SpriteRenderer& sprite);
 private:
     sdlc::Rect<float> m_posRect;

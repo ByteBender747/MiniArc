@@ -329,8 +329,10 @@ void EnemyBon::updateAndRender()
     SDL_SetRenderColorScale(m_appState->renderer, 1);
     m_explosion.setPosition(m_posX, m_posY, sdlc::SpritePositionOffset::Center);
     m_explosion.render(m_appState->renderer, m_appState->deltaTime);
-    if (getPlayer()->hitCheck(m_bonSprite.destination(), 10000)) {
-        hitByProjectile(10000);
+    if (m_bonSprite.currentFrame() >= 2 && m_bonSprite.currentFrame() <= 4) {
+        if (getPlayer()->hitCheck(m_bonSprite.destination(), 10000)) {
+            hitByProjectile(10000);
+        }
     }
     if (m_arrived && !m_explosion.playing() && !m_despawn) {
         m_despawn = true;
