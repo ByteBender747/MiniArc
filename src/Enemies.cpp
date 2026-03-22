@@ -4,6 +4,7 @@
 #include "Enemies.hpp"
 #include "AnimatedSprite.hpp"
 #include "AppState.hpp"
+#include "GoodyItem.hpp"
 #include "MiniArc.hpp"
 #include "PlayerShip.hpp"
 #include "Rect.hpp"
@@ -32,6 +33,9 @@ constexpr double bonAnimationSpeed   = 3.3;
 constexpr float enemyProjectileSpeed       = 150;
 constexpr int enemyProjectileDamage        = 250;
 constexpr int chargedEnemyProjectileDamage = 500;
+
+constexpr double spawnChancePowerUp = 0.3;
+constexpr double spawnChanceShips   = 0.05;
 
 static void initBoom(GameAssets* assets, sdlc::AnimatedSprite& sprite)
 {
@@ -68,6 +72,22 @@ EnemySpawner::EnemySpawner(sdlc::AppState* appState)
             }
         });
     };
+}
+
+void EnemySpawner::spawnGoddy(const sdlc::Point2D<float> &spawnPos)
+{
+    if (m_rng.chance(spawnChanceShips)) {
+        if (auto item = m_enemies.acquire()) {
+            *item = std::make_unique<GoodyItem>(m_appState, spawnPos, GoodyItemType::ship);
+            return;
+        }
+    }
+    if (m_rng.chance(spawnChancePowerUp)) {
+        if (auto item = m_enemies.acquire()) {
+            *item = std::make_unique<GoodyItem>(m_appState, spawnPos, GoodyItemType::powerUp);
+            return;
+        }
+    }
 }
 
 EnemySpawner::~EnemySpawner()
@@ -126,6 +146,13 @@ PlayerShip* Enemy::getPlayer() const
     auto player = static_cast<PlayerShip*>(m_appState->properties["player"].pointer);
     assert(player);
     return player;
+}
+
+EnemySpawner* Enemy::getSpawner() const
+{
+    auto spawner = static_cast<EnemySpawner*>(m_appState->properties["enemies"].pointer);
+    assert(spawner);
+    return spawner;
 }
 
 EnemyProjectile::EnemyProjectile(sdlc::AppState* appState, const sdlc::Vec2f& pos, const sdlc::Vec2f& dir)
@@ -201,6 +228,7 @@ bool EnemyLips::hitByProjectile(int damage)
         m_appState->properties["score"].integer += lipsScore;
         m_appState->audio.stream[strmExplosions]->clear();
         m_appState->audio.stream[strmExplosions]->put(*m_assets->explosion);
+        getSpawner()->spawnGoddy(m_sprite.position());
     } else {
         m_hitFlash = 3;
     }
@@ -223,6 +251,9 @@ void EnemyLips::updateAndRender()
     }
     pos += sdlc::Vec2f(m_jitterValue, lipsEnemyDownSpeed) * sdlc::Vec2f(m_appState->deltaTime);
     m_sprite.setPosition(pos.x, pos.y, sdlc::SpritePositionOffset::Center);
+    if (getPlayer()->hitCheck(m_sprite.destination(), 10000)) {
+        hitByProjectile(10000);
+    }
     if (m_viewPort.intersects(getPositionRect())) {
         if (m_hitFlash > 0) {
             SDL_SetRenderColorScale(m_appState->renderer, 255);
@@ -282,6 +313,7 @@ EnemyBon::EnemyBon(sdlc::AppState *appState)
     m_explosion.setCallback([this](sdlc::AnimatedSprite& ref, sdlc::AnimationEvent event) {
         if (event == sdlc::AnimationEvent::finished) {
             kill();
+            m_appState->properties["score"].integer += bonScore;
         }
     });
 }
@@ -297,6 +329,9 @@ void EnemyBon::updateAndRender()
     SDL_SetRenderColorScale(m_appState->renderer, 1);
     m_explosion.setPosition(m_posX, m_posY, sdlc::SpritePositionOffset::Center);
     m_explosion.render(m_appState->renderer, m_appState->deltaTime);
+    if (getPlayer()->hitCheck(m_bonSprite.destination(), 10000)) {
+        hitByProjectile(10000);
+    }
     if (m_arrived && !m_explosion.playing() && !m_despawn) {
         m_despawn = true;
         m_bonSprite.setFrame(5);
@@ -315,6 +350,7 @@ bool EnemyBon::hitByProjectile(int damage)
             m_bonSprite.hide();
             m_appState->audio.stream[strmExplosions]->clear();
             m_appState->audio.stream[strmExplosions]->put(*m_assets->explosion);
+            getSpawner()->spawnGoddy(m_bonSprite.position());
         }
         return true;
     }

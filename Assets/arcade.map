@@ -43,3 +43,11 @@ RingEffect1,62,1,8,8
 RingEffect2,78,1,8,8
 RingEffect3,93,0,10,10
 RingEffect4,109,0,10,10
+PowerUp1,77,31,8,10
+PowerUp2,93,31,8,10
+PowerUp3,109,31,8,10
+PickupC,76,15,10,10
+PickupS,92,15,10,10
+PickupM,108,15,10,10
+Spark1,95,45,4,4
+Spark2,111,45,4,4

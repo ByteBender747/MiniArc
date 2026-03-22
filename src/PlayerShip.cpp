@@ -152,9 +152,16 @@ bool PlayerShip::hitCheck(const SDL_FRect& rect, int damage)
     if (shipRect.intersects(rect)) {
         result = true;
         m_hitPoints -= damage;
-        m_hitFlash = 5;
-        m_appState->audio.stream[strmPlayerEffects]->clear();
-        m_appState->audio.stream[strmPlayerEffects]->put(*m_assets->hitEffect);
+        if (damage > 0) {
+            m_hitFlash = 5;
+            m_appState->audio.stream[strmPlayerEffects]->clear();
+            m_appState->audio.stream[strmPlayerEffects]->put(*m_assets->hitEffect);
+        }
+        if (damage < 0) { // negative damaged used for healing by pickup
+            if (m_hitPoints > playerInitialHitPoints) {
+                m_hitPoints = playerInitialHitPoints;
+            }
+        }
     }
     return result;
 }

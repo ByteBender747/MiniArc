@@ -13,6 +13,8 @@
 
 constexpr double maxProjectileLifeTime = 5;
 
+class EnemySpawner;
+
 class Enemy
 {
 public:
@@ -33,6 +35,7 @@ public:
     };
 protected:
     PlayerShip* getPlayer() const;
+    EnemySpawner* getSpawner() const;
 protected:
     int m_hitPoints{1};
     GameAssets* m_assets;
@@ -102,6 +105,7 @@ public:
     bool hitCheckAllEnemies(const sdlc::Rect<float>& projectileRect, int damage);
     bool fireProjectileAtTarget(const sdlc::Vec2f& pos, const sdlc::Vec2f& target);
     bool fireProjectileAtDirection(const sdlc::Vec2f& pos, const sdlc::Vec2f& dir);
+    void spawnGoddy(const sdlc::Point2D<float> &spawnPos);
 private:
     double m_spawnTimer{0};
     GameAssets* m_assets;

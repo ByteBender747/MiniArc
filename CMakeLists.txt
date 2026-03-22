@@ -42,4 +42,5 @@ target_sources(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Enemies.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UILayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/HealthBar.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/GoodyItem.cpp
 )   

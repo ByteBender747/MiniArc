@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SDL3/SDL_rect.h>
+
 namespace sdlc
 {
 
@@ -8,7 +10,6 @@ struct Point2D {
     valueT x{0}, y{0};
     Point2D() = default;
     Point2D(valueT x, valueT y) : x(x), y(y) {}
-#ifdef SDL_rect_h_
     Point2D(const SDL_FPoint& r) {
         x = static_cast<valueT>(r.x);
         y = static_cast<valueT>(r.y);
@@ -30,7 +31,6 @@ struct Point2D {
             static_cast<float>(y)
         };
     }
-#endif
 };
 
 template <typename valueT>
@@ -46,7 +46,6 @@ struct Rect {
         b.y = y + h;
     }
 
-#ifdef SDL_rect_h_
     Rect(const SDL_FRect& r) {
         t.x = static_cast<valueT>(r.x);
         t.y = static_cast<valueT>(r.y);
@@ -60,7 +59,6 @@ struct Rect {
         b.x = static_cast<valueT>(r.x) + static_cast<valueT>(r.w);
         b.y = static_cast<valueT>(r.y) + static_cast<valueT>(r.h);
     }
-#endif
 
     valueT width() const {
         return b.x - t.x;
@@ -96,7 +94,6 @@ struct Rect {
         return r;
     }
 
-#ifdef SDL_rect_h_
     operator SDL_Rect() const {
         return {
             static_cast<int>(t.x),
@@ -114,7 +111,6 @@ struct Rect {
             static_cast<float>(height())
         };
     }
-#endif
 };
 
 } // namespace sdlc
