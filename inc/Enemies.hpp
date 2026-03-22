@@ -74,7 +74,7 @@ private:
     int m_hitPoints;
     int m_hitFlash{0};
     bool m_arrived{false};
-    double m_stayTimer;
+    bool m_despawn{false};
     sdlc::AnimatedSprite m_explosion;
     sdlc::AnimatedSprite m_bonSprite;
 };

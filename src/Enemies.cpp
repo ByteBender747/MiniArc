@@ -23,11 +23,10 @@ constexpr double lipsEnemyJitterInterval = 1.5;
 constexpr double lipsAnimationSpeed      = 1.2;
 
 // Enemy Bon behavior configuration
-constexpr int bonHitPoints           = 280;
+constexpr int bonHitPoints           = 200;
 constexpr int bonScore               = 250;
-constexpr double bonStayTime         = 1.5;
 constexpr double bonSpawnProbability = 0.4;
-constexpr double bonAnimationSpeed   = 2.2;
+constexpr double bonAnimationSpeed   = 3.3;
 
 // Enemy projectiles
 constexpr float enemyProjectileSpeed       = 150;
@@ -241,21 +240,29 @@ EnemyBon::EnemyBon(sdlc::AppState *appState)
     , m_bonSprite(m_assets->spriteTexture)
     , m_explosion((m_assets->spriteTexture))
     , m_hitPoints(bonHitPoints)
-    , m_stayTimer(bonStayTime)
 {
     m_bonSprite.addFrame(m_assets->sprites["Bon1"]);
     m_bonSprite.addFrame(m_assets->sprites["Bon2"]);
     m_bonSprite.addFrame(m_assets->sprites["Bon3"]);
     m_bonSprite.addFrame(m_assets->sprites["Bon4"]);
+    m_bonSprite.addFrame(m_assets->sprites["RingEffect1"]);
+    m_bonSprite.addFrame(m_assets->sprites["RingEffect2"]);
+    m_bonSprite.addFrame(m_assets->sprites["RingEffect3"]);
+    m_bonSprite.addFrame(m_assets->sprites["RingEffect4"]);
     initBoom(m_assets, m_explosion);
     sdlc::Rect<int> spawnArea(0, 0, RENDER_LOGICAL_WIDTH, RENDER_LOGICAL_HEIGHT);
     spawnArea = spawnArea.offset(20, 20);
     m_posX = m_rng.next() % spawnArea.width() + spawnArea.t.x;
     m_posY = m_rng.next() % spawnArea.height() + spawnArea.t.y;
+    m_bonSprite.setRepeat(false);
     m_bonSprite.setDuration(bonAnimationSpeed);
-    m_bonSprite.play();
+    m_bonSprite.play(4);
     m_bonSprite.setCallback([this](sdlc::AnimatedSprite& ref, sdlc::AnimationEvent event) {
         if (event == sdlc::AnimationEvent::finished) {
+            if (m_despawn) {
+                kill();
+                return;
+            }
             EnemySpawner* spawner = static_cast<EnemySpawner*>(m_appState->properties["enemies"].pointer);
             sdlc::Vec2f pos = { ref.position().x, ref.position().y };
             spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, -1));
@@ -290,17 +297,16 @@ void EnemyBon::updateAndRender()
     SDL_SetRenderColorScale(m_appState->renderer, 1);
     m_explosion.setPosition(m_posX, m_posY, sdlc::SpritePositionOffset::Center);
     m_explosion.render(m_appState->renderer, m_appState->deltaTime);
-    if (m_arrived && !m_explosion.playing()) {
-        m_stayTimer -= m_appState->deltaTime;
-        if (m_stayTimer <= 0) {
-            kill();
-        }
+    if (m_arrived && !m_explosion.playing() && !m_despawn) {
+        m_despawn = true;
+        m_bonSprite.setFrame(5);
+        m_bonSprite.play();
     }
 }
 
 bool EnemyBon::hitByProjectile(int damage)
 {
-    if (!m_explosion.playing() && m_bonSprite.currentFrame() >= 2) {
+    if (!m_despawn && !m_explosion.playing() && m_bonSprite.currentFrame() >= 2) {
         m_hitPoints -= damage;
         m_hitFlash = 3;
         if (m_hitPoints <= 0) {

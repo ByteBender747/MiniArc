@@ -39,3 +39,7 @@ AlienShot11,120,47,6,6
 AlienShot12,120,26,6,6
 AlienShot21,120,33,6,6
 AlienShot22,120,40,6,6
+RingEffect1,62,1,8,8
+RingEffect2,78,1,8,8
+RingEffect3,93,0,10,10
+RingEffect4,109,0,10,10

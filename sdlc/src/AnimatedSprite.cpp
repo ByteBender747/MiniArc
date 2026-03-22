@@ -57,6 +57,8 @@ void AnimatedSprite::play(int frameCount)
             if (m_frameCount > m_frames.size()) {
                 m_frameCount = static_cast<int>(m_frames.size());
             }
+        } else {
+            m_frameCount = static_cast<int>(m_frames.size());
         }
         handleAnimationEvent(AnimationEvent::start);
     }

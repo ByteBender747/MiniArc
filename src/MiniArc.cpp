@@ -17,7 +17,7 @@
 void MiniArc_Init(sdlc::AppState *state, int argc, char **argv)
 {
     auto assets = new GameAssets();
-    if (!sdlc::loadSpriteDefinitions(assets->sprites, sdlc::resolveRelativeToExe("../Assets/arcade.txt"))) {
+    if (!sdlc::loadSpriteDefinitions(assets->sprites, sdlc::resolveRelativeToExe("../Assets/arcade.map"))) {
         std::cerr << "Error: Could not load Assets/arcade.txt" << std::endl;
         goto ErrorExit;
     }
