@@ -18,6 +18,7 @@ using namespace sdlc;
 
 constexpr float playerMoveSpeed = 100;
 constexpr int playerBeamDamage = 50;
+constexpr int playerChargedBeamDamage = 200;
 
 PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     : m_appState(state)
@@ -26,8 +27,13 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     , m_shotSprite(texture)
     , m_deathAnimation(texture)
     , m_spawnEffect(texture)
+    , m_chargedShot(texture)
 {
     m_assets = static_cast<GameAssets*>(state->properties["assets"].pointer);
+    m_chargedShot.addFrame(m_assets->sprites["LaserCharged1"]);
+    m_chargedShot.addFrame(m_assets->sprites["LaserCharged2"]);
+    m_chargedShot.setFPS(10);
+    m_chargedShot.play();
     m_sprite.setScaleMode(SDL_SCALEMODE_NEAREST);
     m_sprite.setSource(m_assets->sprites["PlayerCenter"]);
     m_flames.setSource(m_assets->sprites["FlameLeft1"]);
@@ -80,7 +86,7 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_spawnEffect.setCallback([this](sdlc::AnimatedSprite& sprite, sdlc::AnimationEvent event) {
         if (event == AnimationEvent::finished) m_isAlive = true;
         if (event == AnimationEvent::start) {
-            m_appState->audio.stream[strmPlayerEffects]->put(*m_assets->spawnEffect);
+            m_appState->audio.stream[strmPlayerEffects].put(m_assets->spawnEffect);
         }
     });
     m_spawnEffect.play();
@@ -112,19 +118,20 @@ void PlayerShip::iteratePlayerShip()
         if (m_isAlive) {
             m_deathAnimation.play();
             m_isAlive = false;
-            m_appState->audio.stream[strmExplosions]->clear();
-            m_appState->audio.stream[strmExplosions]->put(*m_assets->explosion);
+            m_appState->audio.stream[strmExplosions].clear();
+            m_appState->audio.stream[strmExplosions].put(m_assets->explosion);
         }
         m_deathAnimation.setPosition(m_position.x, m_position.y);
         m_deathAnimation.render(m_appState->renderer, m_appState->deltaTime);
     }
 }
 
-bool PlayerShip::fireProjectile(float x, float y)
+bool PlayerShip::fireProjectile(float x, float y, bool charged)
 {
     Projectile* projectile = m_projectiles.acquire();
     if (projectile)  {
         projectile->position = sdlc::Vec2f(x, y);
+        projectile->charged = charged;
     }
     return projectile != nullptr;
 }
@@ -154,8 +161,8 @@ bool PlayerShip::hitCheck(const SDL_FRect& rect, int damage)
         m_hitPoints -= damage;
         if (damage > 0) {
             m_hitFlash = 5;
-            m_appState->audio.stream[strmPlayerEffects]->clear();
-            m_appState->audio.stream[strmPlayerEffects]->put(*m_assets->hitEffect);
+            m_appState->audio.stream[strmPlayerEffects].clear();
+            m_appState->audio.stream[strmPlayerEffects].put(m_assets->hitEffect);
         }
         if (damage < 0) { // negative damaged used for healing by pickup
             if (m_hitPoints > playerInitialHitPoints) {
@@ -174,12 +181,20 @@ void PlayerShip::moveAndRenderProjectiles(float shotSpeed)
         if (item.acquired) {
             Projectile& projectile = item.value;
             projectile.position += sdlc::Vec2f(0, -shotSpeed * m_appState->deltaTime);
-            m_shotSprite.setPosition(projectile.position.x, projectile.position.y, sdlc::SpritePositionOffset::Center);
-            m_shotSprite.render(m_appState->renderer);
+            sdlc::Rect<float> destination;
+            if (projectile.charged) {
+                m_chargedShot.setPosition(projectile.position.x, projectile.position.y, sdlc::SpritePositionOffset::Center);
+                m_chargedShot.render(m_appState->renderer, m_appState->deltaTime);
+                destination = m_chargedShot.destination();
+            } else {
+                m_shotSprite.setPosition(projectile.position.x, projectile.position.y, sdlc::SpritePositionOffset::Center);
+                m_shotSprite.render(m_appState->renderer);
+                destination = m_shotSprite.destination();
+            }
             if (projectile.position.y < 0) {
                 item.acquired = false;
             }
-            if (enemies->hitCheckAllEnemies(m_shotSprite.destination(), playerBeamDamage)) {
+            if (enemies->hitCheckAllEnemies(destination, projectile.charged ? playerChargedBeamDamage : playerBeamDamage)) {
                 item.acquired = false;
             }
         }
@@ -224,11 +239,25 @@ void PlayerShip::handleInputs()
     if (m_appState->input.keys.down("shipDown")) {
         m_position += sdlc::Vec2f(0, delta);
     }
+    if (m_appState->input.keys.down("fireBeam")) {
+        m_chargingTimer += m_appState->deltaTime;
+        if (m_chargingTimer > 0.2 && !m_chargedFlag) {
+            m_appState->audio.stream[strmPlayerGun].put(m_assets->charging);
+            m_chargedFlag = true;
+        }
+    }
     if (m_appState->input.keys.fallingEdge("fireBeam")) {
-        fireProjectile(m_position.x - 4, m_position.y);
-        fireProjectile(m_position.x + 4, m_position.y);
-        m_appState->audio.stream[strmPlayerGun]->clear();
-        m_appState->audio.stream[strmPlayerGun]->put(*m_assets->laserShot);
+        bool charged = m_chargingTimer > 0.5;
+        fireProjectile(m_position.x - 4, m_position.y, charged);
+        fireProjectile(m_position.x + 4, m_position.y, charged);
+        m_appState->audio.stream[strmPlayerGun].clear();
+        if (charged) {
+            m_appState->audio.stream[strmPlayerGun].put(m_assets->chargedShot);
+        } else {
+            m_appState->audio.stream[strmPlayerGun].put(m_assets->laserShot);
+        }
+        m_chargingTimer = 0;
+        m_chargedFlag = false;
     }
 }
 

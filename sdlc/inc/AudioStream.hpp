@@ -14,11 +14,13 @@ public:
     using AudioStreamFinishedCallback = std::function<void(AudioStream&, const void *, int len)>;
 
 public:
+    AudioStream() = default;
     AudioStream(const AudioStream &other);
     AudioStream(AudioStream &&other) noexcept;
     AudioStream(const SDL_AudioSpec& inputFmt, const SDL_AudioSpec& outputFmt);
     virtual ~AudioStream();
     virtual void audioStreamFinished(const void* buf, int len);
+    void create(const SDL_AudioSpec& inputFmt, const SDL_AudioSpec& outputFmt);
     void put(const void* data, int len);
     int get(void* buf, int len) const;
     void emplace(const void* data, int len);
@@ -50,8 +52,8 @@ private:
     float m_gain{1};
     bool m_hasData{false};
     AudioStreamFinishedCallback m_callback;
-    SDL_AudioSpec m_inputFmt, m_outputFmt;
-    SDL_AudioStream* m_stream;
+    SDL_AudioSpec m_inputFmt{}, m_outputFmt{};
+    SDL_AudioStream* m_stream{nullptr};
 };
 
 }

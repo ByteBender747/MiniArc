@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sonar version="0.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="sonar-script.xsd">
+    <synthesis id="first" duration="0.5" normalize="false">
+        <initialize>
+            <linear min="1000" max="0" />
+        </initialize>
+        <mod-freq>
+            <waveform type="sine" frequency="0"/>
+            <waveform type="rect" frequency="20"/>
+            <waveform type="sawtooth" frequency="50"/>
+        </mod-freq>
+        <hall room-size="0.9" decay="0.6"/>
+    </synthesis>
+    <synthesis id="output" duration="0.3" normalize="true">
+        <initialize>
+            <linear min="0" max="500"/>
+        </initialize>
+        <mod-freq>
+            <waveform type="sawtooth" frequency="0"/>
+            <waveform type="rect" frequency="20"/>
+            <waveform type="sine" frequency="50"/>
+        </mod-freq>
+        <mod-amp method="add">
+            <import id="first"/>
+        </mod-amp>
+        <mod-amp method="multiply">
+            <hull attack="20%" sustain="50%" sustain-level="-5dB" min="-60dB" max="1"/>
+        </mod-amp>
+        <hall room-size="0.7" decay="0.6" wet="0.6"/>
+    </synthesis>
+</sonar>

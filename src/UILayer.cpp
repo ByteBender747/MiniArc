@@ -34,10 +34,11 @@ UILayer::UILayer(sdlc::AppState* appState)
             sr.setPosition(RENDER_LOGICAL_WIDTH / 2., RENDER_LOGICAL_HEIGHT / 2.);
             sr.render(m_appState->renderer);
             if (!m_gameOverSfxFlag) {
-                m_appState->audio.stream[strmPlayerEffects]->setGain(.35f);
-                m_appState->audio.stream[strmPlayerEffects]->put(*m_assets->gameOver);
+                m_appState->audio.stream[strmPlayerEffects].setGain(.35f);
+                m_appState->audio.stream[strmPlayerEffects].put(m_assets->gameOver);
                 m_gameOverSfxFlag = true;
             }
+            m_appState->properties["gameOver"].boolean = true;
         }
     };
     m_assets = static_cast<GameAssets*>(m_appState->properties["assets"].pointer);
@@ -95,7 +96,7 @@ void UILayer::renderScoreValue()
 
 void deleteUI(sdlc::AppState* state, const std::string& name)
 {
-    UILayer* ptr = static_cast<UILayer*>(state->properties[name].pointer);
+    auto* ptr = static_cast<UILayer*>(state->properties[name].pointer);
     if (ptr) {
         delete ptr;
         state->properties[name].pointer = nullptr;

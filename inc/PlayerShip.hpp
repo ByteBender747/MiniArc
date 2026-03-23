@@ -40,16 +40,18 @@ private:
     };
     struct Projectile {
         sdlc::Vec2f position;
+        bool charged{false};
     };
 private:
     void shipMovement();
     void animateFlames();
     void handleInputs();
     void moveAndRenderProjectiles(float shotSpeed);
-    bool fireProjectile(float x, float y);
+    bool fireProjectile(float x, float y, bool charged);
     void reSpawn();
     void iteratePlayerShip();
 private:
+    bool m_chargedFlag{false};
     bool m_isAlive{false};
     float m_posLimits[4]{};
     uint8_t m_flameType{0};
@@ -57,12 +59,14 @@ private:
     bool m_triggerState{false};
     int m_hitFlash{0};
     int m_hitPoints{playerInitialHitPoints};
+    double m_chargingTimer{0};
     sdlc::StaticPool<Projectile, 16> m_projectiles;
     MovementDirection m_direction{MovementDirection::None};
     sdlc::Vec2f m_position;
     sdlc::SpriteRenderer m_sprite;
     sdlc::SpriteRenderer m_flames;
     sdlc::SpriteRenderer m_shotSprite;
+    sdlc::AnimatedSprite m_chargedShot;
     sdlc::AnimatedSprite m_deathAnimation;
     sdlc::AnimatedSprite m_spawnEffect;
     sdlc::AppState* m_appState;

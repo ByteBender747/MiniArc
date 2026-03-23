@@ -11,13 +11,15 @@ struct GameAssets
 {
     sdlc::SpriteDefinitions sprites;
     sdlc::ResPtr<SDL_Texture> spriteTexture;
-    sdlc::AudioDataBufferPtr laserShot;
-    sdlc::AudioDataBufferPtr alienShot;
-    sdlc::AudioDataBufferPtr explosion;
-    sdlc::AudioDataBufferPtr spawnEffect;
-    sdlc::AudioDataBufferPtr hitEffect;
-    sdlc::AudioDataBufferPtr gameOver;
-    sdlc::AudioDataBufferPtr pickup;
+    sdlc::AudioDataBuffer laserShot;
+    sdlc::AudioDataBuffer alienShot;
+    sdlc::AudioDataBuffer explosion;
+    sdlc::AudioDataBuffer spawnEffect;
+    sdlc::AudioDataBuffer hitEffect;
+    sdlc::AudioDataBuffer gameOver;
+    sdlc::AudioDataBuffer pickup;
+    sdlc::AudioDataBuffer charging;
+    sdlc::AudioDataBuffer chargedShot;
 };
 
 // Audio stream assignment

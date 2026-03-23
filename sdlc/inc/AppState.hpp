@@ -22,6 +22,7 @@ namespace sdlc
 union Property {
     uint8_t data[8] {0, 0, 0, 0, 0, 0, 0, 0};
     void* pointer;
+    bool boolean;
     int64_t integer;
     float floatValue;
     double doubleValue;
@@ -47,7 +48,7 @@ struct AppState {
     struct {
         AudioDevice device;
         SDL_AudioSpec audioSpec{};
-        std::array<std::unique_ptr<AudioStream>, AUDIO_NUM_STREAMS> stream;
+        std::array<AudioStream, AUDIO_NUM_STREAMS> stream;
     } audio;
 #endif
 };

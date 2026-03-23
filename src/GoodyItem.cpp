@@ -31,7 +31,7 @@ void GoodyItem::addScore(int points)
 
 void GoodyItem::playPickupSound()
 {
-    m_appState->audio.stream[strmPlayerEffects]->put(*m_assets->pickup);
+    m_appState->audio.stream[strmPlayerEffects].put(m_assets->pickup);
 }
 
 void GoodyItem::updateAndRender()

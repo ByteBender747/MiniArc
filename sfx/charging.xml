@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sonar version="0.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="sonar-script.xsd">
+    <synthesis id="output" duration="0.5" normalize="true">
+        <initialize>
+            <linear min="50" max="200" />
+        </initialize>
+        <mod-freq>
+            <waveform type="rect" frequency="0"/>
+            <waveform type="sawtooth" frequency="50"/>
+        </mod-freq>
+    </synthesis>
+</sonar>

@@ -100,8 +100,8 @@ bool EnemySpawner::fireProjectileAtTarget(const sdlc::Vec2f& pos, const sdlc::Ve
     auto item = m_enemies.acquire();
     if (item) {
         *item = std::make_unique<EnemyProjectile>(m_appState, pos, normalized((target - pos)));
-        m_appState->audio.stream[strmAlienGun]->clear();
-        m_appState->audio.stream[strmAlienGun]->put(*m_assets->alienShot);
+        m_appState->audio.stream[strmAlienGun].clear();
+        m_appState->audio.stream[strmAlienGun].put(m_assets->alienShot);
         return true;
     }
     return false;
@@ -112,8 +112,8 @@ bool EnemySpawner::fireProjectileAtDirection(const sdlc::Vec2f& pos, const sdlc:
     auto item = m_enemies.acquire();
     if (item) {
         *item = std::make_unique<EnemyProjectile>(m_appState, pos, normalized((dir)));
-        m_appState->audio.stream[strmAlienGun]->clear();
-        m_appState->audio.stream[strmAlienGun]->put(*m_assets->alienShot);
+        m_appState->audio.stream[strmAlienGun].clear();
+        m_appState->audio.stream[strmAlienGun].put(m_assets->alienShot);
         return true;
     }
     return false;
@@ -226,8 +226,8 @@ bool EnemyLips::hitByProjectile(int damage)
         m_sprite.stop();
         m_playDeathAnimation = true;
         m_appState->properties["score"].integer += lipsScore;
-        m_appState->audio.stream[strmExplosions]->clear();
-        m_appState->audio.stream[strmExplosions]->put(*m_assets->explosion);
+        m_appState->audio.stream[strmExplosions].clear();
+        m_appState->audio.stream[strmExplosions].put(m_assets->explosion);
         getSpawner()->spawnGoddy(m_sprite.position());
     } else {
         m_hitFlash = 3;
@@ -295,15 +295,17 @@ EnemyBon::EnemyBon(sdlc::AppState *appState)
                 return;
             }
             EnemySpawner* spawner = static_cast<EnemySpawner*>(m_appState->properties["enemies"].pointer);
-            sdlc::Vec2f pos = { ref.position().x, ref.position().y };
-            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, -1));
-            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(1, -1));
-            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, 1));
-            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(1, 1));
-            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, 0));
-            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(1, 0));
-            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(0, -1));
-            spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(0, 1));
+            if (!m_appState->properties["gameOver"].boolean) {
+                sdlc::Vec2f pos = { ref.position().x, ref.position().y };
+                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, -1));
+                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(1, -1));
+                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, 1));
+                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(1, 1));
+                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, 0));
+                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(1, 0));
+                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(0, -1));
+                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(0, 1));
+            }
             m_arrived = true;
         }
     });
@@ -350,8 +352,8 @@ bool EnemyBon::hitByProjectile(int damage)
             m_explosion.play();
             m_explosion.show();
             m_bonSprite.hide();
-            m_appState->audio.stream[strmExplosions]->clear();
-            m_appState->audio.stream[strmExplosions]->put(*m_assets->explosion);
+            m_appState->audio.stream[strmExplosions].clear();
+            m_appState->audio.stream[strmExplosions].put(m_assets->explosion);
             getSpawner()->spawnGoddy(m_bonSprite.position());
         }
         return true;

@@ -65,8 +65,8 @@ SDL_AppResult SDL_AppInit(void** appState, int argc, char** argv)
     }
     std::vector<SDL_AudioStream*> streamStack;
     for (int i = 0; i < AUDIO_NUM_STREAMS; ++i) {
-        state->audio.stream[i] = std::make_unique<AudioStream>(state->audio.audioSpec, state->audio.audioSpec);
-        streamStack.emplace_back(state->audio.stream[i]->stream());
+        state->audio.stream[i].create(state->audio.audioSpec, state->audio.audioSpec);
+        streamStack.emplace_back(state->audio.stream[i].stream());
     }
     SDL_BindAudioStreams(state->audio.device.id, streamStack.data(), streamStack.size());
 #endif
@@ -83,7 +83,7 @@ SDL_AppResult SDL_AppEvent(void* appState, SDL_Event* event)
         return SDL_APP_SUCCESS;
     }
     for (auto& handler : state->eventHandler) {
-        handler.second(state, event);
+        if (handler.second) handler.second(state, event);
     }
     return SDL_APP_CONTINUE;
 }
@@ -104,7 +104,7 @@ SDL_AppResult SDL_AppIterate(void* appState)
     SDL_RenderClear(state->renderer);
 
     for (auto& handler : state->iterateHandler) {
-        handler.second(state);
+        if (handler.second) handler.second(state);
     }
 
     SDL_RenderPresent(state->renderer);

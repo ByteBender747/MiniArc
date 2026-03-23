@@ -8,3 +8,5 @@ sonar -i ./sfx/spawn-effect.xml -b${FORMAT} -s${FREQ} output:./Assets/spawn-effe
 sonar -i ./sfx/hit-effect.xml -b${FORMAT} -s${FREQ} output:./Assets/hit-effect.wav
 sonar -i ./sfx/game-over.xml -b${FORMAT} -s${FREQ} output:./Assets/game-over.wav
 sonar -i ./sfx/pickup.xml -b${FORMAT} -s${FREQ} output:./Assets/pickup.wav
+sonar -i ./sfx/charging.xml -b${FORMAT} -s${FREQ} output:./Assets/charging.wav
+sonar -i ./sfx/charged-shot.xml -b${FORMAT} -s${FREQ} output:./Assets/charged-shot.wav

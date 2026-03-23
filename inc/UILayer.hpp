@@ -19,8 +19,8 @@ public:
     bool isGameOver();
 private:
     PlayerShip* getPlayer();
-    int m_renderWidth;
-    int m_renderHeight;
+    int m_renderWidth{};
+    int m_renderHeight{};
     bool m_gameOverSfxFlag{false};
     GameAssets* m_assets;
     sdlc::ResPtr<SDL_Texture> m_startImage;

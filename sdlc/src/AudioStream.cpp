@@ -37,11 +37,22 @@ AudioStream::AudioStream(AudioStream &&other) noexcept
 }
 
 AudioStream::AudioStream(const SDL_AudioSpec &inputFmt, const SDL_AudioSpec &outputFmt)
-    : m_inputFmt(inputFmt), m_outputFmt(outputFmt)
 {
+    create(inputFmt, outputFmt);
+}
+
+void AudioStream::create(const SDL_AudioSpec &inputFmt, const SDL_AudioSpec &outputFmt)
+{
+    if (m_stream) {
+        SDL_DestroyAudioStream(m_stream);
+        m_stream = nullptr;
+    }
+    m_inputFmt = inputFmt;
+    m_outputFmt = outputFmt;
     m_stream = SDL_CreateAudioStream(&m_inputFmt, &m_outputFmt);
     if (!m_stream) {
         std::cerr << "Error: AudioStream::AudioStream(): could not create audio stream" << std::endl;
+        std::cerr << "SDL_GetError: " << SDL_GetError() << std::endl;
     }
 }
 
