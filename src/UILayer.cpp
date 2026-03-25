@@ -11,7 +11,7 @@
 #include "FontRenderer.hpp"
 #include "HealthBar.hpp"
 #include "MiniArc.hpp"
-#include "PathHelper.hpp"
+#include "Utility.hpp"
 #include "PlayerShip.hpp"
 #include "Rect.hpp"
 #include "SpriteRenderer.hpp"

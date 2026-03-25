@@ -84,6 +84,4 @@ private:
     SDL_FPoint m_position{0, 0};
 };
 
-bool loadSpriteDefinitions(SpriteDefinitions& def, const std::filesystem::path& path, char separator = ',');
-
 } // namespace sdlc

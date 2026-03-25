@@ -7,9 +7,8 @@
 #include "BackgroundStars.hpp"
 #include "Enemies.hpp"
 #include "PlayerShip.hpp"
-#include "SpriteRenderer.hpp"
 #include "MiniArc.hpp"
-#include "PathHelper.hpp"
+#include "Utility.hpp"
 #include "UILayer.hpp"
 
 #include <SDL3_image/SDL_image.h>

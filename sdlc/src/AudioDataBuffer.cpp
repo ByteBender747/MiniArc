@@ -1,5 +1,5 @@
 #include "AudioDataBuffer.hpp"
-#include "PathHelper.hpp"
+#include "Utility.hpp"
 #include "AppState.hpp"
 
 #include <iostream>

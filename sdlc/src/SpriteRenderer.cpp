@@ -173,32 +173,4 @@ value_type ParseValue(const std::string& sval, bool& error)
     return value;
 }
 
-bool loadSpriteDefinitions(SpriteDefinitions& def, const std::filesystem::path& path, char separator)
-{
-    std::string line;
-    std::ifstream stream(path, std::fstream::in);
-    if (!stream.is_open()) {
-        return false;
-    }
-    while (getline(stream, line)) {
-        std::istringstream iss(line);
-        std::string name, sx, sy, sw, sh;
-        getline(iss, name, separator);
-        getline(iss, sx, separator);
-        getline(iss, sy, separator);
-        getline(iss, sw, separator);
-        getline(iss, sh, separator);
-        bool error = false;
-        auto x = ParseValue<int>(sx, error);
-        auto y = ParseValue<int>(sy, error);
-        auto w = ParseValue<int>(sw, error);
-        auto h = ParseValue<int>(sh, error);
-        if (!error) {
-            Rect<int> r(x, y, w, h);
-            def[name] = r;
-        }
-    }
-    return true;
-}
-
 } // namespace sdlc
