@@ -1,11 +1,9 @@
 #pragma once
 
-#include "AppState.hpp"
 #include "FontRenderer.hpp"
 #include "MiniArc.hpp"
 #include "PlayerShip.hpp"
 #include "ResPtr.hpp"
-#include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
 
 class UILayer
@@ -16,6 +14,7 @@ public:
     void renderScoreValue();
     void renderHealthBar();
     void renderShipCount();
+    void renderModTime();
     bool isGameOver();
 private:
     PlayerShip* getPlayer();

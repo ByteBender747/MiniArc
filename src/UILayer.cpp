@@ -29,6 +29,7 @@ UILayer::UILayer(sdlc::AppState* appState)
         renderScoreValue();
         renderHealthBar();
         renderShipCount();
+        renderModTime();
         if (isGameOver()) {
             sdlc::SpriteRenderer sr(m_gameOverImage);
             sr.setPosition(RENDER_LOGICAL_WIDTH / 2., RENDER_LOGICAL_HEIGHT / 2.);
@@ -64,9 +65,22 @@ void UILayer::renderShipCount()
     int shipCount = m_appState->properties["playerShips"].integer;
     sdlc::SpriteRenderer sprite(m_assets->spriteTexture);
     sprite.setSource(m_assets->sprites["PlayerSmall"]);
+    m_font->setTextColor(sdlc::RGBA(255, 255, 255, 255));
     m_font->renderText(m_renderWidth - 80, m_renderHeight - 60, std::format("x{}", shipCount));
     sprite.setPosition(RENDER_LOGICAL_WIDTH - 33, RENDER_LOGICAL_HEIGHT - 14, sdlc::SpritePositionOffset::TopLeft);
     sprite.render(m_appState->renderer);
+}
+
+void UILayer::renderModTime()
+{
+    double modTime = getPlayer()->getWeaponPowerUpTime();
+    if (modTime > 0) {
+        std::string numberStr = std::format("{:.1f}", modTime);
+        auto dim = m_font->measureText(numberStr);
+        float xpos = WINDOW_WIDTH / 2 - dim.width / 2;
+        m_font->setTextColor(sdlc::RGBA(0, 0, 255, 255));
+        m_font->renderText(xpos, 10, numberStr);
+    }
 }
 
 void UILayer::renderHealthBar()
@@ -91,6 +105,7 @@ void UILayer::renderScoreValue()
     os.setf(std::ios_base::showbase);
     os << std::setw(7) << std::setfill('0') << score;
     auto dim = m_font->measureText(os.str().c_str());
+    m_font->setTextColor(sdlc::RGBA(255, 255, 255, 255));
     m_font->renderText(WINDOW_WIDTH - dim.width - 20, 10, os.str().c_str());
 }
 

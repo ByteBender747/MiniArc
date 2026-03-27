@@ -11,6 +11,11 @@
 #include "SpriteRenderer.hpp"
 #include "Vector2.hpp"
 
+constexpr double percentage(double x)
+{
+    return x / 100.;
+}
+
 // General spawning behavior
 constexpr int spawnXMargin     = 8;
 constexpr double spawnInterval = 2.;
@@ -34,8 +39,9 @@ constexpr float enemyProjectileSpeed       = 150;
 constexpr int enemyProjectileDamage        = 250;
 constexpr int chargedEnemyProjectileDamage = 500;
 
-constexpr double spawnChancePowerUp = 0.3;
-constexpr double spawnChanceShips   = 0.05;
+constexpr double spawnChancePowerUp       = percentage(30);
+constexpr double spawnChanceShips         = percentage(2);
+constexpr double spawnChanceWeaponPowerUp = percentage(10);
 
 static void initBoom(GameAssets* assets, sdlc::AnimatedSprite& sprite)
 {
@@ -85,6 +91,12 @@ void EnemySpawner::spawnGoddy(const sdlc::Point2D<float> &spawnPos)
     if (m_rng.chance(spawnChancePowerUp)) {
         if (auto item = m_enemies.acquire()) {
             *item = std::make_unique<GoodyItem>(m_appState, spawnPos, GoodyItemType::powerUp);
+            return;
+        }
+    }
+    if (m_rng.chance(spawnChanceWeaponPowerUp)) {
+        if (auto item = m_enemies.acquire()) {
+            *item = std::make_unique<GoodyItem>(m_appState, spawnPos, GoodyItemType::weaponPowerUp);
             return;
         }
     }

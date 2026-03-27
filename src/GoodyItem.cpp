@@ -1,8 +1,10 @@
 #include "GoodyItem.hpp"
 
-constexpr float itemDownSpeed = 50;
-constexpr int pickupScore     = 120;
-constexpr int shipScore       = 430;
+constexpr float itemDownSpeed  = 50;
+
+constexpr int pickupScore      = 120;
+constexpr int shipScore        = 430;
+constexpr int weaponPicupScore = 110;
 
 GoodyItem::GoodyItem(sdlc::AppState *appState, const sdlc::Point2D<float> &spawnPos, GoodyItemType type)
     : Enemy(appState), m_position(spawnPos.x, spawnPos.y), m_type(type)
@@ -20,6 +22,9 @@ void GoodyItem::getItemSprite(sdlc::SpriteRenderer& sprite)
             break;
         case GoodyItemType::rocket:
             sprite.setSource(m_assets->sprites["PickupM"]);
+            break;
+        case GoodyItemType::weaponPowerUp:
+            sprite.setSource(m_assets->sprites["PowerUp1"]);
             break;
     }
 }
@@ -54,6 +59,14 @@ void GoodyItem::updateAndRender()
         if (getPlayer()->hitCheck(m_posRect, 0)) {
             m_appState->properties["playerShips"].integer += 1;
             addScore(shipScore);
+            playPickupSound();
+            kill();
+        }
+    }
+    if (m_type == GoodyItemType::weaponPowerUp) {
+        if (getPlayer()->hitCheck(m_posRect, 0)) {
+            addScore(weaponPicupScore);
+            getPlayer()->enableWeaponPowerUp(10);
             playPickupSound();
             kill();
         }

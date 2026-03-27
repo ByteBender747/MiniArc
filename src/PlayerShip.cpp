@@ -146,6 +146,7 @@ void PlayerShip::reSpawn()
         m_spawnEffect.play();
         m_appState->input.keys.clearStates();
         m_hitFlash = 0;
+        m_weaponPowerUpTimer = 0;
     }
 }
 
@@ -171,6 +172,11 @@ bool PlayerShip::hitCheck(const SDL_FRect& rect, int damage)
         }
     }
     return result;
+}
+
+void PlayerShip::enableWeaponPowerUp(float time)
+{
+    m_weaponPowerUpTimer += time;
 }
 
 void PlayerShip::moveAndRenderProjectiles(float shotSpeed)
@@ -246,8 +252,11 @@ void PlayerShip::handleInputs()
             m_chargedFlag = true;
         }
     }
+    if (m_weaponPowerUpTimer > 0) {
+        m_weaponPowerUpTimer -= m_appState->deltaTime;
+    }
     if (m_appState->input.keys.fallingEdge("fireBeam")) {
-        bool charged = m_chargingTimer > 0.5;
+        bool charged = m_chargingTimer > 0.5 || m_weaponPowerUpTimer > 0;
         fireProjectile(m_position.x - 4, m_position.y, charged);
         fireProjectile(m_position.x + 4, m_position.y, charged);
         m_appState->audio.stream[strmPlayerGun].clear();

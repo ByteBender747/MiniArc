@@ -151,7 +151,7 @@ void SpriteRenderer::render(SDL_Renderer* renderer, double deltaTime)
     }
 }
 
-bool SpriteRenderer::isOnScreen(SDL_Renderer* renderer)
+bool SpriteRenderer::isOnScreen(SDL_Renderer* renderer) const
 {
     int width, height;
     assert(SDL_GetCurrentRenderOutputSize(renderer, &width, &height));

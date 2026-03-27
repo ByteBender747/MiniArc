@@ -5,7 +5,7 @@
 
 enum class GoodyItemType
 {
-    powerUp, rocket, ship
+    powerUp, rocket, ship, weaponPowerUp
 };
 
 class GoodyItem : public Enemy

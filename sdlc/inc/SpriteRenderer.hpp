@@ -42,7 +42,7 @@ public:
     void setPosition(const SDL_FPoint& posRef, SpritePositionOffset offset = SpritePositionOffset::Center);
     virtual void render(SDL_Renderer* renderer, double deltaTime);
     void render(SDL_Renderer* renderer) { render(renderer, 0); }
-    bool isOnScreen(SDL_Renderer* renderer);
+    bool isOnScreen(SDL_Renderer* renderer) const;
     void setScaleMode(SDL_ScaleMode mode);
     void setAlphaMod(Uint8 alpha);
     void setColorMod(Uint8 r, Uint8 g, Uint8 b);

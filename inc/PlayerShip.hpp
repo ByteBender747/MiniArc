@@ -33,7 +33,9 @@ public:
     int getCurrentHitPointe() const {
         return m_hitPoints;
     }
+    [[nodiscard]] double getWeaponPowerUpTime() const { return m_weaponPowerUpTimer; }
     bool hitCheck(const SDL_FRect& rect, int damage);
+    void enableWeaponPowerUp(float time);
 private:
     enum class MovementDirection {
         None, Left, Right
@@ -51,6 +53,7 @@ private:
     void reSpawn();
     void iteratePlayerShip();
 private:
+    float m_weaponPowerUpTimer{0};
     bool m_chargedFlag{false};
     bool m_isAlive{false};
     float m_posLimits[4]{};
