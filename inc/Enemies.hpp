@@ -55,7 +55,7 @@ public:
     bool hitByProjectile(int damage) override;
     sdlc::Rect<float> getPositionRect() override;
 private:
-    double m_jitterTimer{0};
+    float m_jitterTimer{0};
     float m_jitterValue{0};
     int m_hitFlash{0};
     bool m_playDeathAnimation{false};
@@ -92,7 +92,7 @@ private:
     struct {
         sdlc::Vec2f position;
         sdlc::Vec2f velocity;
-        double lifeTime{maxProjectileLifeTime};
+        float lifeTime{maxProjectileLifeTime};
     } m_projectile;
     sdlc::AnimatedSprite m_projectileSprite;
 };
@@ -105,9 +105,9 @@ public:
     bool hitCheckAllEnemies(const sdlc::Rect<float>& projectileRect, int damage);
     bool fireProjectileAtTarget(const sdlc::Vec2f& pos, const sdlc::Vec2f& target);
     bool fireProjectileAtDirection(const sdlc::Vec2f& pos, const sdlc::Vec2f& dir);
-    void spawnGoddy(const sdlc::Point2D<float> &spawnPos);
+    void spawnGoody(const sdlc::Point2D<float> &spawnPos);
 private:
-    double m_spawnTimer{0};
+    float m_spawnTimer{0};
     GameAssets* m_assets;
     sdlc::Random m_rng;
     sdlc::AppState* m_appState;

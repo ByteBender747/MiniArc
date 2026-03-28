@@ -1,22 +1,22 @@
-#include "AudioDataBuffer.hpp"
 #include "Utility.hpp"
 #include "AppState.hpp"
+#include "AudioDataBuffer.hpp"
 
-#include <iostream>
+#include <SDL3/SDL_log.h>
 #include <SDL3/SDL_audio.h>
 
 namespace sdlc
 {
 
-AudioDataBufferPtr loadWaveRelative(AppState *state, const std::filesystem::path &filePath)
+AudioDataBufferPtr LoadWaveRelative(AppState *state, const std::filesystem::path &filePath)
 {
     return std::make_unique<sdlc::AudioDataBuffer>(
-        AudioDataBuffer(state->audio.audioSpec, resolveRelativeToExe(filePath)));
+        AudioDataBuffer(state->audio.audioSpec, ResolveRelativeToExe(filePath)));
 }
 
-bool loadWaveRelative(AudioDataBuffer& buf, AppState *state, const std::filesystem::path &filePath)
+bool LoadWaveRelative(AudioDataBuffer& buf, AppState *state, const std::filesystem::path &filePath)
 {
-    return buf.loadWave(state->audio.audioSpec, resolveRelativeToExe(filePath));
+    return buf.loadWave(state->audio.audioSpec, ResolveRelativeToExe(filePath));
 }
 
 AudioDataBuffer::AudioDataBuffer(const AudioDataBuffer &other)
@@ -35,29 +35,59 @@ AudioDataBuffer::AudioDataBuffer(AudioDataBuffer &&other) noexcept
     other.m_size = 0;
 }
 
-AudioDataBuffer::AudioDataBuffer(uint32_t size)
+AudioDataBuffer::AudioDataBuffer(uint32_t size, u_int8_t channels, uint32_t sampleRate, SDL_AudioFormat format)
     : m_size(size)
 {
     m_data = new uint8_t[size];
+    m_waveSpec.channels = channels;
+    m_waveSpec.freq = sampleRate;
+    m_waveSpec.format = format;
+}
+
+float AudioDataBuffer::getPlayTime() const
+{
+    int sampleSize;
+    switch (m_waveSpec.format) {
+        case SDL_AUDIO_U8:
+        case SDL_AUDIO_S8:
+            sampleSize = 1;
+            break;
+        case SDL_AUDIO_S16LE:
+        case SDL_AUDIO_S16BE:
+            sampleSize = 2;
+            break;
+        case SDL_AUDIO_S32LE:
+        case SDL_AUDIO_S32BE:
+        case SDL_AUDIO_F32LE:
+        case SDL_AUDIO_F32BE:
+            sampleSize = 4;
+            break;
+        default:
+            sampleSize = 0;
+    }
+    if (m_data && m_size && sampleSize && m_waveSpec.channels && m_waveSpec.freq) {
+        return static_cast<float>(m_size) / m_waveSpec.freq / m_waveSpec.channels / sampleSize;
+    }
+    return 0;
 }
 
 bool AudioDataBuffer::loadWave(const SDL_AudioSpec &deviceSpec, const std::filesystem::path &filePath)
 {
     bool result = true;
-    SDL_AudioSpec waveSpec;
     freeBuffer(); // Delete old data first if there are any
-    if (!SDL_LoadWAV(filePath.c_str(), &waveSpec, &m_data, &m_size)) {
-        std::cerr << "Error: Unable to load wav file: " << filePath.c_str() << std::endl;
+    SDL_Log("Loading WAV file: %s", filePath.c_str());
+    if (!SDL_LoadWAV(filePath.c_str(), &m_waveSpec, &m_data, &m_size)) {
+        SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Unable to load WAV file: %s", filePath.c_str());
         m_data = nullptr;
         m_size = 0;
         result = false;
     } else {
-        if (waveSpec.format != deviceSpec.format) {
+        if (m_waveSpec.format != deviceSpec.format) {
             int destLen = 0;
             Uint8 *destData = nullptr;
-            if (!SDL_ConvertAudioSamples(&waveSpec, m_data,
+            if (!SDL_ConvertAudioSamples(&m_waveSpec, m_data,
                                          static_cast<int>(m_size), &deviceSpec, &destData, &destLen)) {
-                std::cerr << "Error: Unable to convert audio samples into device format" << std::endl;
+                SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Unable to convert audio samples into device specific format");
                 result = false;
             } else {
                 SDL_free(m_data);
@@ -94,4 +124,4 @@ AudioDataBuffer::~AudioDataBuffer()
     freeBuffer();
 }
 
-}
+} // namespace sdlc

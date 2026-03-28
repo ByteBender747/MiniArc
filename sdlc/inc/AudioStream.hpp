@@ -21,16 +21,16 @@ public:
     virtual ~AudioStream();
     virtual void audioStreamFinished(const void* buf, int len);
     void create(const SDL_AudioSpec& inputFmt, const SDL_AudioSpec& outputFmt);
-    void put(const void* data, int len);
+    void put(const void* data, int len, bool clear = false);
     int get(void* buf, int len) const;
-    void emplace(const void* data, int len);
+    void emplace(const void* data, int len, bool clear = false);
     void setGain(float gain);
     void clear();
-    void put(const AudioDataBuffer& buffer) {
-        put(buffer.data(), buffer.size());
+    void put(const AudioDataBuffer& buffer, bool clear = false) {
+        put(buffer.data(), buffer.size(), clear);
     }
-    void emplace(const AudioDataBuffer& buffer) {
-        emplace(buffer.data(), buffer.size());
+    void emplace(const AudioDataBuffer& buffer, bool clear = false) {
+        emplace(buffer.data(), buffer.size(), clear);
     }
     [[nodiscard]] int bytesQueued() const;
     [[nodiscard]] float gain() const {
@@ -45,12 +45,8 @@ public:
     [[nodiscard]] const SDL_AudioSpec& outputFormat() const {
         return m_outputFmt;
     }
-    [[nodiscard]] bool hasData() const {
-        return m_hasData;
-    }
 private:
     float m_gain{1};
-    bool m_hasData{false};
     AudioStreamFinishedCallback m_callback;
     SDL_AudioSpec m_inputFmt{}, m_outputFmt{};
     SDL_AudioStream* m_stream{nullptr};

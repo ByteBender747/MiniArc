@@ -25,14 +25,14 @@ constexpr int lipsHitPoints              = 150;
 constexpr int lipsScore                  = 200;
 constexpr float lipsEnemyDownSpeed       = 40;
 constexpr float lipsEnemyMaxJitter       = 32;
-constexpr double lipsEnemyJitterInterval = 1.5;
-constexpr double lipsAnimationSpeed      = 1.2;
+constexpr float lipsEnemyJitterInterval  = 1.5;
+constexpr float lipsAnimationSpeed       = 1.2;
 
 // Enemy Bon behavior configuration
 constexpr int bonHitPoints           = 200;
 constexpr int bonScore               = 250;
 constexpr double bonSpawnProbability = 0.4;
-constexpr double bonAnimationSpeed   = 3.3;
+constexpr float bonAnimationSpeed    = 3.3;
 
 // Enemy projectiles
 constexpr float enemyProjectileSpeed       = 150;
@@ -80,7 +80,7 @@ EnemySpawner::EnemySpawner(sdlc::AppState* appState)
     };
 }
 
-void EnemySpawner::spawnGoddy(const sdlc::Point2D<float> &spawnPos)
+void EnemySpawner::spawnGoody(const sdlc::Point2D<float> &spawnPos)
 {
     if (m_rng.chance(spawnChanceShips)) {
         if (auto item = m_enemies.acquire()) {
@@ -240,7 +240,7 @@ bool EnemyLips::hitByProjectile(int damage)
         m_appState->properties["score"].integer += lipsScore;
         m_appState->audio.stream[strmExplosions].clear();
         m_appState->audio.stream[strmExplosions].put(m_assets->explosion);
-        getSpawner()->spawnGoddy(m_sprite.position());
+        getSpawner()->spawnGoody(m_sprite.position());
     } else {
         m_hitFlash = 3;
     }
@@ -366,7 +366,7 @@ bool EnemyBon::hitByProjectile(int damage)
             m_bonSprite.hide();
             m_appState->audio.stream[strmExplosions].clear();
             m_appState->audio.stream[strmExplosions].put(m_assets->explosion);
-            getSpawner()->spawnGoddy(m_bonSprite.position());
+            getSpawner()->spawnGoody(m_bonSprite.position());
         }
         return true;
     }

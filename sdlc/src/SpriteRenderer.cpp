@@ -1,8 +1,4 @@
 #include <cassert>
-#include <filesystem>
-#include <fstream>
-#include <sstream>
-#include <iostream>
 
 #include <SDL3/SDL_blendmode.h>
 #include <SDL3/SDL_render.h>
@@ -133,7 +129,7 @@ void SpriteRenderer::setDestination(float x, float y, float w, float h)
     m_destination.y = y;
 }
 
-void SpriteRenderer::render(SDL_Renderer* renderer, double deltaTime)
+void SpriteRenderer::render(SDL_Renderer* renderer, float deltaTime)
 {
     if (m_visible && m_source.w > 0 && m_source.h > 0 && m_destination.w > 0 && m_destination.h > 0) {
         if (m_modifier) {
@@ -158,19 +154,6 @@ bool SpriteRenderer::isOnScreen(SDL_Renderer* renderer) const
     Rect<float> screenRect(0, 0, width, height);
     Rect<float> source(m_source);
     return screenRect.intersects(source);
-}
-
-template <typename value_type>
-value_type ParseValue(const std::string& sval, bool& error)
-{
-    value_type value;
-    std::istringstream ss(sval);
-    ss >> value;
-    if (ss.fail()) {
-        std::cerr << "Error: could not parse '" << sval << "'" << std::endl;
-        error = true;
-    }
-    return value;
 }
 
 } // namespace sdlc

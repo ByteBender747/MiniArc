@@ -13,7 +13,6 @@
 #include "Keyboard.hpp"
 #include "AudioDevice.hpp"
 #include "AudioStream.hpp"
-#include "Config.hpp"
 
 namespace sdlc
 {
@@ -34,7 +33,7 @@ struct AppState {
     SDL_Renderer* renderer;
     Uint64 iterations{0};
     double timeStamp{0};
-    double deltaTime{0};
+    float deltaTime{0};
     bool isRunning{true};
     SDL_Color clearColor{0, 0, 0, 255};
     std::map<int, EventHandler> eventHandler;

@@ -72,7 +72,7 @@ void AnimatedSprite::pause()
     }
 }
 
-void AnimatedSprite::render(SDL_Renderer *renderer, double deltaTime)
+void AnimatedSprite::render(SDL_Renderer *renderer, float deltaTime)
 {
     if (m_running) {
         m_time += deltaTime;
@@ -106,14 +106,14 @@ int AnimatedSprite::addFrame(const SDL_FRect &rect)
     return m_frameCount - 1;
 }
 
-void AnimatedSprite::setDuration(double time)
+void AnimatedSprite::setDuration(float time)
 {
-    m_interval = time / static_cast<double>(m_frames.size());
+    m_interval = time / static_cast<float>(m_frames.size());
 }
 
-void AnimatedSprite::setFPS(double fps)
+void AnimatedSprite::setFPS(float fps)
 {
-    m_interval = 1.0 / static_cast<double>(fps);
+    m_interval = 1.0 / static_cast<float>(fps);
 }
 
 void AnimatedSprite::setFrame(unsigned int number)

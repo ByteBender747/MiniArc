@@ -1,3 +1,4 @@
+#include <SDL3/SDL_log.h>
 #include <ostream>
 #include <iostream>
 
@@ -16,25 +17,25 @@
 void MiniArc_Init(sdlc::AppState *state, int argc, char **argv)
 {
     auto assets = new GameAssets();
-    if (!sdlc::loadSpriteDefinitions(assets->sprites, sdlc::resolveRelativeToExe("../Assets/arcade.map"))) {
+    if (!sdlc::LoadSpriteDefinitions(assets->sprites, sdlc::ResolveRelativeToExe("../Assets/arcade.map"))) {
         std::cerr << "Error: Could not load Assets/arcade.txt" << std::endl;
         goto ErrorExit;
     }
-    assets->spriteTexture = IMG_LoadTexture(state->renderer,
-                                            sdlc::resolveRelativeToExe("../Assets/arcade.png").c_str());
+    assets->spriteTexture = sdlc::LoadTexture(state->renderer,
+                                            sdlc::ResolveRelativeToExe("../Assets/arcade.png").c_str());
     if (!assets->spriteTexture) {
         std::cerr << "Error: Could not load Assets/arcade.png" << std::endl;
         goto ErrorExit;
     }
-    sdlc::loadWaveRelative(assets->alienShot, state, "../Assets/alien-shot.wav");
-    sdlc::loadWaveRelative(assets->laserShot, state, "../Assets/laser-shot.wav");
-    sdlc::loadWaveRelative(assets->explosion, state, "../Assets/explosion.wav");
-    sdlc::loadWaveRelative(assets->spawnEffect, state, "../Assets/spawn-effect.wav");
-    sdlc::loadWaveRelative(assets->hitEffect, state, "../Assets/hit-effect.wav");
-    sdlc::loadWaveRelative(assets->gameOver, state, "../Assets/game-over.wav");
-    sdlc::loadWaveRelative(assets->pickup, state, "../Assets/pickup.wav");
-    sdlc::loadWaveRelative(assets->charging, state, "../Assets/charging.wav");
-    sdlc::loadWaveRelative(assets->chargedShot, state, "../Assets/charged-shot.wav");
+    sdlc::LoadWaveRelative(assets->alienShot, state, "../Assets/alien-shot.wav");
+    sdlc::LoadWaveRelative(assets->laserShot, state, "../Assets/laser-shot.wav");
+    sdlc::LoadWaveRelative(assets->explosion, state, "../Assets/explosion.wav");
+    sdlc::LoadWaveRelative(assets->spawnEffect, state, "../Assets/spawn-effect.wav");
+    sdlc::LoadWaveRelative(assets->hitEffect, state, "../Assets/hit-effect.wav");
+    sdlc::LoadWaveRelative(assets->gameOver, state, "../Assets/game-over.wav");
+    sdlc::LoadWaveRelative(assets->pickup, state, "../Assets/pickup.wav");
+    sdlc::LoadWaveRelative(assets->charging, state, "../Assets/charging.wav");
+    sdlc::LoadWaveRelative(assets->chargedShot, state, "../Assets/charged-shot.wav");
     state->input.keys.mapKey("shipUp", SDL_SCANCODE_W);
     state->input.keys.mapKey("shipDown", SDL_SCANCODE_S);
     state->input.keys.mapKey("shipLeft", SDL_SCANCODE_A);
@@ -51,7 +52,6 @@ void MiniArc_Init(sdlc::AppState *state, int argc, char **argv)
     return;
 ErrorExit:
     state->isRunning = false;
-    delete assets;
 }
 
 void MiniArc_Exit(sdlc::AppState *state)

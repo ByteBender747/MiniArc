@@ -1,6 +1,6 @@
+#include <SDL3/SDL_log.h>
 #include <cctype>
 #include <cstdlib>
-#include <iostream>
 #include <cassert>
 
 #include <SDL3/SDL_error.h>
@@ -21,12 +21,13 @@ namespace sdlc
 {
 
 FontRenderer::FontRenderer(SDL_Renderer* renderer, const char* filePath, float size, FontRenderMode mode)
-    : m_renderer(renderer), m_maxCharPerLine(256)
+    : m_renderer(renderer)
 {
+    SDL_Log("Loading font file: %s", filePath);
     TTF_Font* ttf = TTF_OpenFont(filePath, size);
     if (!ttf) {
-        std::cerr << "Error: could not load font file: " << filePath << std::endl;
-        std::cerr << "SDL_GetError(): " << SDL_GetError() << std::endl;
+        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Could not load font file: %s", filePath);
+        SDL_LogTrace(SDL_LOG_CATEGORY_SYSTEM, "SDL_GetError(): %s", SDL_GetError());
         exit(EXIT_FAILURE);
     }
     int charX = 0;
@@ -57,7 +58,7 @@ FontRenderer::FontRenderer(SDL_Renderer* renderer, const char* filePath, float s
             glyph = TTF_RenderGlyph_LCD(ttf, atlasString[i], white, black);
             break;
         default:
-            std::cerr << "Error: invalid font render mode" << std::endl;
+            SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Invalid font render mode");
             exit(EXIT_FAILURE);
         }
         assert(glyph);
@@ -113,6 +114,19 @@ void FontRenderer::renderText(const SDL_FRect& src, const SDL_FRect& dst)
     restoreLogicalPresentationMode();
 }
 
+static Character getScaledChar(const Character& ch, float value)
+{
+    return {
+        .x = ch.x * value,
+        .y = ch.y * value,
+        .width = ch.width * value,
+        .height = ch.height * value,
+        .originX = ch.originX * value,
+        .originY = ch.originY * value,
+        .advance = ch.advance * value
+    };
+}
+
 int FontRenderer::renderText(float x, float y, std::string_view text)
 {
     int charCount = 0, originX = x;
@@ -125,10 +139,11 @@ int FontRenderer::renderText(float x, float y, std::string_view text)
             continue;
         }
         Character& fc = m_font.characters[text[i]];
+        Character sc = getScaledChar(fc, m_scale);
         SDL_FRect src{ fc.x, fc.y, fc.width, fc.height };
-        SDL_FRect dst{ x, y + fc.originY, fc.width, fc.height };
+        SDL_FRect dst{ x, y + sc.originY, sc.width, sc.height };
         renderText(src, dst);
-        x += fc.advance - fc.originX;
+        x += sc.advance - sc.originX;
     }
     return x;
 }
@@ -144,10 +159,11 @@ void FontRenderer::renderFontTexture(float x, float y)
 
 Dimension<float> FontRenderer::measureText(std::string_view text)
 {
-    Dimension<float> result { 0, static_cast<float>(m_font.height) };
+    Dimension<float> result { 0, static_cast<float>(m_font.height) * m_scale };
     for (int i = 0; i < text.size(); ++i) {
         Character& fc = m_font.characters[text[i]];
-        result.width += fc.advance - fc.originX;
+        Character sc = getScaledChar(fc, m_scale);
+        result.width += sc.advance - sc.originX;
     }
     return result;
 }

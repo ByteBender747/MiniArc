@@ -14,6 +14,9 @@ find_package(SDL3_image REQUIRED)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
 
+# create compile_commands.json for clangd
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 add_subdirectory(sdlc)
 
 # add target executable

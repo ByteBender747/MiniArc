@@ -51,13 +51,6 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
             iteratePlayerShip();
         }
     };
-    m_appState->eventHandler[playerZIndex] = [this](AppState* appState, SDL_Event* event) {
-        if (event->type == SDL_EVENT_KEY_UP && m_triggerState) {
-            if (!sdlc::getKeyState(SDL_SCANCODE_SPACE)) {
-                m_triggerState = false;
-            }
-        }
-    };
 
     m_deathAnimation.addFrame(m_assets->sprites["Boom1"]);
     m_deathAnimation.addFrame(m_assets->sprites["Boom2"]);

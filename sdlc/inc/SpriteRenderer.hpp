@@ -7,8 +7,8 @@
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_surface.h>
 
+#include <string>
 #include <unordered_map>
-#include <filesystem>
 
 #include "Rect.hpp"
 
@@ -29,8 +29,8 @@ class SpriteRenderModifier
 {
 public:
     virtual ~SpriteRenderModifier() = default;
-    virtual void renderBegin(SDL_Renderer* renderer, SpriteRenderer& spriteRenderer, double deltaTime) = 0;
-    virtual void renderEnd(SDL_Renderer* renderer, SpriteRenderer& spriteRenderer, double deltaTime) = 0;
+    virtual void renderBegin(SDL_Renderer* renderer, SpriteRenderer& spriteRenderer, float deltaTime) = 0;
+    virtual void renderEnd(SDL_Renderer* renderer, SpriteRenderer& spriteRenderer, float deltaTime) = 0;
 };
 
 class SpriteRenderer
@@ -40,7 +40,7 @@ public:
     virtual ~SpriteRenderer() = default;
     void setPosition(float x, float y, SpritePositionOffset offset = SpritePositionOffset::Center);
     void setPosition(const SDL_FPoint& posRef, SpritePositionOffset offset = SpritePositionOffset::Center);
-    virtual void render(SDL_Renderer* renderer, double deltaTime);
+    virtual void render(SDL_Renderer* renderer, float deltaTime);
     void render(SDL_Renderer* renderer) { render(renderer, 0); }
     bool isOnScreen(SDL_Renderer* renderer) const;
     void setScaleMode(SDL_ScaleMode mode);

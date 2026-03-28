@@ -49,7 +49,7 @@ public:
     int size() const {
         return m_font.size;
     }
-    int charPerLine() const {
+    int charsPerLine() const {
         return m_maxCharPerLine;
     }
     void setCharsPerLine(int value) {
@@ -61,6 +61,12 @@ public:
     [[nodiscard]] const RGBA& getTextColor() const {
         return m_textColor;
     }
+    void setScale(float value) {
+        m_scale = value;
+    }
+    [[nodiscard]] float scale() {
+        return m_scale;
+    }
     ~FontRenderer();
 
 protected:
@@ -71,8 +77,9 @@ protected:
 
 private:
     Font m_font;
-    int m_maxCharPerLine;
+    int m_maxCharPerLine{256};
     bool m_textureOwner;
+    float m_scale{1};
     RGBA m_textColor{255, 255, 255, 255};
     Dimension<int> m_logicalSize;
     Dimension<float> m_textureSize;
@@ -81,6 +88,6 @@ private:
     SDL_Texture* m_fontTexture;
 };
 
-using FontMap = std::unordered_map<std::string, std::shared_ptr<FontRenderer>>;
+using FontMap = std::unordered_map<std::string, std::unique_ptr<FontRenderer>>;
 
 } // namespace sdlc

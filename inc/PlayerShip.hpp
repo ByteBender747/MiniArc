@@ -59,7 +59,6 @@ private:
     float m_posLimits[4]{};
     uint8_t m_flameType{0};
     double m_flameTimer{0};
-    bool m_triggerState{false};
     int m_hitFlash{0};
     int m_hitPoints{playerInitialHitPoints};
     double m_chargingTimer{0};

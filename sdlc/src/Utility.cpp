@@ -1,3 +1,5 @@
+#include <SDL3/SDL_log.h>
+#include <SDL3/SDL_surface.h>
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -6,7 +8,10 @@
 #include "Utility.hpp"
 #include "Random.hpp"
 #include "CSVParser.hpp"
+#include "ResPtr.hpp"
 #include "SpriteRenderer.hpp"
+
+#include <SDL3/SDL.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -20,16 +25,17 @@
 
 namespace sdlc
 {
-int probabilityList(const ProbabilityItem *items, unsigned int itemCount)
+
+int ProbabilityList(const ProbabilityItem *items, unsigned int itemCount)
 {
     std::vector<ProbabilityItem> probabilities(itemCount);
     for (unsigned int i = 0; i < itemCount; ++i) {
         probabilities[i] = items[i];
     }
     std::ranges::sort(probabilities.begin(), probabilities.end(),
-                      [](const ProbabilityItem &a, const ProbabilityItem &b) {
-                          return a.probability < b.probability;
-                      });
+    [](const ProbabilityItem &a, const ProbabilityItem &b) {
+        return a.probability < b.probability;
+    });
     Random rng;
     for (const auto &[probability, index]: probabilities) {
         if (rng.chance(probability)) {
@@ -39,7 +45,32 @@ int probabilityList(const ProbabilityItem *items, unsigned int itemCount)
     return -1;
 }
 
-bool loadSpriteDefinitions(SpriteDefinitions &def, const std::filesystem::path &filePath)
+SDL_Texture* LoadTexture(SDL_Renderer* renderer, const std::filesystem::path &filePath)
+{
+    ResPtr<SDL_Surface> surface;
+    SDL_Texture* texture = nullptr;
+    if (filePath.extension() == ".bmp") {
+        SDL_Log("Loading BMP texture file: %s", filePath.c_str());
+        surface = SDL_LoadBMP(filePath.c_str());
+    } else if (filePath.extension() == ".png") {
+        SDL_Log("Loading PNG texture file: %s", filePath.c_str());
+        surface = SDL_LoadPNG(filePath.c_str());
+    } else {
+        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Unsupported image format for file: %s", filePath.c_str());
+    }
+    if (surface) {
+        texture = SDL_CreateTextureFromSurface(renderer, surface);
+        if (!texture) {
+            SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "SDL_CreateTextureFromSurface() failed: %s", SDL_GetError());
+        }
+    } else {
+        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Failed to load image file: %s", filePath.c_str());
+        SDL_LogTrace(SDL_LOG_CATEGORY_SYSTEM, "SDL_GetError(): %s", SDL_GetError());
+    }
+    return texture;
+}
+
+bool LoadSpriteDefinitions(SpriteDefinitions &def, const std::filesystem::path &filePath)
 {
     bool result = true;
     SDL_Rect rect;
@@ -47,29 +78,29 @@ bool loadSpriteDefinitions(SpriteDefinitions &def, const std::filesystem::path &
     try {
         csv::parse(filePath, ',', [&](const csv::CellData &cdata) {
             switch (cdata.index()) {
-                case 0:
-                    name = cdata.value();
-                    break;
-                case 1:
-                    rect.x = cdata.value<int>();
-                    break;
-                case 2:
-                    rect.y = cdata.value<int>();
-                    break;
-                case 3:
-                    rect.w = cdata.value<int>();
-                    break;
-                case 4:
-                    rect.h = cdata.value<int>();
-                    if (def.contains(name)) {
-                        std::cerr << "Error parsing file: '" << filePath.filename() << "'" << std::endl;
-                        std::cerr << "Line: " << cdata.line() << " at cell: " << cdata.index()
-                                  << "Element: '" << name << "' already existing!" << std::endl;
-                        result = false;
-                        return;
-                    }
-                    def[name] = rect;
-                    break;
+            case 0:
+                name = cdata.value();
+                break;
+            case 1:
+                rect.x = cdata.value<int>();
+                break;
+            case 2:
+                rect.y = cdata.value<int>();
+                break;
+            case 3:
+                rect.w = cdata.value<int>();
+                break;
+            case 4:
+                rect.h = cdata.value<int>();
+                if (def.contains(name)) {
+                    std::cerr << "Error parsing file: '" << filePath.filename() << "'" << std::endl;
+                    std::cerr << "Line: " << cdata.line() << " at cell: " << cdata.index()
+                              << "Element: '" << name << "' already existing!" << std::endl;
+                    result = false;
+                    return;
+                }
+                def[name] = rect;
+                break;
             }
         });
     } catch (const std::exception &e) {
@@ -80,7 +111,7 @@ bool loadSpriteDefinitions(SpriteDefinitions &def, const std::filesystem::path &
     return result;
 }
 
-static std::filesystem::path getExecutablePath()
+static std::filesystem::path GetExecutablePath()
 {
 #ifdef _WIN32
     char buffer[MAX_PATH];
@@ -99,10 +130,11 @@ static std::filesystem::path getExecutablePath()
 #endif
 }
 
-std::filesystem::path resolveRelativeToExe(const std::string &relativePath)
+std::filesystem::path ResolveRelativeToExe(const std::string &relativePath)
 {
-    std::filesystem::path exePath = getExecutablePath();
+    std::filesystem::path exePath = GetExecutablePath();
     std::filesystem::path exeDir = exePath.parent_path();
     return std::filesystem::canonical(exeDir / relativePath);
 }
+
 } // namespace sdlc

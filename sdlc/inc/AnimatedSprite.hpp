@@ -4,7 +4,6 @@
 #include <SDL3/SDL_rect.h>
 
 #include <vector>
-#include <cstdint>
 #include <functional>
 
 namespace sdlc
@@ -35,11 +34,11 @@ public:
     AnimatedSprite(const AnimatedSprite &other);
     AnimatedSprite(AnimatedSprite &&other) noexcept;
 
-    void render(SDL_Renderer* renderer, double deltaTime) override;
+    void render(SDL_Renderer* renderer, float deltaTime) override;
     int addFrame(const SDL_FRect& rect);
     int addFrames(const SpriteImageDistribution& dist);
-    void setDuration(double time);
-    void setFPS(double fps);
+    void setDuration(float time);
+    void setFPS(float fps);
     void setFrame(unsigned int number);
     void play(int frameCount = -1);
     void pause();
@@ -61,8 +60,8 @@ private:
     int m_frameCount{0};
     bool m_running{false};
     bool m_repeat{true};
-    double m_time{0};
-    double m_interval{1};
+    float m_time{0};
+    float m_interval{1};
     int m_currentFrame{0};
     Callback m_callback;
     std::vector<SDL_FRect> m_frames;

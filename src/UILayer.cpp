@@ -23,7 +23,7 @@ UILayer::UILayer(sdlc::AppState* appState)
 {
     m_font = new sdlc::FontRenderer(
         m_appState->renderer,
-        sdlc::resolveRelativeToExe("../Assets/Gameplay.ttf").c_str(), 
+        sdlc::ResolveRelativeToExe("../Assets/Gameplay.ttf").c_str(), 
         32, sdlc::FontRenderMode::Solid);
     m_appState->iterateHandler[uiZIndex] = [this](sdlc::AppState* appState) {
         renderScoreValue();
@@ -43,8 +43,8 @@ UILayer::UILayer(sdlc::AppState* appState)
         }
     };
     m_assets = static_cast<GameAssets*>(m_appState->properties["assets"].pointer);
-    m_startImage = IMG_LoadTexture(m_appState->renderer, sdlc::resolveRelativeToExe("../Assets/start.png").c_str());
-    m_gameOverImage = IMG_LoadTexture(m_appState->renderer, sdlc::resolveRelativeToExe("../Assets/game_over.png").c_str());
+    m_startImage = sdlc::LoadTexture(m_appState->renderer, sdlc::ResolveRelativeToExe("../Assets/start.png").c_str());
+    m_gameOverImage = sdlc::LoadTexture(m_appState->renderer, sdlc::ResolveRelativeToExe("../Assets/game_over.png").c_str());
     SDL_GetRenderOutputSize(m_appState->renderer, &m_renderWidth, &m_renderHeight);
 }
 
@@ -77,7 +77,7 @@ void UILayer::renderModTime()
     if (modTime > 0) {
         std::string numberStr = std::format("{:.1f}", modTime);
         auto dim = m_font->measureText(numberStr);
-        float xpos = WINDOW_WIDTH / 2 - dim.width / 2;
+        float xpos = static_cast<float>(WINDOW_WIDTH) / 2 - dim.width / 2;
         m_font->setTextColor(sdlc::RGBA(0, 0, 255, 255));
         m_font->renderText(xpos, 10, numberStr);
     }
