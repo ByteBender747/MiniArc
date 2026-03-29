@@ -1,10 +1,6 @@
-#include <SDL3/SDL_render.h>
 #include <ios>
 #include <cassert>
-#include <sstream>
 #include <format>
-
-#include <SDL3/SDL_rect.h>
 
 #include "UILayer.hpp"
 #include "AppState.hpp"
@@ -45,7 +41,7 @@ UILayer::UILayer(sdlc::AppState* appState)
     m_assets = static_cast<GameAssets*>(m_appState->properties["assets"].pointer);
     m_startImage = sdlc::LoadTexture(m_appState->renderer, sdlc::ResolveRelativeToExe("../Assets/start.png").c_str());
     m_gameOverImage = sdlc::LoadTexture(m_appState->renderer, sdlc::ResolveRelativeToExe("../Assets/game_over.png").c_str());
-    SDL_GetRenderOutputSize(m_appState->renderer, &m_renderWidth, &m_renderHeight);
+    m_font->setScale(0.25);
 }
 
 bool UILayer::isGameOver()
@@ -62,11 +58,11 @@ UILayer::~UILayer()
 
 void UILayer::renderShipCount()
 {
-    int shipCount = m_appState->properties["playerShips"].integer;
+    int shipCount = static_cast<int>(m_appState->properties["playerShips"].integer);
     sdlc::SpriteRenderer sprite(m_assets->spriteTexture);
     sprite.setSource(m_assets->sprites["PlayerSmall"]);
     m_font->setTextColor(sdlc::RGBA(255, 255, 255, 255));
-    m_font->renderText(m_renderWidth - 80, m_renderHeight - 60, std::format("x{}", shipCount));
+    m_font->renderText(RENDER_LOGICAL_WIDTH - 20, RENDER_LOGICAL_HEIGHT - 15, std::format("x{}", shipCount));
     sprite.setPosition(RENDER_LOGICAL_WIDTH - 33, RENDER_LOGICAL_HEIGHT - 14, sdlc::SpritePositionOffset::TopLeft);
     sprite.render(m_appState->renderer);
 }
@@ -77,9 +73,9 @@ void UILayer::renderModTime()
     if (modTime > 0) {
         std::string numberStr = std::format("{:.1f}", modTime);
         auto dim = m_font->measureText(numberStr);
-        float xpos = static_cast<float>(WINDOW_WIDTH) / 2 - dim.width / 2;
+        float xpos = static_cast<float>(RENDER_LOGICAL_WIDTH) / 2 - dim.width / 2;
         m_font->setTextColor(sdlc::RGBA(0, 0, 255, 255));
-        m_font->renderText(xpos, 10, numberStr);
+        m_font->renderText(xpos, 5, numberStr);
     }
 }
 
@@ -101,12 +97,10 @@ PlayerShip* UILayer::getPlayer()
 void UILayer::renderScoreValue()
 {
     int64_t score = m_appState->properties["score"].integer;
-    std::ostringstream os;
-    os.setf(std::ios_base::showbase);
-    os << std::setw(7) << std::setfill('0') << score;
-    auto dim = m_font->measureText(os.str().c_str());
+    std::string numberStr = std::format("{:07}", score);
+    sdlc::Dimension<float> dim = m_font->measureText(numberStr);
     m_font->setTextColor(sdlc::RGBA(255, 255, 255, 255));
-    m_font->renderText(WINDOW_WIDTH - dim.width - 20, 10, os.str().c_str());
+    m_font->renderText(RENDER_LOGICAL_WIDTH - dim.width - 10, 5, numberStr);
 }
 
 void deleteUI(sdlc::AppState* state, const std::string& name)

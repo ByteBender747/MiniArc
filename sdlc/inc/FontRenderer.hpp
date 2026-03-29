@@ -67,13 +67,13 @@ public:
     [[nodiscard]] float scale() {
         return m_scale;
     }
-    ~FontRenderer();
+    virtual ~FontRenderer();
 
 protected:
     void preserveLogicalPresentationMode();
     void restoreLogicalPresentationMode() const;
     void disableLogicalPresentationMode() const;
-    void renderText(const SDL_FRect& src, const SDL_FRect& dst);
+    virtual void renderGlyphRect(const SDL_FRect& src, const SDL_FRect& dst);
 
 private:
     Font m_font;

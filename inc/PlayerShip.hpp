@@ -1,20 +1,14 @@
 #pragma once
 
 #include <string>
-#include <cstdint>
-#include <memory.h>
-
 #include <SDL3/SDL_render.h>
-#include <SDL3/SDL_time.h>
 
 #include "AnimatedSprite.hpp"
 #include "StaticPool.hpp"
 #include "Vector2.hpp"
-#include "AppState.hpp"
 #include "MiniArc.hpp"
 #include "SpriteRenderer.hpp"
-
-constexpr int playerInitialHitPoints = 1200;
+#include "GameConfig.hpp"
 
 class PlayerShip
 {
@@ -53,6 +47,7 @@ private:
     void reSpawn();
     void iteratePlayerShip();
 private:
+    float m_invulnerableTimer{playerInvulnerableTime};
     float m_weaponPowerUpTimer{0};
     bool m_chargedFlag{false};
     bool m_isAlive{false};

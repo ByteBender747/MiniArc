@@ -10,8 +10,7 @@
 #include "Random.hpp"
 #include "Rect.hpp"
 #include "Vector2.hpp"
-
-constexpr double maxProjectileLifeTime = 5;
+#include "GameConfig.hpp"
 
 class EnemySpawner;
 
@@ -44,8 +43,8 @@ public:
         None, Alan, Lips, Bon
     };
 protected:
-    PlayerShip* getPlayer() const;
-    EnemySpawner* getSpawner() const;
+    [[nodiscard]] PlayerShip* getPlayer() const;
+    [[nodiscard]] EnemySpawner* getSpawner() const;
 protected:
     int m_hitPoints{1};
     GameAssets* m_assets;

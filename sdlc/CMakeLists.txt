@@ -24,4 +24,5 @@ target_sources(sdlc PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/AudioStream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/AudioDataBuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/CSVParser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Timer.cpp
 )

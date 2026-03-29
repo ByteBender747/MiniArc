@@ -11,7 +11,7 @@ MiniArc is a vertical-scrolling space shooter inspired by classic arcade games. 
 ## Features
 
 - Scrolling starfield background with parallax effect
-- Two enemy (planed three) types with distinct behaviors and projectile attacks
+- Three enemy types with distinct behaviors and projectile attacks
 - Hold-to-charge weapon mechanic (4x damage)
 - Collectible power-ups: health restore, extra ships, weapon enhancement
 - Procedurally generated sound effects via [sonar](https://github.com/ByteBender747/sonar)

@@ -16,10 +16,6 @@
 
 using namespace sdlc;
 
-constexpr float playerMoveSpeed = 100;
-constexpr int playerBeamDamage = 50;
-constexpr int playerChargedBeamDamage = 200;
-
 PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     : m_appState(state)
     , m_sprite(texture)
@@ -37,7 +33,7 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_sprite.setScaleMode(SDL_SCALEMODE_NEAREST);
     m_sprite.setSource(m_assets->sprites["PlayerCenter"]);
     m_flames.setSource(m_assets->sprites["FlameLeft1"]);
-    m_position = sdlc::Vec2f(RENDER_LOGICAL_WIDTH / 2., RENDER_LOGICAL_HEIGHT - 20.);
+    m_position = Vec2f(RENDER_LOGICAL_WIDTH / 2., RENDER_LOGICAL_HEIGHT - 20.);
     m_posLimits[0] = 7;
     m_posLimits[1] = RENDER_LOGICAL_WIDTH - 7;
     m_posLimits[2] = 8;
@@ -59,11 +55,11 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_deathAnimation.addFrame(m_assets->sprites["Boom5"]);
     m_deathAnimation.setFPS(20);
     m_deathAnimation.setRepeat(false);
-    m_deathAnimation.setCallback([this](sdlc::AnimatedSprite& sprite, sdlc::AnimationEvent event) {
+    m_deathAnimation.setCallback([this](AnimatedSprite& sprite, AnimationEvent event) {
         if (event == AnimationEvent::finished) reSpawn();
     });
 
-    sdlc::SpriteImageDistribution dist {
+    SpriteImageDistribution dist {
         .startX = 3,
         .startY = 71,
         .spriteWidth = 14,
@@ -76,7 +72,7 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_spawnEffect.addFrames(dist);
     m_spawnEffect.setDuration(1.5);
     m_spawnEffect.setRepeat(false);
-    m_spawnEffect.setCallback([this](sdlc::AnimatedSprite& sprite, sdlc::AnimationEvent event) {
+    m_spawnEffect.setCallback([this](AnimatedSprite& sprite, AnimationEvent event) {
         if (event == AnimationEvent::finished) m_isAlive = true;
         if (event == AnimationEvent::start) {
             m_appState->audio.stream[strmPlayerEffects].put(m_assets->spawnEffect);
@@ -111,8 +107,7 @@ void PlayerShip::iteratePlayerShip()
         if (m_isAlive) {
             m_deathAnimation.play();
             m_isAlive = false;
-            m_appState->audio.stream[strmExplosions].clear();
-            m_appState->audio.stream[strmExplosions].put(m_assets->explosion);
+            m_appState->audio.stream[strmExplosions].put(m_assets->explosion, true);
         }
         m_deathAnimation.setPosition(m_position.x, m_position.y);
         m_deathAnimation.render(m_appState->renderer, m_appState->deltaTime);
@@ -123,7 +118,7 @@ bool PlayerShip::fireProjectile(float x, float y, bool charged)
 {
     Projectile* projectile = m_projectiles.acquire();
     if (projectile)  {
-        projectile->position = sdlc::Vec2f(x, y);
+        projectile->position = Vec2f(x, y);
         projectile->charged = charged;
     }
     return projectile != nullptr;
@@ -132,7 +127,7 @@ bool PlayerShip::fireProjectile(float x, float y, bool charged)
 void PlayerShip::reSpawn()
 {
     if (m_appState->properties["playerShips"].integer > 0) {
-        m_position = sdlc::Vec2f(RENDER_LOGICAL_WIDTH / 2., RENDER_LOGICAL_HEIGHT - 20.);
+        m_position = Vec2f(RENDER_LOGICAL_WIDTH / 2., RENDER_LOGICAL_HEIGHT - 20.);
         m_hitPoints = playerInitialHitPoints;
         --m_appState->properties["playerShips"].integer;
         m_projectiles.clear();
@@ -140,6 +135,7 @@ void PlayerShip::reSpawn()
         m_appState->input.keys.clearStates();
         m_hitFlash = 0;
         m_weaponPowerUpTimer = 0;
+        m_invulnerableTimer = playerInvulnerableTime;
     }
 }
 
@@ -149,14 +145,17 @@ bool PlayerShip::hitCheck(const SDL_FRect& rect, int damage)
     if (!isAlive() || isSpawning()) {
         return result;
     }
-    sdlc::Rect<float> shipRect = m_sprite.destination();
+    if (m_invulnerableTimer > 0) {
+        m_invulnerableTimer -= m_appState->deltaTime;
+        return result;
+    }
+    Rect<float> shipRect = m_sprite.destination();
     if (shipRect.intersects(rect)) {
         result = true;
         m_hitPoints -= damage;
         if (damage > 0) {
             m_hitFlash = 5;
-            m_appState->audio.stream[strmPlayerEffects].clear();
-            m_appState->audio.stream[strmPlayerEffects].put(m_assets->hitEffect);
+            m_appState->audio.stream[strmPlayerEffects].put(m_assets->hitEffect, true);
         }
         if (damage < 0) { // negative damaged used for healing by pickup
             if (m_hitPoints > playerInitialHitPoints) {
@@ -179,14 +178,14 @@ void PlayerShip::moveAndRenderProjectiles(float shotSpeed)
     for (auto& item : m_projectiles) {
         if (item.acquired) {
             Projectile& projectile = item.value;
-            projectile.position += sdlc::Vec2f(0, -shotSpeed * m_appState->deltaTime);
-            sdlc::Rect<float> destination;
+            projectile.position += Vec2f(0, -shotSpeed * m_appState->deltaTime);
+            Rect<float> destination;
             if (projectile.charged) {
-                m_chargedShot.setPosition(projectile.position.x, projectile.position.y, sdlc::SpritePositionOffset::Center);
+                m_chargedShot.setPosition(projectile.position.x, projectile.position.y, SpritePositionOffset::Center);
                 m_chargedShot.render(m_appState->renderer, m_appState->deltaTime);
                 destination = m_chargedShot.destination();
             } else {
-                m_shotSprite.setPosition(projectile.position.x, projectile.position.y, sdlc::SpritePositionOffset::Center);
+                m_shotSprite.setPosition(projectile.position.x, projectile.position.y, SpritePositionOffset::Center);
                 m_shotSprite.render(m_appState->renderer);
                 destination = m_shotSprite.destination();
             }
@@ -225,18 +224,18 @@ void PlayerShip::handleInputs()
     float delta = m_appState->deltaTime * playerMoveSpeed;
     m_direction = MovementDirection::None;
     if (m_appState->input.keys.down("shipRight")) {
-        m_position += sdlc::Vec2f(delta, 0);
+        m_position += Vec2f(delta, 0);
         m_direction = MovementDirection::Right;
     }
     if (m_appState->input.keys.down("shipLeft")) {
-        m_position += sdlc::Vec2f(-delta, 0);
+        m_position += Vec2f(-delta, 0);
         m_direction = MovementDirection::Left;
     }
     if (m_appState->input.keys.down("shipUp")) {
-        m_position += sdlc::Vec2f(0, -delta);
+        m_position += Vec2f(0, -delta);
     }
     if (m_appState->input.keys.down("shipDown")) {
-        m_position += sdlc::Vec2f(0, delta);
+        m_position += Vec2f(0, delta);
     }
     if (m_appState->input.keys.down("fireBeam")) {
         m_chargingTimer += m_appState->deltaTime;
@@ -265,21 +264,21 @@ void PlayerShip::handleInputs()
 
 void PlayerShip::shipMovement()
 {
-    m_position.x = sdlc::clamp(m_position.x, m_posLimits[0], m_posLimits[1]);
-    m_position.y = sdlc::clamp(m_position.y, m_posLimits[2], m_posLimits[3]);
-    m_sprite.setPosition(m_position.x, m_position.y, sdlc::SpritePositionOffset::Center);
+    m_position.x = clamp(m_position.x, m_posLimits[0], m_posLimits[1]);
+    m_position.y = clamp(m_position.y, m_posLimits[2], m_posLimits[3]);
+    m_sprite.setPosition(m_position.x, m_position.y, SpritePositionOffset::Center);
     switch (m_direction) {
     case MovementDirection::Left:
         m_sprite.setSource(m_assets->sprites["PlayerLeft"]);
-        m_flames.setPosition(m_position.x - 1, m_position.y + 10, sdlc::SpritePositionOffset::Center);
+        m_flames.setPosition(m_position.x - 1, m_position.y + 10, SpritePositionOffset::Center);
         break;
     case MovementDirection::Right:
         m_sprite.setSource(m_assets->sprites["PlayerRight"]);
-        m_flames.setPosition(m_position.x + 1, m_position.y + 10, sdlc::SpritePositionOffset::Center);
+        m_flames.setPosition(m_position.x + 1, m_position.y + 10, SpritePositionOffset::Center);
         break;
     case MovementDirection::None:
         m_sprite.setSource(m_assets->sprites["PlayerCenter"]);
-        m_flames.setPosition(m_position.x, m_position.y + 10, sdlc::SpritePositionOffset::Center);
+        m_flames.setPosition(m_position.x, m_position.y + 10, SpritePositionOffset::Center);
         break;
     }
 }

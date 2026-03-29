@@ -1,5 +1,4 @@
-#include <SDL3/SDL_log.h>
-#include <SDL3/SDL_surface.h>
+
 #include <vector>
 #include <iostream>
 #include <algorithm>
