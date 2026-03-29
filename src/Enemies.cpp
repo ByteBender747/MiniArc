@@ -29,10 +29,18 @@ constexpr float lipsEnemyJitterInterval  = 1.5;
 constexpr float lipsAnimationSpeed       = 1.2;
 
 // Enemy Bon behavior configuration
-constexpr int bonHitPoints           = 200;
-constexpr int bonScore               = 250;
-constexpr double bonSpawnProbability = 0.4;
-constexpr float bonAnimationSpeed    = 3.3;
+constexpr int bonHitPoints            = 200;
+constexpr int bonScore                = 250;
+constexpr double bonSpawnProbability  = percentage(40);
+constexpr double alanSpawnProbability = percentage(60);
+constexpr float bonAnimationSpeed     = 3.3;
+
+// Enemy Alan behavior configuration
+constexpr float alanActionInterval   = 1.5;
+constexpr float alanMoveSpeed        = 100;
+constexpr int alanHitPoints          = 450;
+constexpr int alanScore              = 320;
+constexpr float alanAnimationSpeed   = 5;
 
 // Enemy projectiles
 constexpr float enemyProjectileSpeed       = 150;
@@ -43,7 +51,20 @@ constexpr double spawnChancePowerUp       = percentage(30);
 constexpr double spawnChanceShips         = percentage(2);
 constexpr double spawnChanceWeaponPowerUp = percentage(10);
 
-static void initBoom(GameAssets* assets, sdlc::AnimatedSprite& sprite)
+void FlashModifier::renderBegin(SDL_Renderer *renderer, sdlc::SpriteRenderer &spriteRenderer, float deltaTime)
+{
+    if (m_flashFrameCount > 0) {
+        SDL_SetRenderColorScale(renderer, 255);
+        m_flashFrameCount--;
+    }
+}
+
+void FlashModifier::renderEnd(SDL_Renderer *renderer, sdlc::SpriteRenderer &spriteRenderer, float deltaTime)
+{
+    SDL_SetRenderColorScale(renderer, 1);
+}
+
+static void InitBoom(GameAssets* assets, sdlc::AnimatedSprite& sprite)
 {
     sprite.addFrame(assets->sprites["Boom1"]);
     sprite.addFrame(assets->sprites["Boom2"]);
@@ -65,6 +86,8 @@ EnemySpawner::EnemySpawner(sdlc::AppState* appState)
             if (auto item = m_enemies.acquire()) {
                 if (m_rng.chance(bonSpawnProbability)) {
                     *item = std::make_unique<EnemyBon>(appState);
+                } else if (m_rng.chance(alanSpawnProbability)) {
+                    *item = std::make_unique<EnemyAlan>(appState);
                 } else {
                     *item = std::make_unique<EnemyLips>(appState);
                 }
@@ -112,8 +135,7 @@ bool EnemySpawner::fireProjectileAtTarget(const sdlc::Vec2f& pos, const sdlc::Ve
     auto item = m_enemies.acquire();
     if (item) {
         *item = std::make_unique<EnemyProjectile>(m_appState, pos, normalized((target - pos)));
-        m_appState->audio.stream[strmAlienGun].clear();
-        m_appState->audio.stream[strmAlienGun].put(m_assets->alienShot);
+        m_appState->audio.stream[strmAlienGun].put(m_assets->alienShot, true);
         return true;
     }
     return false;
@@ -124,8 +146,7 @@ bool EnemySpawner::fireProjectileAtDirection(const sdlc::Vec2f& pos, const sdlc:
     auto item = m_enemies.acquire();
     if (item) {
         *item = std::make_unique<EnemyProjectile>(m_appState, pos, normalized((dir)));
-        m_appState->audio.stream[strmAlienGun].clear();
-        m_appState->audio.stream[strmAlienGun].put(m_assets->alienShot);
+        m_appState->audio.stream[strmAlienGun].put(m_assets->alienShot, true);
         return true;
     }
     return false;
@@ -219,7 +240,7 @@ EnemyLips::EnemyLips(sdlc::AppState* appState)
         }
     });
     m_sprite.play();
-    initBoom(m_assets, m_boomAnimation);
+    InitBoom(m_assets, m_boomAnimation);
     m_boomAnimation.setRepeat(false);
     m_boomAnimation.setFPS(20);
     m_hitPoints = lipsHitPoints;
@@ -238,8 +259,7 @@ bool EnemyLips::hitByProjectile(int damage)
         m_sprite.stop();
         m_playDeathAnimation = true;
         m_appState->properties["score"].integer += lipsScore;
-        m_appState->audio.stream[strmExplosions].clear();
-        m_appState->audio.stream[strmExplosions].put(m_assets->explosion);
+        m_appState->audio.stream[strmExplosions].put(m_assets->explosion, true);
         getSpawner()->spawnGoody(m_sprite.position());
     } else {
         m_hitFlash = 3;
@@ -278,6 +298,81 @@ void EnemyLips::updateAndRender()
     }
 }
 
+EnemyAlan::EnemyAlan(sdlc::AppState *appState)
+    : Enemy(appState)
+    , m_alanSprite(m_assets->spriteTexture)
+    , m_deathAnimation(m_assets->spriteTexture)
+    , m_hitPoints(alanHitPoints)
+{
+    InitBoom(m_assets, m_deathAnimation);
+    m_deathAnimation.setFPS(20);
+    m_deathAnimation.setRepeat(false);
+    m_deathAnimation.setCallback([this](sdlc::AnimatedSprite& ref, sdlc::AnimationEvent event) {
+        if (event == sdlc::AnimationEvent::finished) {
+            kill();
+        }
+    });
+    m_deathAnimation.hide();
+    m_alanSprite.addFrame(m_assets->sprites["Alan1"]);
+    m_alanSprite.addFrame(m_assets->sprites["Alan2"]);
+    m_alanSprite.addFrame(m_assets->sprites["Alan3"]);
+    m_alanSprite.addFrame(m_assets->sprites["Alan4"]);
+    m_alanSprite.addFrame(m_assets->sprites["Alan5"]);
+    m_alanSprite.addFrame(m_assets->sprites["Alan6"]);
+    m_alanSprite.setModifier(&m_flashModifier);
+    m_alanSprite.setFPS(alanAnimationSpeed);
+    m_alanSprite.play();
+    m_alanSprite.setPosition(
+        spawnXMargin + (m_rng.next() % (RENDER_LOGICAL_WIDTH - spawnXMargin)), 0,
+        sdlc::SpritePositionOffset::Center);
+}
+
+void EnemyAlan::updateAndRender()
+{
+    if (m_actionTimer <= 0 && m_maxDirChanges > 0) {
+        m_moveDirection = sdlc::normalized(sdlc::Vec2f(getPlayer()->getPosition()) - sdlc::Vec2f(m_alanSprite.position()));
+        m_actionTimer = alanActionInterval;
+        --m_maxDirChanges;
+    } else {
+        m_actionTimer -= m_appState->deltaTime;
+    }
+    sdlc::Vec2f newPos = m_alanSprite.position();
+    newPos += m_moveDirection * sdlc::Vec2f(alanMoveSpeed) * sdlc::Vec2f(m_appState->deltaTime);
+    m_alanSprite.setPosition(newPos.x, newPos.y, sdlc::SpritePositionOffset::Center);
+    if (m_viewPort.intersects(getPositionRect())) {
+        m_alanSprite.render(m_appState->renderer, m_appState->deltaTime);
+        m_deathAnimation.setPosition(m_alanSprite.position().x, m_alanSprite.position().y, sdlc::SpritePositionOffset::Center);
+        m_deathAnimation.render(m_appState->renderer, m_appState->deltaTime);
+    } else {
+        kill();
+    }
+    if (getPlayer()->hitCheck(m_alanSprite.destination(), 10000)) {
+        hitByProjectile(10000);
+    }
+}
+
+bool EnemyAlan::hitByProjectile(int damage)
+{
+    if (!m_deathAnimation.playing()) {
+        m_flashModifier.setFlashCount(3);
+        m_hitPoints -= damage;
+        if (m_hitPoints <= 0) {
+            m_alanSprite.hide();
+            m_deathAnimation.show();
+            m_deathAnimation.play();
+            m_appState->audio.stream[strmExplosions].put(m_assets->explosion, true);
+            getSpawner()->spawnGoody(m_alanSprite.position());
+        }
+        return true;
+    }
+    return false;
+}
+
+sdlc::Rect<float> EnemyAlan::getPositionRect()
+{
+    return m_alanSprite.destination();
+}
+
 EnemyBon::EnemyBon(sdlc::AppState *appState)
     : Enemy(appState)
     , m_bonSprite(m_assets->spriteTexture)
@@ -292,7 +387,7 @@ EnemyBon::EnemyBon(sdlc::AppState *appState)
     m_bonSprite.addFrame(m_assets->sprites["RingEffect2"]);
     m_bonSprite.addFrame(m_assets->sprites["RingEffect3"]);
     m_bonSprite.addFrame(m_assets->sprites["RingEffect4"]);
-    initBoom(m_assets, m_explosion);
+    InitBoom(m_assets, m_explosion);
     sdlc::Rect<int> spawnArea(0, 0, RENDER_LOGICAL_WIDTH, RENDER_LOGICAL_HEIGHT);
     spawnArea = spawnArea.offset(20, 20);
     m_posX = m_rng.next() % spawnArea.width() + spawnArea.t.x;
@@ -364,8 +459,7 @@ bool EnemyBon::hitByProjectile(int damage)
             m_explosion.play();
             m_explosion.show();
             m_bonSprite.hide();
-            m_appState->audio.stream[strmExplosions].clear();
-            m_appState->audio.stream[strmExplosions].put(m_assets->explosion);
+            m_appState->audio.stream[strmExplosions].put(m_assets->explosion, true);
             getSpawner()->spawnGoody(m_bonSprite.position());
         }
         return true;

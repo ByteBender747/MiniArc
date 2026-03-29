@@ -15,6 +15,16 @@ constexpr double maxProjectileLifeTime = 5;
 
 class EnemySpawner;
 
+class FlashModifier : public sdlc::SpriteRenderModifier
+{
+public:
+    void renderBegin(SDL_Renderer *renderer, sdlc::SpriteRenderer &spriteRenderer, float deltaTime) override;
+    void renderEnd(SDL_Renderer *renderer, sdlc::SpriteRenderer &spriteRenderer, float deltaTime) override;
+    void setFlashCount(int flashCount) { m_flashFrameCount = flashCount; }
+private:
+    int m_flashFrameCount{0};
+};
+
 class Enemy
 {
 public:
@@ -80,6 +90,23 @@ private:
     bool m_despawn{false};
     sdlc::AnimatedSprite m_explosion;
     sdlc::AnimatedSprite m_bonSprite;
+};
+
+class EnemyAlan : public Enemy
+{
+public:
+    EnemyAlan(sdlc::AppState* appState);
+    void updateAndRender() override;
+    bool hitByProjectile(int damage) override;
+    sdlc::Rect<float> getPositionRect() override;
+private:
+    int m_maxDirChanges{5};
+    int m_hitPoints;
+    float m_actionTimer{0};
+    FlashModifier m_flashModifier;
+    sdlc::Vec2f m_moveDirection;
+    sdlc::AnimatedSprite m_deathAnimation;
+    sdlc::AnimatedSprite m_alanSprite;
 };
 
 class EnemyProjectile : public Enemy

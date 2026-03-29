@@ -148,6 +148,6 @@ void SDL_AppQuit(void* appState, SDL_AppResult result)
     SDL_CloseAudioDevice(state->audio.device.id);
 #endif
     delete state;
-    SDL_Log("Application exitid with code: %d", result);
+    SDL_Log("Application exited with code: %d", result);
     SDL_Quit();
 }

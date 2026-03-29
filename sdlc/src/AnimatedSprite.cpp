@@ -44,6 +44,7 @@ void AnimatedSprite::stop()
     m_running = false;
     m_currentFrame = 0;
     m_time = 0;
+    hide();
     setSource(0, 0, 0, 0);
     handleAnimationEvent(AnimationEvent::stopped);
 }
@@ -61,6 +62,7 @@ void AnimatedSprite::play(int frameCount)
             m_frameCount = static_cast<int>(m_frames.size());
         }
         handleAnimationEvent(AnimationEvent::start);
+        show();
     }
 }
 
