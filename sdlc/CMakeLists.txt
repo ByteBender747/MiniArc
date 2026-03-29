@@ -13,6 +13,7 @@ add_library(sdlc)
 target_include_directories(sdlc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
 target_sources(sdlc PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/AppLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Utility.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/AppEntry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FontRenderer.cpp
