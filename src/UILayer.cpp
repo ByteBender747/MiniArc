@@ -12,7 +12,36 @@
 #include "Rect.hpp"
 #include "SpriteRenderer.hpp"
 
-#include <SDL3_image/SDL_image.h>
+NameInput::NameInput(sdlc::AppState *appState, sdlc::FontRenderer *font)
+    : m_textInput(appState->renderer, font)
+    , m_appState(appState)
+    , m_font(font)
+{
+    appState->eventHandler[textInputSlot] = [this](sdlc::AppState* appState, SDL_Event* event) {
+        m_textInput.handleEvent(*event);
+    };
+    m_textInput.setCallback([this](std::string_view text, bool accepted) {
+        if (accepted) {
+            m_name = text;
+        }
+        m_inputFinished = true;
+    });
+    appState->iterateHandler[textInputSlot] = [this](sdlc::AppState* appState) {
+        float oldScale = m_font->scale();
+        std::string caption = "Your Name: ";
+        sdlc::Point2D<float> pos(RENDER_LOGICAL_WIDTH / 2 - 10, RENDER_LOGICAL_HEIGHT / 2 + 16);
+        m_font->setScale(0.15);
+        m_font->renderText(pos.x, pos.y, caption);
+        m_textInput.render(pos.x + m_font->measureText(caption).width, pos.y);
+        m_font->setScale(oldScale);
+    };
+}
+
+NameInput::~NameInput()
+{
+    m_appState->eventHandler[textInputSlot] = nullptr;
+    m_appState->iterateHandler[textInputSlot] = nullptr;
+}
 
 UILayer::UILayer(sdlc::AppState* appState)
     : m_appState(appState)
@@ -36,6 +65,16 @@ UILayer::UILayer(sdlc::AppState* appState)
                 m_gameOverSfxFlag = true;
             }
             m_appState->properties["gameOver"].boolean = true;
+            if (!m_nameInput && !m_hiscoreDone) {
+                sdlc::TextInput::startTextInput(m_appState->window);
+                m_nameInput = new NameInput(m_appState, m_font);
+            } else {
+                if (m_nameInput->hasFinished()) {
+                    sdlc::TextInput::stopTextInput(m_appState->window);
+                    m_hiscoreDone = true;
+                    delete m_nameInput;
+                }
+            }
         }
     };
     m_assets = static_cast<GameAssets*>(m_appState->properties["assets"].pointer);
