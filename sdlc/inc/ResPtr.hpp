@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SDL3/SDL_iostream.h>
 #include <utility> // for std::exchange
 
 #include <SDL3/SDL_audio.h>
@@ -69,6 +70,14 @@ public:
     }
 
 private:
+    static inline void freeRes(void* res) {
+        SDL_free(res);
+    }
+
+    static inline void freeRes(SDL_IOStream* res) {
+        SDL_CloseIO(res);
+    }   
+
     static inline void freeRes(SDL_Texture* res) {
         SDL_DestroyTexture(res);
     }

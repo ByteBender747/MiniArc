@@ -43,6 +43,8 @@ struct AppState
     double timeStamp{0};
     float deltaTime{0};
     bool isRunning{true};
+    char **argv{nullptr};
+    int argc{0};
     SDL_Color clearColor{0, 0, 0, 255};
     std::unique_ptr<Scene> scene;
     std::unordered_map<std::string, sdlc::Property> properties;
@@ -56,6 +58,7 @@ struct AppState
         std::array<AudioStream, AUDIO_NUM_STREAMS> stream;
     } audio;
 #endif
+    void exchangeScene(Scene *scenePtr);
 };
 
 } // namespace sdlc

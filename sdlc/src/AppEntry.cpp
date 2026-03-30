@@ -18,6 +18,15 @@ Scene::Scene(AppState *appState)
 {
 }
 
+void AppState::exchangeScene(Scene *scenePtr)
+{
+    if (scenePtr) {
+        properties["cachedScenePointer"].pointer = scenePtr;
+    } else {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Scene pointer is null");
+    }
+}
+
 static void EnumRenderDrivers()
 {
     for (int i = 0; i < SDL_GetNumRenderDrivers(); ++i) {
@@ -29,6 +38,9 @@ SDL_AppResult SDL_AppInit(void** appState, int argc, char** argv)
 {
     auto state = new AppState();
     *appState = state;
+    state->argv = argv;
+    state->argc = argc;
+
     SDL_InitFlags flags = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
 
 #ifdef AUDIO_FORMAT
@@ -131,6 +143,15 @@ SDL_AppResult SDL_AppIterate(void* appState)
         state->clearColor.r, state->clearColor.g, state->clearColor.b, state->clearColor.a
     );
     SDL_RenderClear(state->renderer);
+
+    // Current scene can be replaced safely with 'cachedScenePointer'
+    if (state->properties.contains("cachedScenePointer")) {
+        auto ptr = static_cast<Scene*>(state->properties["cachedScenePointer"].pointer);
+        if (ptr) {
+            state->scene.reset(ptr);
+            state->properties.erase("cachedScenePointer");
+        }
+    }
 
     state->scene->manager.addLayersDeferred();
     state->scene->manager.update(state->deltaTime);

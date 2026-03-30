@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL_render.h>
+#include <cstdint>
 
 #include "AppState.hpp"
 #include "AudioDataBuffer.hpp"
@@ -22,6 +23,14 @@ struct GameAssets
     sdlc::AudioDataBuffer chargedShot;
 };
 
+struct HiScoreRecord
+{
+    std::string playerName;
+    uint32_t score;
+};
+
+using HiScoreTable = std::array<HiScoreRecord, 10>;
+
 class PlayerShip;
 class BackgroundStars;
 class EnemySpawner;
@@ -36,3 +45,6 @@ struct MiniArcGame : sdlc::Scene
     EnemySpawner* enemies{nullptr};
     UILayer* uiLayer{nullptr};
 };
+
+uint32_t LoadHiScore(HiScoreTable &table);
+void SaveHiScore(HiScoreTable &table);

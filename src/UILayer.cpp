@@ -1,38 +1,55 @@
 #include <cassert>
 #include <format>
+#include <string>
 
 #include "UILayer.hpp"
+#include "AppLayer.hpp"
 #include "AppState.hpp"
 #include "FontRenderer.hpp"
+#include "GameConfig.hpp"
 #include "HealthBar.hpp"
 #include "MiniArc.hpp"
 #include "PlayerShip.hpp"
 #include "Rect.hpp"
 #include "SpriteRenderer.hpp"
+#include "TextInput.hpp"
 #include "Utility.hpp"
 
+static std::string playerName;
+
 NameInput::NameInput(sdlc::AppState *appState, sdlc::FontRenderer *font)
-    : m_textInput(appState->renderer, font)
+    : sdlc::AppLayer("UIInput", uiZIndex)
+    , m_textInput(appState->renderer, font)
     , m_appState(appState)
     , m_font(font)
 {
+    sdlc::TextInput::startTextInput(m_appState->window);
     m_textInput.setCallback([this](std::string_view text, bool accepted) {
         if (accepted) {
-            m_name = text;
+            playerName = text;
+            deleteLayer();
         }
-        m_inputFinished = true;
     });
 }
 
-void NameInput::render()
+NameInput::~NameInput()
+{
+    sdlc::TextInput::stopTextInput(m_appState->window);
+}
+
+void NameInput::render(SDL_Renderer *renderer)
 {
     float oldScale = m_font->scale();
     std::string caption = "Your Name: ";
-    sdlc::Point2D<float> pos(RENDER_LOGICAL_WIDTH / 2 - 10, RENDER_LOGICAL_HEIGHT / 2 + 16);
+    sdlc::Point2D<float> pos(RENDER_LOGICAL_WIDTH / 2 - 12, RENDER_LOGICAL_HEIGHT / 2 + 13);
     m_font->setScale(0.15);
     m_font->renderText(pos.x, pos.y, caption);
     m_textInput.render(pos.x + m_font->measureText(caption).width, pos.y);
     m_font->setScale(oldScale);
+}
+
+void NameInput::update(float deltaTime)
+{
 }
 
 void NameInput::handleEvent(SDL_Event& event)
@@ -56,7 +73,6 @@ UILayer::UILayer(MiniArcGame* game)
 
 UILayer::~UILayer()
 {
-    delete m_nameInput;
     delete m_font;
 }
 
@@ -80,25 +96,10 @@ void UILayer::render(SDL_Renderer* renderer)
             m_gameOverSfxFlag = true;
         }
         m_appState->properties["gameOver"].boolean = true;
-        if (!m_nameInput && !m_hiscoreDone) {
-            sdlc::TextInput::startTextInput(m_appState->window);
-            m_nameInput = new NameInput(m_appState, m_font);
-        } else if (m_nameInput && m_nameInput->hasFinished()) {
-            sdlc::TextInput::stopTextInput(m_appState->window);
-            m_hiscoreDone = true;
-            delete m_nameInput;
-            m_nameInput = nullptr;
+        if (!m_nameInputStarted) {
+            m_appState->scene->manager.addLayer(new NameInput(m_appState, m_font));
+            m_nameInputStarted = true;
         }
-        if (m_nameInput) {
-            m_nameInput->render();
-        }
-    }
-}
-
-void UILayer::handleEvent(SDL_Event& event)
-{
-    if (m_nameInput) {
-        m_nameInput->handleEvent(event);
     }
 }
 

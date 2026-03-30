@@ -55,6 +55,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UILayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/HealthBar.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/GoodyItem.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/HiScore.cpp
 )
 
 # generate sound effect wave files from xml sources

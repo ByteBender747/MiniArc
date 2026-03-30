@@ -1,4 +1,4 @@
-#include <SDL3/SDL_scancode.h>
+#include <string>
 
 #include "AppState.hpp"
 #include "BackgroundStars.hpp"
@@ -7,6 +7,7 @@
 #include "MiniArc.hpp"
 #include "UILayer.hpp"
 #include "Utility.hpp"
+#include "ResPtr.hpp"
 
 #include <SDL3_image/SDL_image.h>
 
@@ -42,9 +43,4 @@ MiniArcGame::MiniArcGame(sdlc::AppState *appState)
     manager.addLayer(player);
     manager.addLayer(enemies);
     manager.addLayer(uiLayer);
-}
-
-void MiniArc_Exit(sdlc::AppState *state)
-{
-    state->scene.reset();
 }
