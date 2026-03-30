@@ -33,34 +33,46 @@ static void InitBoom(GameAssets* assets, sdlc::AnimatedSprite& sprite)
     sprite.addFrame(assets->sprites["Boom5"]);
 }
 
-EnemySpawner::EnemySpawner(sdlc::AppState* appState)
-    : m_appState(appState)
+EnemySpawner::EnemySpawner(MiniArcGame* game)
+    : AppLayer("EnemySpawner", enemyZIndex)
+    , m_appState(game->appState)
+    , m_assets(&game->assets)
 {
     assert(m_appState);
-    m_assets = static_cast<GameAssets*>(m_appState->properties["assets"].pointer);
     assert(m_assets);
-    m_appState->iterateHandler[enemyZIndex] = [this](sdlc::AppState* appState) {
-        m_spawnTimer += appState->deltaTime;
-        if (m_spawnTimer > spawnInterval) {
-            m_spawnTimer = 0;
-            if (auto item = m_enemies.acquire()) {
-                if (m_rng.chance(bonSpawnProbability)) {
-                    *item = std::make_unique<EnemyBon>(appState);
-                } else if (m_rng.chance(alanSpawnProbability)) {
-                    *item = std::make_unique<EnemyAlan>(appState);
-                } else {
-                    *item = std::make_unique<EnemyLips>(appState);
-                }
+}
+
+void EnemySpawner::update(float deltaTime)
+{
+    m_spawnTimer += deltaTime;
+    if (m_spawnTimer > spawnInterval) {
+        m_spawnTimer = 0;
+        if (auto item = m_enemies.acquire()) {
+            if (m_rng.chance(bonSpawnProbability)) {
+                *item = std::make_unique<EnemyBon>(m_appState);
+            } else if (m_rng.chance(alanSpawnProbability)) {
+                *item = std::make_unique<EnemyAlan>(m_appState);
+            } else {
+                *item = std::make_unique<EnemyLips>(m_appState);
             }
         }
-        m_enemies.foreachAcquired([](sdlc::PoolItem<std::unique_ptr<Enemy>>& item) {
-            if (!item.value->isAlive()) {
-                item.acquired = false;
-            } else {
-                item.value->updateAndRender();
-            }
-        });
-    };
+    }
+    m_enemies.foreachAcquired([](sdlc::PoolItem<std::unique_ptr<Enemy>>& item) {
+        if (!item.value->isAlive()) {
+            item.acquired = false;
+        } else {
+            item.value->update();
+        }
+    });
+}
+
+void EnemySpawner::render(SDL_Renderer* renderer)
+{
+    m_enemies.foreachAcquired([renderer](sdlc::PoolItem<std::unique_ptr<Enemy>>& item) {
+        if (item.value->isAlive()) {
+            item.value->render(renderer);
+        }
+    });
 }
 
 void EnemySpawner::spawnGoody(const sdlc::Point2D<float> &spawnPos)
@@ -83,11 +95,6 @@ void EnemySpawner::spawnGoody(const sdlc::Point2D<float> &spawnPos)
             return;
         }
     }
-}
-
-EnemySpawner::~EnemySpawner()
-{
-    m_appState->iterateHandler[enemyZIndex] = nullptr;
 }
 
 bool EnemySpawner::fireProjectileAtTarget(const sdlc::Vec2f& pos, const sdlc::Vec2f& target)
@@ -129,21 +136,21 @@ Enemy::Enemy(sdlc::AppState* appState)
     : m_appState(appState)
 {
     assert(m_appState);
-    m_assets = static_cast<GameAssets*>(m_appState->properties["assets"].pointer);
+    m_assets = &static_cast<MiniArcGame*>(m_appState->scene.get())->assets;
     assert(m_assets);
     m_viewPort = sdlc::Rect<float>(0, 0, RENDER_LOGICAL_WIDTH, RENDER_LOGICAL_HEIGHT);
 }
 
 PlayerShip* Enemy::getPlayer() const
 {
-    auto player = static_cast<PlayerShip*>(m_appState->properties["player"].pointer);
+    auto player = static_cast<PlayerShip*>(m_appState->scene->manager.findLayerByName("PlayerShip"));
     assert(player);
     return player;
 }
 
 EnemySpawner* Enemy::getSpawner() const
 {
-    auto spawner = static_cast<EnemySpawner*>(m_appState->properties["enemies"].pointer);
+    auto spawner = static_cast<EnemySpawner*>(m_appState->scene->manager.findLayerByName("EnemySpawner"));
     assert(spawner);
     return spawner;
 }
@@ -164,18 +171,24 @@ sdlc::Rect<float> EnemyProjectile::getPositionRect()
     return m_projectileSprite.destination();
 }
 
-void EnemyProjectile::updateAndRender()
+void EnemyProjectile::update()
 {
     if (m_projectile.lifeTime > 0) {
-        m_projectileSprite.setPosition(m_projectile.position.x, m_projectile.position.y);
-        m_projectile.position += m_projectile.velocity * sdlc::Vec2f(m_appState->deltaTime);
         m_projectile.lifeTime -= m_appState->deltaTime;
-        m_projectileSprite.render(m_appState->renderer, m_appState->deltaTime);
+        m_projectile.position += m_projectile.velocity * sdlc::Vec2f(m_appState->deltaTime);
+        m_projectileSprite.setPosition(m_projectile.position.x, m_projectile.position.y);
         if (getPlayer()->hitCheck(m_projectileSprite.destination(), enemyProjectileDamage)) {
             kill();
         }
     } else {
         kill();
+    }
+}
+
+void EnemyProjectile::render(SDL_Renderer* renderer)
+{
+    if (isAlive() && m_projectile.lifeTime > 0) {
+        m_projectileSprite.render(renderer, m_appState->deltaTime);
     }
 }
 
@@ -195,8 +208,7 @@ EnemyLips::EnemyLips(sdlc::AppState* appState)
     m_sprite.setDuration(lipsAnimationSpeed);
     m_sprite.setCallback([this](sdlc::AnimatedSprite& ref, sdlc::AnimationEvent event) {
         if (getPlayer()->isAlive() && event == sdlc::AnimationEvent::finished) {
-            EnemySpawner* spawner = static_cast<EnemySpawner*>(m_appState->properties["enemies"].pointer);
-            spawner->fireProjectileAtTarget(m_sprite.position(), getPlayer()->getPosition());
+            getSpawner()->fireProjectileAtTarget(m_sprite.position(), getPlayer()->getPosition());
         }
     });
     m_sprite.play();
@@ -227,11 +239,9 @@ bool EnemyLips::hitByProjectile(int damage)
     return true;
 }
 
-void EnemyLips::updateAndRender()
+void EnemyLips::update()
 {
-    if (m_playDeathAnimation && isAlive()) {
-        m_boomAnimation.setPosition(m_sprite.position().x, m_sprite.position().y, sdlc::SpritePositionOffset::Center);
-        m_boomAnimation.render(m_appState->renderer, m_appState->deltaTime);
+    if (m_playDeathAnimation) {
         if (m_boomAnimation.finished()) kill();
         return;
     }
@@ -246,15 +256,25 @@ void EnemyLips::updateAndRender()
     if (getPlayer()->hitCheck(m_sprite.destination(), 10000)) {
         hitByProjectile(10000);
     }
+    if (!m_viewPort.intersects(getPositionRect())) {
+        kill();
+    }
+}
+
+void EnemyLips::render(SDL_Renderer* renderer)
+{
+    if (m_playDeathAnimation) {
+        m_boomAnimation.setPosition(m_sprite.position().x, m_sprite.position().y, sdlc::SpritePositionOffset::Center);
+        m_boomAnimation.render(renderer, m_appState->deltaTime);
+        return;
+    }
     if (m_viewPort.intersects(getPositionRect())) {
         if (m_hitFlash > 0) {
-            SDL_SetRenderColorScale(m_appState->renderer, 255);
+            SDL_SetRenderColorScale(renderer, 255);
             --m_hitFlash;
         }
-        m_sprite.render(m_appState->renderer, m_appState->deltaTime);
-        SDL_SetRenderColorScale(m_appState->renderer, 1);
-    } else {
-        kill(); // Runs out of visible area
+        m_sprite.render(renderer, m_appState->deltaTime);
+        SDL_SetRenderColorScale(renderer, 1);
     }
 }
 
@@ -287,7 +307,7 @@ EnemyAlan::EnemyAlan(sdlc::AppState *appState)
         sdlc::SpritePositionOffset::Center);
 }
 
-void EnemyAlan::updateAndRender()
+void EnemyAlan::update()
 {
     if (m_actionTimer <= 0 && m_maxDirChanges > 0) {
         m_moveDirection = sdlc::normalized(sdlc::Vec2f(getPlayer()->getPosition()) - sdlc::Vec2f(m_alanSprite.position()));
@@ -299,15 +319,20 @@ void EnemyAlan::updateAndRender()
     sdlc::Vec2f newPos = m_alanSprite.position();
     newPos += m_moveDirection * sdlc::Vec2f(alanMoveSpeed) * sdlc::Vec2f(m_appState->deltaTime);
     m_alanSprite.setPosition(newPos.x, newPos.y, sdlc::SpritePositionOffset::Center);
-    if (m_viewPort.intersects(getPositionRect())) {
-        m_alanSprite.render(m_appState->renderer, m_appState->deltaTime);
-        m_deathAnimation.setPosition(m_alanSprite.position().x, m_alanSprite.position().y, sdlc::SpritePositionOffset::Center);
-        m_deathAnimation.render(m_appState->renderer, m_appState->deltaTime);
-    } else {
+    if (!m_viewPort.intersects(getPositionRect())) {
         kill();
     }
     if (getPlayer()->hitCheck(m_alanSprite.destination(), 10000)) {
         hitByProjectile(10000);
+    }
+}
+
+void EnemyAlan::render(SDL_Renderer* renderer)
+{
+    if (m_viewPort.intersects(getPositionRect())) {
+        m_alanSprite.render(renderer, m_appState->deltaTime);
+        m_deathAnimation.setPosition(m_alanSprite.position().x, m_alanSprite.position().y, sdlc::SpritePositionOffset::Center);
+        m_deathAnimation.render(renderer, m_appState->deltaTime);
     }
 }
 
@@ -322,6 +347,7 @@ bool EnemyAlan::hitByProjectile(int damage)
             m_deathAnimation.play();
             m_appState->audio.stream[strmExplosions].put(m_assets->explosion, true);
             getSpawner()->spawnGoody(m_alanSprite.position());
+            m_appState->properties["score"].integer += alanScore;
         }
         return true;
     }
@@ -361,17 +387,16 @@ EnemyBon::EnemyBon(sdlc::AppState *appState)
                 kill();
                 return;
             }
-            EnemySpawner* spawner = static_cast<EnemySpawner*>(m_appState->properties["enemies"].pointer);
             if (!m_appState->properties["gameOver"].boolean) {
                 sdlc::Vec2f pos = { ref.position().x, ref.position().y };
-                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, -1));
-                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(1, -1));
-                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, 1));
-                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(1, 1));
-                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, 0));
-                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(1, 0));
-                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(0, -1));
-                spawner->fireProjectileAtDirection(pos, sdlc::Vec2f(0, 1));
+                getSpawner()->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, -1));
+                getSpawner()->fireProjectileAtDirection(pos, sdlc::Vec2f(1, -1));
+                getSpawner()->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, 1));
+                getSpawner()->fireProjectileAtDirection(pos, sdlc::Vec2f(1, 1));
+                getSpawner()->fireProjectileAtDirection(pos, sdlc::Vec2f(-1, 0));
+                getSpawner()->fireProjectileAtDirection(pos, sdlc::Vec2f(1, 0));
+                getSpawner()->fireProjectileAtDirection(pos, sdlc::Vec2f(0, -1));
+                getSpawner()->fireProjectileAtDirection(pos, sdlc::Vec2f(0, 1));
             }
             m_arrived = true;
         }
@@ -387,26 +412,30 @@ EnemyBon::EnemyBon(sdlc::AppState *appState)
     });
 }
 
-void EnemyBon::updateAndRender()
+void EnemyBon::update()
 {
-    if (m_hitFlash > 0) {
-        SDL_SetRenderColorScale(m_appState->renderer, 255);
-        --m_hitFlash;
-    }
-    m_bonSprite.setPosition(m_posX, m_posY, sdlc::SpritePositionOffset::Center);
-    m_bonSprite.render(m_appState->renderer, m_appState->deltaTime);
-    SDL_SetRenderColorScale(m_appState->renderer, 1);
-    m_explosion.setPosition(m_posX, m_posY, sdlc::SpritePositionOffset::Center);
-    m_explosion.render(m_appState->renderer, m_appState->deltaTime);
-    if (m_bonSprite.currentFrame() >= 2 && m_bonSprite.currentFrame() <= 4) {
-        if (getPlayer()->hitCheck(m_bonSprite.destination(), 10000)) {
-            hitByProjectile(10000);
-        }
-    }
     if (m_arrived && !m_explosion.playing() && !m_despawn) {
         m_despawn = true;
         m_bonSprite.setFrame(5);
         m_bonSprite.play();
+    }
+}
+
+void EnemyBon::render(SDL_Renderer* renderer)
+{
+    if (m_hitFlash > 0) {
+        SDL_SetRenderColorScale(renderer, 255);
+        --m_hitFlash;
+    }
+    m_bonSprite.setPosition(m_posX, m_posY, sdlc::SpritePositionOffset::Center);
+    m_bonSprite.render(renderer, m_appState->deltaTime);
+    SDL_SetRenderColorScale(renderer, 1);
+    m_explosion.setPosition(m_posX, m_posY, sdlc::SpritePositionOffset::Center);
+    m_explosion.render(renderer, m_appState->deltaTime);
+    if (m_bonSprite.currentFrame() >= 2 && m_bonSprite.currentFrame() <= 4) {
+        if (getPlayer()->hitCheck(m_bonSprite.destination(), 10000)) {
+            hitByProjectile(10000);
+        }
     }
 }
 
@@ -430,13 +459,4 @@ bool EnemyBon::hitByProjectile(int damage)
 sdlc::Rect<float> EnemyBon::getPositionRect()
 {
     return m_bonSprite.destination();
-}
-
-void deleteEnemies(sdlc::AppState* state, const std::string& name)
-{
-    auto ptr = static_cast<EnemySpawner*>(state->properties[name].pointer);
-    if (ptr) {
-        delete ptr;
-        state->properties[name].pointer = nullptr;
-    }
 }

@@ -28,9 +28,11 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/inc)
 set(WAVE_BITS 16)
 set(WAVE_SAMPLE_FREQ 22050)
 
+target_include_directories(sdlc PUBLIC ${CMAKE_SOURCE_DIR}/inc)
+
 target_compile_definitions(sdlc PUBLIC
-    APP_INIT=MiniArc_Init
-    APP_EXIT=MiniArc_Exit
+    SCENE_CLASS=MiniArcGame
+    SCENE_HEADER="MiniArc.hpp"
     WINDOW_TITLE="Mini Arcade"
     WINDOW_WIDTH=560
     WINDOW_HEIGHT=896

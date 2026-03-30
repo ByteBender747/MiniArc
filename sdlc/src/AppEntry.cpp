@@ -7,10 +7,16 @@
 #include "AppState.hpp"
 #include "Config.hpp"
 
+#ifdef SCENE_HEADER
+#include SCENE_HEADER
+#endif
+
 using namespace sdlc;
 
-void APP_INIT(AppState* state, int argc, char** argv);
-void APP_EXIT(AppState* state);
+Scene::Scene(AppState *appState)
+    : manager(appState), appState(appState)
+{
+}
 
 static void EnumRenderDrivers()
 {
@@ -92,7 +98,11 @@ SDL_AppResult SDL_AppInit(void** appState, int argc, char** argv)
     }
 #endif
 
-    APP_INIT(state, argc, argv); // Entry point defined via cmake
+#ifdef SCENE_CLASS
+    state->scene = std::make_unique<SCENE_CLASS>(state);
+#else
+#error Default scene must be defined
+#endif
 
     return SDL_APP_CONTINUE;
 }
@@ -103,9 +113,7 @@ SDL_AppResult SDL_AppEvent(void* appState, SDL_Event* event)
     if (event->type == SDL_EVENT_QUIT) {
         return SDL_APP_SUCCESS;
     }
-    for (auto& handler : state->eventHandler) {
-        if (handler.second) handler.second(state, event);
-    }
+    state->scene->manager.handleEvent(*event);
     return SDL_APP_CONTINUE;
 }
 
@@ -124,9 +132,9 @@ SDL_AppResult SDL_AppIterate(void* appState)
     );
     SDL_RenderClear(state->renderer);
 
-    for (auto& handler : state->iterateHandler) {
-        if (handler.second) handler.second(state);
-    }
+    state->scene->manager.addLayersDeferred();
+    state->scene->manager.update(state->deltaTime);
+    state->scene->manager.render(state->renderer);
 
     SDL_RenderPresent(state->renderer);
 
@@ -137,7 +145,7 @@ SDL_AppResult SDL_AppIterate(void* appState)
 void SDL_AppQuit(void* appState, SDL_AppResult result)
 {
     auto state = static_cast<AppState*>(appState);
-    APP_EXIT(state);
+    state->scene.release();
     if (state->renderer) {
         SDL_DestroyRenderer(state->renderer);
     }

@@ -5,6 +5,19 @@ constexpr double percentage(double x)
     return x / 100.;
 }
 
+// Audio stream assignment
+constexpr int strmPlayerGun = 0;
+constexpr int strmAlienGun = 1;
+constexpr int strmExplosions = 2;
+constexpr int strmPlayerEffects = 3;
+
+// Drawing order configuration
+constexpr int backgroundZIndex = 0;
+constexpr int enemyZIndex = 1;
+constexpr int playerZIndex = 2;
+constexpr int uiZIndex = 3;
+constexpr int textInputSlot = 4;
+
 // Player configuration
 constexpr float playerMoveSpeed        = 100;
 constexpr int playerBeamDamage         = 50;

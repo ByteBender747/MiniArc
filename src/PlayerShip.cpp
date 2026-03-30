@@ -11,21 +11,19 @@
 #include "Vector2.hpp"
 #include "Keyboard.hpp"
 
-#include <SDL3/SDL_events.h>
-#include <SDL3/SDL_scancode.h>
-
 using namespace sdlc;
 
-PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
-    : m_appState(state)
-    , m_sprite(texture)
-    , m_flames(texture)
-    , m_shotSprite(texture)
-    , m_deathAnimation(texture)
-    , m_spawnEffect(texture)
-    , m_chargedShot(texture)
+PlayerShip::PlayerShip(MiniArcGame *game)
+    : AppLayer("PlayerShip", playerZIndex)
+    , m_appState(game->appState)
+    , m_assets(&game->assets)
+    , m_sprite(game->assets.spriteTexture)
+    , m_flames(game->assets.spriteTexture)
+    , m_shotSprite(game->assets.spriteTexture)
+    , m_deathAnimation(game->assets.spriteTexture)
+    , m_spawnEffect(game->assets.spriteTexture)
+    , m_chargedShot(game->assets.spriteTexture)
 {
-    m_assets = static_cast<GameAssets*>(state->properties["assets"].pointer);
     m_chargedShot.addFrame(m_assets->sprites["LaserCharged1"]);
     m_chargedShot.addFrame(m_assets->sprites["LaserCharged2"]);
     m_chargedShot.setFPS(10);
@@ -39,14 +37,6 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_posLimits[2] = 8;
     m_posLimits[3] = RENDER_LOGICAL_HEIGHT - 8;
     m_shotSprite.setSource(m_assets->sprites["Laser"]);
-    m_appState->iterateHandler[playerZIndex] = [this](AppState* appState) {
-        if (!m_spawnEffect.finished()) {
-            m_spawnEffect.setPosition(m_position.x, m_position.y);
-            m_spawnEffect.render(appState->renderer, appState->deltaTime);
-        } else {
-            iteratePlayerShip();
-        }
-    };
 
     m_deathAnimation.addFrame(m_assets->sprites["Boom1"]);
     m_deathAnimation.addFrame(m_assets->sprites["Boom2"]);
@@ -81,28 +71,21 @@ PlayerShip::PlayerShip(AppState* state, SDL_Texture* texture)
     m_spawnEffect.play();
 }
 
-PlayerShip::~PlayerShip()
+void PlayerShip::render(SDL_Renderer *renderer)
 {
-    m_appState->iterateHandler[playerZIndex] = nullptr;
-    m_appState->eventHandler[playerZIndex] = nullptr;
-}
-
-void PlayerShip::iteratePlayerShip()
-{
-    if (m_isAlive) {
-        handleInputs();
-        shipMovement();
-        animateFlames();
+    if (!m_spawnEffect.finished()) {
+        m_spawnEffect.setPosition(m_position.x, m_position.y);
+        m_spawnEffect.render(renderer, m_appState->deltaTime);
+        return;
     }
-    moveAndRenderProjectiles(200);
     if (m_hitPoints > 0) {
         if (m_hitFlash) {
-            SDL_SetRenderColorScale(m_appState->renderer, 255);
+            SDL_SetRenderColorScale(renderer, 255);
             --m_hitFlash;
         }
-        m_sprite.render(m_appState->renderer);
-        SDL_SetRenderColorScale(m_appState->renderer, 1);
-        m_flames.render(m_appState->renderer);
+        m_sprite.render(renderer);
+        SDL_SetRenderColorScale(renderer, 1);
+        m_flames.render(renderer);
     } else {
         if (m_isAlive) {
             m_deathAnimation.play();
@@ -110,8 +93,18 @@ void PlayerShip::iteratePlayerShip()
             m_appState->audio.stream[strmExplosions].put(m_assets->explosion, true);
         }
         m_deathAnimation.setPosition(m_position.x, m_position.y);
-        m_deathAnimation.render(m_appState->renderer, m_appState->deltaTime);
+        m_deathAnimation.render(renderer, m_appState->deltaTime);
     }
+}
+
+void PlayerShip::update(float deltaTime)
+{
+    if (m_isAlive) {
+        handleInputs();
+        shipMovement();
+        animateFlames();
+    }
+    moveAndRenderProjectiles(200);
 }
 
 bool PlayerShip::fireProjectile(float x, float y, bool charged)
@@ -173,7 +166,7 @@ void PlayerShip::enableWeaponPowerUp(float time)
 
 void PlayerShip::moveAndRenderProjectiles(float shotSpeed)
 {
-    EnemySpawner* enemies = static_cast<EnemySpawner*>(m_appState->properties["enemies"].pointer);
+    EnemySpawner* enemies = static_cast<EnemySpawner*>(m_appState->scene->manager.findLayerByName("EnemySpawner"));
     assert(enemies);
     for (auto& item : m_projectiles) {
         if (item.acquired) {
@@ -280,14 +273,5 @@ void PlayerShip::shipMovement()
         m_sprite.setSource(m_assets->sprites["PlayerCenter"]);
         m_flames.setPosition(m_position.x, m_position.y + 10, SpritePositionOffset::Center);
         break;
-    }
-}
-
-void deletePlayerShip(AppState* state, const std::string& name)
-{
-    auto* player = static_cast<PlayerShip*>(state->properties[name].pointer);
-    if (player) {
-        delete player;
-        state->properties[name].pointer = nullptr;
     }
 }

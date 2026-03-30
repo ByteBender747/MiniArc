@@ -1,8 +1,8 @@
 #pragma once
 
-#include <memory>
 #include <SDL3/SDL_render.h>
 
+#include "AppState.hpp"
 #include "AudioDataBuffer.hpp"
 #include "SpriteRenderer.hpp"
 #include "ResPtr.hpp"
@@ -22,15 +22,17 @@ struct GameAssets
     sdlc::AudioDataBuffer chargedShot;
 };
 
-// Audio stream assignment
-constexpr int strmPlayerGun = 0;
-constexpr int strmAlienGun = 1;
-constexpr int strmExplosions = 2;
-constexpr int strmPlayerEffects = 3;
+class PlayerShip;
+class BackgroundStars;
+class EnemySpawner;
+class UILayer;
 
-// Drawing order configuration
-constexpr int backgroundZIndex = 0;
-constexpr int enemyZIndex = 1;
-constexpr int playerZIndex = 2;
-constexpr int uiZIndex = 3;
-constexpr int textInputSlot = 4;
+struct MiniArcGame : sdlc::Scene
+{
+    MiniArcGame(sdlc::AppState *appState);
+    GameAssets assets;
+    PlayerShip* player{nullptr};
+    BackgroundStars* stars{nullptr};
+    EnemySpawner* enemies{nullptr};
+    UILayer* uiLayer{nullptr};
+};

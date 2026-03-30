@@ -144,6 +144,15 @@ void LayerManager::enableLayerByName(std::string_view name)
     }
 }
 
+void LayerManager::handleEvent(SDL_Event &event)
+{
+    for (auto& layerContainer : m_layers) {
+        if (layerContainer.layer != nullptr && layerContainer.alive && layerContainer.enabled) {
+            layerContainer.layer->handleEvent(event);
+        }
+    }
+}
+
 void LayerManager::render(SDL_Renderer *renderer)
 {
     for (auto& layerContainer : m_layers) {

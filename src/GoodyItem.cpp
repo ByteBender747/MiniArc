@@ -1,4 +1,6 @@
 #include "GoodyItem.hpp"
+#include "MiniArc.hpp"
+#include "PlayerShip.hpp"
 
 constexpr float itemDownSpeed  = 50;
 
@@ -7,8 +9,12 @@ constexpr int shipScore        = 430;
 constexpr int weaponPicupScore = 110;
 
 GoodyItem::GoodyItem(sdlc::AppState *appState, const sdlc::Point2D<float> &spawnPos, GoodyItemType type)
-    : Enemy(appState), m_position(spawnPos.x, spawnPos.y), m_type(type)
+    : Enemy(appState)
+    , m_sprite(m_assets->spriteTexture)
+    , m_position(spawnPos.x, spawnPos.y)
+    , m_type(type)
 {
+    getItemSprite(m_sprite);
 }
 
 void GoodyItem::getItemSprite(sdlc::SpriteRenderer& sprite)
@@ -39,14 +45,11 @@ void GoodyItem::playPickupSound()
     m_appState->audio.stream[strmPlayerEffects].put(m_assets->pickup);
 }
 
-void GoodyItem::updateAndRender()
+void GoodyItem::update()
 {
     sdlc::Rect<float> clientRect(0, 0, RENDER_LOGICAL_WIDTH, RENDER_LOGICAL_HEIGHT);
-    sdlc::SpriteRenderer item(m_assets->spriteTexture);
-    getItemSprite(item);
-    item.setPosition(m_position.x, m_position.y);
-    item.render(m_appState->renderer);
-    m_posRect = sdlc::Rect<float>(item.destination());
+    m_sprite.setPosition(m_position.x, m_position.y);
+    m_posRect = sdlc::Rect<float>(m_sprite.destination());
     m_position += sdlc::Vec2f(0, 1) * sdlc::Vec2f(itemDownSpeed) * sdlc::Vec2f(m_appState->deltaTime);
     if (m_type == GoodyItemType::powerUp) {
         if (getPlayer()->hitCheck(m_posRect, -100)) {
@@ -72,6 +75,11 @@ void GoodyItem::updateAndRender()
         }
     }
     if (!clientRect.intersects(m_posRect)) kill();
+}
+
+void GoodyItem::render(SDL_Renderer* renderer)
+{
+    m_sprite.render(renderer);
 }
 
 bool GoodyItem::hitByProjectile(int damage)

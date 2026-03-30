@@ -1,22 +1,24 @@
 #pragma once
 
-#include <string>
+#include <array>
 #include <SDL3/SDL_render.h>
 
-#include "AppState.hpp"
+#include "AppLayer.hpp"
 #include "ColorConverter.hpp"
-#include "MiniArc.hpp"
 #include "SpriteRenderer.hpp"
 #include "Vector2.hpp"
 #include "Random.hpp"
 
-class BackgroundStars {
+struct MiniArcGame;
+struct GameAssets;
+
+class BackgroundStars : public sdlc::AppLayer {
 public:
-    BackgroundStars(sdlc::AppState* state, SDL_Texture* texture);
-    virtual ~BackgroundStars();
+    BackgroundStars(MiniArcGame* game);
+    void render(SDL_Renderer* renderer) override;
+    void update(float deltaTime) override;
 private:
     void spawnStar();
-    void moveAndRender();
 private:
     enum class StarType {
         Small, Middle, Large
@@ -37,5 +39,3 @@ private:
     sdlc::SpriteRenderer m_sprite;
     std::array<Star, 32> m_stars;
 };
-
-void deleteBackgroundStar(sdlc::AppState* state, const std::string& name);

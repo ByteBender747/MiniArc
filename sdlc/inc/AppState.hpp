@@ -4,12 +4,12 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
 
-#include <map>
+#include <memory>
 #include <string>
 #include <cstdint>
-#include <functional>
 #include <unordered_map>
 
+#include "AppLayer.hpp"
 #include "Keyboard.hpp"
 #include "AudioDevice.hpp"
 #include "AudioStream.hpp"
@@ -17,7 +17,8 @@
 namespace sdlc
 {
 
-union Property {
+union Property
+{
     uint8_t data[8] {0, 0, 0, 0, 0, 0, 0, 0};
     void* pointer;
     bool boolean;
@@ -26,9 +27,16 @@ union Property {
     double doubleValue;
 };
 
-struct AppState {
-    using EventHandler = std::function<void(AppState* state, SDL_Event* event)>;
-    using IterateHandler = std::function<void(AppState* state)>;
+struct Scene
+{
+    Scene(AppState *appState);
+    AppState *appState;
+    LayerManager manager;
+    std::unordered_map<std::string, sdlc::Property> properties;
+};
+
+struct AppState
+{
     SDL_Window* window;
     SDL_Renderer* renderer;
     Uint64 iterations{0};
@@ -36,8 +44,7 @@ struct AppState {
     float deltaTime{0};
     bool isRunning{true};
     SDL_Color clearColor{0, 0, 0, 255};
-    std::map<int, EventHandler> eventHandler;
-    std::map<int, IterateHandler> iterateHandler;
+    std::unique_ptr<Scene> scene;
     std::unordered_map<std::string, sdlc::Property> properties;
     struct {
         KeyMap keys;

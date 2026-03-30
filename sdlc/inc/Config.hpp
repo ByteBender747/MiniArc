@@ -23,13 +23,3 @@
 #ifndef WINDOW_TITLE
 #define WINDOW_TITLE "SDL3 Application"
 #endif
-
-#ifndef APP_INIT
-#define APP_INIT
-#warning Application entry point not defined
-#endif
-
-#ifndef APP_EXIT
-#define APP_EXIT
-#warning Application exit point not defined
-#endif

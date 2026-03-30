@@ -29,6 +29,7 @@ public:
     void addLayer(AppLayer *layer);
     void render(SDL_Renderer *renderer);
     void update(float deltaTime);
+    void handleEvent(SDL_Event &event);
     void addLayersDeferred();
     void deleteLayerByName(std::string_view name);
     void disableLayerByName(std::string_view name);

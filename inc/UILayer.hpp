@@ -1,20 +1,23 @@
 #pragma once
 
+#include "AppLayer.hpp"
 #include "FontRenderer.hpp"
-#include "MiniArc.hpp"
-#include "PlayerShip.hpp"
 #include "ResPtr.hpp"
+#include "TextInput.hpp"
 #include <SDL3/SDL_render.h>
 
-#include "TextInput.hpp"
+struct MiniArcGame;
+struct GameAssets;
+class PlayerShip;
 
 class NameInput
 {
 public:
     NameInput(sdlc::AppState* appState, sdlc::FontRenderer* font);
-    ~NameInput();
     const std::string& getName() { return m_name; }
     bool hasFinished() const { return m_inputFinished; }
+    void render();
+    void handleEvent(SDL_Event& event);
 private:
     bool m_inputFinished{false};
     std::string m_name;
@@ -23,18 +26,22 @@ private:
     sdlc::TextInput m_textInput;
 };
 
-class UILayer
+class UILayer : public sdlc::AppLayer
 {
 public:
-    UILayer(sdlc::AppState* appState);
-    virtual ~UILayer();
+    UILayer(MiniArcGame* game);
+    ~UILayer();
+    void render(SDL_Renderer* renderer) override;
+    void update(float deltaTime) override;
+    void handleEvent(SDL_Event& event) override;
+private:
+    PlayerShip* getPlayer();
+    bool isGameOver();
     void renderScoreValue();
     void renderHealthBar();
     void renderShipCount();
     void renderModTime();
-    bool isGameOver();
 private:
-    PlayerShip* getPlayer();
     int m_renderWidth{};
     int m_renderHeight{};
     bool m_gameOverSfxFlag{false};
@@ -46,5 +53,3 @@ private:
     sdlc::FontRenderer* m_font;
     sdlc::AppState* m_appState;
 };
-
-void deleteUI(sdlc::AppState* state, const std::string& name);
