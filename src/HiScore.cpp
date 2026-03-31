@@ -39,7 +39,7 @@ static uint32_t GetMinScore(HiScoreTable &table)
 {
     uint32_t minScore = UINT32_MAX;
     for (auto& entry : table) {
-        minScore = std::min(minScore, entry.score);
+        minScore = std::min<uint32_t>(minScore, entry.score);
     }
     return minScore;
 }

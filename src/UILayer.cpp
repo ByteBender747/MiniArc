@@ -109,7 +109,7 @@ UILayer::UILayer(MiniArcGame *game)
 {
     m_font = new sdlc::FontRenderer(
         m_appState->renderer,
-        sdlc::ResolveRelativeToExe("../Assets/Gameplay.ttf").c_str(),
+        sdlc::ResolveRelativeToExe("../Assets/Gameplay.ttf").string().c_str(),
         32, sdlc::FontRenderMode::Solid);
     m_startImage = sdlc::LoadTexture(m_appState->renderer, sdlc::ResolveRelativeToExe("../Assets/start.png").c_str());
     m_gameOverImage = sdlc::LoadTexture(m_appState->renderer,

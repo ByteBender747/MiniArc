@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_library(sdlc)
 
+target_link_libraries(sdlc PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
 target_include_directories(sdlc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
 target_sources(sdlc PRIVATE

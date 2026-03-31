@@ -54,16 +54,17 @@ std::filesystem::path GetSaveGameFolder(const char* orgName, const char* gameNam
 
 SDL_Texture* LoadTexture(SDL_Renderer* renderer, const std::filesystem::path &filePath)
 {
+    std::string tmpfilePath = filePath.string();
     ResPtr<SDL_Surface> surface;
     SDL_Texture* texture = nullptr;
     if (filePath.extension() == ".bmp") {
-        SDL_Log("Loading BMP texture file: %s", filePath.c_str());
-        surface = SDL_LoadBMP(filePath.c_str());
+        SDL_Log("Loading BMP texture file: %s", tmpfilePath.c_str());
+        surface = SDL_LoadBMP(filePath.string().c_str());
     } else if (filePath.extension() == ".png") {
-        SDL_Log("Loading PNG texture file: %s", filePath.c_str());
-        surface = SDL_LoadPNG(filePath.c_str());
+        SDL_Log("Loading PNG texture file: %s", tmpfilePath.c_str());
+        surface = SDL_LoadPNG(filePath.string().c_str());
     } else {
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Unsupported image format for file: %s", filePath.c_str());
+        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Unsupported image format for file: %s", tmpfilePath.c_str());
     }
     if (surface) {
         texture = SDL_CreateTextureFromSurface(renderer, surface);
@@ -71,7 +72,7 @@ SDL_Texture* LoadTexture(SDL_Renderer* renderer, const std::filesystem::path &fi
             SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "SDL_CreateTextureFromSurface() failed: %s", SDL_GetError());
         }
     } else {
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Failed to load image file: %s", filePath.c_str());
+        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Failed to load image file: %s", tmpfilePath.c_str());
         SDL_LogTrace(SDL_LOG_CATEGORY_SYSTEM, "SDL_GetError(): %s", SDL_GetError());
     }
     return texture;
@@ -123,7 +124,7 @@ static std::filesystem::path GetExecutablePath()
 #ifdef _WIN32
     char buffer[MAX_PATH];
     GetModuleFileNameA(NULL, buffer, MAX_PATH);
-    return fs::path(buffer);
+    return std::filesystem::path(buffer);
 #elif __APPLE__
     char buffer[PATH_MAX];
     uint32_t size = PATH_MAX;
@@ -137,7 +138,7 @@ static std::filesystem::path GetExecutablePath()
 #endif
 }
 
-std::filesystem::path ResolveRelativeToExe(const std::string &relativePath)
+std::filesystem::path ResolveRelativeToExe(const std::filesystem::path &relativePath)
 {
     std::filesystem::path exePath = GetExecutablePath();
     std::filesystem::path exeDir = exePath.parent_path();

@@ -102,7 +102,7 @@ SDL_AppResult SDL_AppInit(void** appState, int argc, char** argv)
     std::vector<SDL_AudioStream*> streamStack;
     for (int i = 0; i < AUDIO_NUM_STREAMS; ++i) {
         state->audio.stream[i].create(state->audio.audioSpec, state->audio.audioSpec);
-        streamStack.emplace_back(state->audio.stream[i].stream());
+        streamStack.push_back(state->audio.stream[i].stream());
     }
     if (!SDL_BindAudioStreams(state->audio.device.id, streamStack.data(), streamStack.size())) {
         SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "SDL_BindAudioStreams() failed: %s", SDL_GetError());

@@ -9,8 +9,6 @@
 #include "Utility.hpp"
 #include "ResPtr.hpp"
 
-#include <SDL3_image/SDL_image.h>
-
 MiniArcGame::MiniArcGame(sdlc::AppState *appState)
     : Scene(appState)
 {
