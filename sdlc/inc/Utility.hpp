@@ -18,5 +18,6 @@ int ProbabilityList(const ProbabilityItem* items, unsigned int itemCount);
 bool LoadSpriteDefinitions(SpriteDefinitions &def, const std::filesystem::path &filePath);
 std::filesystem::path ResolveRelativeToExe(const std::string& relativePath);
 SDL_Texture* LoadTexture(SDL_Renderer* renderer, const std::filesystem::path &filePath);
+std::filesystem::path GetSaveGameFolder(const char* orgName, const char* gameName);
 
 } // namespace sdlc

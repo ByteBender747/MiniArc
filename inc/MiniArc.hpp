@@ -47,4 +47,5 @@ struct MiniArcGame : sdlc::Scene
 };
 
 uint32_t LoadHiScore(HiScoreTable &table);
-void SaveHiScore(HiScoreTable &table);
+void SaveHiScore(const HiScoreTable &table);
+int ScoreRating(const HiScoreTable &table, uint32_t score);

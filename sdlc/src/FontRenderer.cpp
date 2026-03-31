@@ -88,6 +88,7 @@ FontRenderer::FontRenderer(SDL_Renderer* renderer, const char* filePath, float s
     m_font.size = size;
     m_font.characterCount = sizeof(atlasString) - 1;
     m_font.width = surfaceWith;
+    m_font.height = charHeight;
 }
 
 void FontRenderer::preserveLogicalPresentationMode()

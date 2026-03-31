@@ -66,6 +66,7 @@ protected:
 
 private:
     int m_zIndex;
+    bool m_preventFromAdding{false};
     bool m_enabledInitState{true};
     std::string_view m_name;
     LayerContainer *m_container{nullptr};

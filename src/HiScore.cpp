@@ -2,9 +2,9 @@
 #include <sstream>
 #include <fstream>
 #include <string>
-#include <algorithm>
 
 #include "MiniArc.hpp"
+#include "Utility.hpp"
 
 #include <SDL3/SDL.h>
 
@@ -12,7 +12,7 @@ const char* gameName = "MiniArc";
 const char* orgName  = "PIB Games";
 
 template <typename value_type>
-static inline value_type parse_value(std::string sval)
+static value_type parse_value(const std::string &sval)
 {
     value_type value;
     std::istringstream ss(sval);
@@ -21,6 +21,27 @@ static inline value_type parse_value(std::string sval)
         throw std::runtime_error("Invalid attribute value");
     }
     return value;
+}
+
+int ScoreRating(const HiScoreTable &table, uint32_t score)
+{
+    int pos = -1;
+    for (int i = 0; i < table.size(); ++i) {
+        if (score > table[i].score) {
+            pos = i;
+            break;
+        }
+    }
+    return pos;
+}
+
+static uint32_t GetMinScore(HiScoreTable &table)
+{
+    uint32_t minScore = UINT32_MAX;
+    for (auto& entry : table) {
+        minScore = std::min(minScore, entry.score);
+    }
+    return minScore;
 }
 
 static void LoadDefaultScoreBoard(HiScoreTable &table)
@@ -39,10 +60,7 @@ static void LoadDefaultScoreBoard(HiScoreTable &table)
 
 uint32_t LoadHiScore(HiScoreTable &table)
 {
-    uint32_t minScore = UINT32_MAX;
-    char* userPath(SDL_GetPrefPath(orgName, gameName));
-    std::string fname(userPath);
-    fname += "HiScore.txt";
+    std::filesystem::path fname = sdlc::GetSaveGameFolder(orgName, gameName) / "HiScore.txt";
     std::ifstream stream(fname, std::fstream::in);
     std::string line;
     int line_count = 0;
@@ -54,7 +72,6 @@ uint32_t LoadHiScore(HiScoreTable &table)
             getline(iss, name, '\t');
             getline(iss, score, '\t');
             uint32_t score_value = parse_value<uint32_t>(score);
-            minScore = std::min(minScore, score_value);
             table[line_count] = {
                 .playerName = name,
                 .score = score_value
@@ -66,20 +83,12 @@ uint32_t LoadHiScore(HiScoreTable &table)
         }
         stream.close();
     }
-    SDL_free(userPath);
-    return minScore;
+    return GetMinScore(table);
 }
 
-void SaveHiScore(HiScoreTable &table)
+void SaveHiScore(const HiScoreTable &table)
 {
-    // Sort the table from highest to lowest score
-    std::sort(table.begin(), table.end(), [](const HiScoreRecord& a, const HiScoreRecord& b) {
-        return a.score > b.score;
-    });
-    
-    char* userPath = SDL_GetPrefPath(orgName, gameName);
-    std::string fname(userPath);
-    fname += "HiScore.txt";
+    std::filesystem::path fname = sdlc::GetSaveGameFolder(orgName, gameName) / "HiScore.txt";
     std::ofstream stream(fname);
     if (stream.is_open()) {
         for (auto& entry : table) {
@@ -88,5 +97,4 @@ void SaveHiScore(HiScoreTable &table)
         }
         stream.close();
     }
-    SDL_free(userPath);
 }

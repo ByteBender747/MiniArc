@@ -2,6 +2,8 @@
 
 #include "AppLayer.hpp"
 #include "FontRenderer.hpp"
+#include "MiniArc.hpp"
+#include "Rect.hpp"
 #include "ResPtr.hpp"
 #include "TextInput.hpp"
 #include <SDL3/SDL_render.h>
@@ -14,14 +16,28 @@ class NameInput : public sdlc::AppLayer
 {
 public:
     NameInput(sdlc::AppState* appState, sdlc::FontRenderer* font);
-    ~NameInput();
+    ~NameInput() override;
     void render(SDL_Renderer *renderer) override;
     void update(float deltaTime) override;
     void handleEvent(SDL_Event& event) override;
 private:
+    HiScoreTable m_table;
     sdlc::FontRenderer *m_font;
     sdlc::AppState *m_appState;
     sdlc::TextInput m_textInput;
+};
+
+class HiScoreScreen : public sdlc::AppLayer
+{
+public:
+    HiScoreScreen(sdlc::FontRenderer* font);
+    void render(SDL_Renderer *renderer) override;
+    void update(float deltaTime) override;
+    void printScoreLine(int line);
+private:
+    HiScoreTable m_scoreTable;
+    sdlc::Point2D<float> m_posOffset;
+    sdlc::FontRenderer *m_font;
 };
 
 class UILayer : public sdlc::AppLayer

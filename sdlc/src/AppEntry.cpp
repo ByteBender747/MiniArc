@@ -166,7 +166,7 @@ SDL_AppResult SDL_AppIterate(void* appState)
 void SDL_AppQuit(void* appState, SDL_AppResult result)
 {
     auto state = static_cast<AppState*>(appState);
-    state->scene.release();
+    state->scene.reset();
     if (state->renderer) {
         SDL_DestroyRenderer(state->renderer);
     }

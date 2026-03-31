@@ -17,7 +17,7 @@ void AppLayer::deleteLayer()
         m_container->alive = false;
         m_container->enabled = false;
     } else {
-        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Layer container not ready yet");
+        m_preventFromAdding = true;
     }
 }
 
@@ -54,6 +54,11 @@ LayerManager::~LayerManager()
 void LayerManager::addLayer(AppLayer *layer)
 {
     if (layer) {
+        // Special case: if deleteLayer() was called by constructor
+        if (layer->m_preventFromAdding) {
+            delete layer;
+            return;
+        }
         layer->m_appState = m_appState;
         m_layerAddStack.push(layer);
     } else {
