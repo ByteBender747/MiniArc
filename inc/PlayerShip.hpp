@@ -1,26 +1,21 @@
 #pragma once
 
-#include <string>
-#include <cstdint>
-#include <memory.h>
-
 #include <SDL3/SDL_render.h>
-#include <SDL3/SDL_time.h>
 
+#include "AppLayer.hpp"
 #include "AnimatedSprite.hpp"
 #include "StaticPool.hpp"
 #include "Vector2.hpp"
-#include "AppState.hpp"
 #include "MiniArc.hpp"
 #include "SpriteRenderer.hpp"
+#include "GameConfig.hpp"
 
-constexpr int playerInitialHitPoints = 1200;
-
-class PlayerShip
+class PlayerShip : public sdlc::AppLayer
 {
 public:
-    PlayerShip(sdlc::AppState* state, SDL_Texture* texture);
-    virtual ~PlayerShip();
+    PlayerShip(MiniArcGame* game);
+    void render(SDL_Renderer *renderer) override;
+    void update(float deltaTime) override;
     const sdlc::Vec2f& getPosition() const {
         return m_position;
     }
@@ -51,8 +46,8 @@ private:
     void moveAndRenderProjectiles(float shotSpeed);
     bool fireProjectile(float x, float y, bool charged);
     void reSpawn();
-    void iteratePlayerShip();
 private:
+    float m_invulnerableTimer{playerInvulnerableTime};
     float m_weaponPowerUpTimer{0};
     bool m_chargedFlag{false};
     bool m_isAlive{false};
@@ -72,7 +67,6 @@ private:
     sdlc::AnimatedSprite m_deathAnimation;
     sdlc::AnimatedSprite m_spawnEffect;
     sdlc::AppState* m_appState;
-    GameAssets* m_assets;
+    GameAssets* m_assets{nullptr};
 };
 
-void deletePlayerShip(sdlc::AppState* state, const std::string& name);

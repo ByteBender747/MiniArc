@@ -1,8 +1,9 @@
 #pragma once
 
-#include <memory>
 #include <SDL3/SDL_render.h>
+#include <cstdint>
 
+#include "AppState.hpp"
 #include "AudioDataBuffer.hpp"
 #include "SpriteRenderer.hpp"
 #include "ResPtr.hpp"
@@ -22,14 +23,29 @@ struct GameAssets
     sdlc::AudioDataBuffer chargedShot;
 };
 
-// Audio stream assignment
-constexpr int strmPlayerGun = 0;
-constexpr int strmAlienGun = 1;
-constexpr int strmExplosions = 2;
-constexpr int strmPlayerEffects = 3;
+struct HiScoreRecord
+{
+    std::string playerName;
+    uint32_t score;
+};
 
-// Drawing order configuration
-constexpr int backgroundZIndex = 0;
-constexpr int enemyZIndex = 1;
-constexpr int playerZIndex = 2;
-constexpr int uiZIndex = 3;
+using HiScoreTable = std::array<HiScoreRecord, 10>;
+
+class PlayerShip;
+class BackgroundStars;
+class EnemySpawner;
+class UILayer;
+
+struct MiniArcGame : sdlc::Scene
+{
+    MiniArcGame(sdlc::AppState *appState);
+    GameAssets assets;
+    PlayerShip* player{nullptr};
+    BackgroundStars* stars{nullptr};
+    EnemySpawner* enemies{nullptr};
+    UILayer* uiLayer{nullptr};
+};
+
+uint32_t LoadHiScore(HiScoreTable &table);
+void SaveHiScore(const HiScoreTable &table);
+int ScoreRating(const HiScoreTable &table, uint32_t score);

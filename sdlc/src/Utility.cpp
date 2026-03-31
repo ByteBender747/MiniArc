@@ -1,5 +1,4 @@
-#include <SDL3/SDL_log.h>
-#include <SDL3/SDL_surface.h>
+
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -43,6 +42,14 @@ int ProbabilityList(const ProbabilityItem *items, unsigned int itemCount)
         }
     }
     return -1;
+}
+
+std::filesystem::path GetSaveGameFolder(const char* orgName, const char* gameName)
+{
+    char* folder = SDL_GetPrefPath(orgName, gameName);
+    std::filesystem::path result = folder;
+    SDL_free(folder);
+    return result;
 }
 
 SDL_Texture* LoadTexture(SDL_Renderer* renderer, const std::filesystem::path &filePath)

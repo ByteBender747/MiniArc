@@ -1,8 +1,8 @@
-#include <SDL3/SDL_log.h>
 #include <cctype>
 #include <cstdlib>
 #include <cassert>
 
+#include <SDL3/SDL_log.h>
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_render.h>
@@ -45,16 +45,16 @@ FontRenderer::FontRenderer(SDL_Renderer* renderer, const char* filePath, float s
     for (int i = 0; i < sizeof(atlasString) - 1; ++i) {
         SDL_Surface* glyph;
         switch (mode) {
-        case sdlc::FontRenderMode::Solid:
+        case FontRenderMode::Solid:
             glyph = TTF_RenderGlyph_Solid(ttf, atlasString[i], white);
             break;
-        case sdlc::FontRenderMode::Blended:
+        case FontRenderMode::Blended:
             glyph = TTF_RenderGlyph_Blended(ttf, atlasString[i], white);
             break;
-        case sdlc::FontRenderMode::Shaded:
+        case FontRenderMode::Shaded:
             glyph = TTF_RenderGlyph_Shaded(ttf, atlasString[i], white, black);
             break;
-        case sdlc::FontRenderMode::LCD:
+        case FontRenderMode::LCD:
             glyph = TTF_RenderGlyph_LCD(ttf, atlasString[i], white, black);
             break;
         default:
@@ -88,6 +88,7 @@ FontRenderer::FontRenderer(SDL_Renderer* renderer, const char* filePath, float s
     m_font.size = size;
     m_font.characterCount = sizeof(atlasString) - 1;
     m_font.width = surfaceWith;
+    m_font.height = charHeight;
 }
 
 void FontRenderer::preserveLogicalPresentationMode()
@@ -105,13 +106,11 @@ void FontRenderer::disableLogicalPresentationMode() const
     SDL_SetRenderLogicalPresentation(m_renderer, 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED);
 }
 
-void FontRenderer::renderText(const SDL_FRect& src, const SDL_FRect& dst)
+void FontRenderer::renderGlyphRect(const SDL_FRect& src, const SDL_FRect& dst)
 {
-    disableLogicalPresentationMode();
     SDL_SetTextureColorMod(m_fontTexture, m_textColor.r, m_textColor.g, m_textColor.b);
     SDL_SetTextureAlphaModFloat(m_fontTexture, m_textColor.a / 255.0f);
     SDL_RenderTexture(m_renderer, m_fontTexture, &src, &dst);
-    restoreLogicalPresentationMode();
 }
 
 static Character getScaledChar(const Character& ch, float value)
@@ -136,13 +135,12 @@ int FontRenderer::renderText(float x, float y, std::string_view text)
             x = originX;
             y += m_font.height;
             charCount = 0;
-            continue;
         }
         Character& fc = m_font.characters[text[i]];
         Character sc = getScaledChar(fc, m_scale);
         SDL_FRect src{ fc.x, fc.y, fc.width, fc.height };
         SDL_FRect dst{ x, y + sc.originY, sc.width, sc.height };
-        renderText(src, dst);
+        renderGlyphRect(src, dst);
         x += sc.advance - sc.originX;
     }
     return x;
@@ -154,7 +152,7 @@ void FontRenderer::renderFontTexture(float x, float y)
     SDL_FRect dst { x, y, m_textureSize.width, m_textureSize.height };
     assert(m_fontTexture);
     assert(m_textureSize.width && m_textureSize.height);
-    renderText(src, dst);
+    renderGlyphRect(src, dst);
 }
 
 Dimension<float> FontRenderer::measureText(std::string_view text)
