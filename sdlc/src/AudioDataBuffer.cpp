@@ -11,12 +11,12 @@ namespace sdlc
 AudioDataBufferPtr LoadWaveRelative(AppState *state, const std::filesystem::path &filePath)
 {
     return std::make_unique<sdlc::AudioDataBuffer>(
-        AudioDataBuffer(state->audio.audioSpec, ResolveRelativeToExe(filePath)));
+        AudioDataBuffer(state->audio.audioSpec, ResolveRelativeToExe(filePath.string())));
 }
 
 bool LoadWaveRelative(AudioDataBuffer& buf, AppState *state, const std::filesystem::path &filePath)
 {
-    return buf.loadWave(state->audio.audioSpec, ResolveRelativeToExe(filePath));
+    return buf.loadWave(state->audio.audioSpec, ResolveRelativeToExe(filePath.string()));
 }
 
 AudioDataBuffer::AudioDataBuffer(const AudioDataBuffer &other)
@@ -35,7 +35,7 @@ AudioDataBuffer::AudioDataBuffer(AudioDataBuffer &&other) noexcept
     other.m_size = 0;
 }
 
-AudioDataBuffer::AudioDataBuffer(uint32_t size, u_int8_t channels, uint32_t sampleRate, SDL_AudioFormat format)
+AudioDataBuffer::AudioDataBuffer(uint32_t size, uint8_t channels, uint32_t sampleRate, SDL_AudioFormat format)
     : m_size(size)
 {
     m_data = new uint8_t[size];
@@ -74,10 +74,11 @@ float AudioDataBuffer::getPlayTime() const
 bool AudioDataBuffer::loadWave(const SDL_AudioSpec &deviceSpec, const std::filesystem::path &filePath)
 {
     bool result = true;
+    std::string tmpfilePath = filePath.string();
     freeBuffer(); // Delete old data first if there are any
-    SDL_Log("Loading WAV file: %s", filePath.c_str());
-    if (!SDL_LoadWAV(filePath.c_str(), &m_waveSpec, &m_data, &m_size)) {
-        SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Unable to load WAV file: %s", filePath.c_str());
+    SDL_Log("Loading WAV file: %s", tmpfilePath.c_str());
+    if (!SDL_LoadWAV(tmpfilePath.c_str(), &m_waveSpec, &m_data, &m_size)) {
+        SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Unable to load WAV file: %s", tmpfilePath.c_str());
         m_data = nullptr;
         m_size = 0;
         result = false;

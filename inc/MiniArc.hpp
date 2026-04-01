@@ -1,12 +1,14 @@
 #pragma once
 
-#include <SDL3/SDL_render.h>
+#include <array>
 #include <cstdint>
 
 #include "AppState.hpp"
 #include "AudioDataBuffer.hpp"
 #include "SpriteRenderer.hpp"
 #include "ResPtr.hpp"
+
+#include <SDL3/SDL_render.h>
 
 struct GameAssets
 {
@@ -26,7 +28,7 @@ struct GameAssets
 struct HiScoreRecord
 {
     std::string playerName;
-    uint32_t score;
+    uint32_t score{ 0 };
 };
 
 using HiScoreTable = std::array<HiScoreRecord, 10>;

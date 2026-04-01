@@ -4,6 +4,7 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
 
+#include <array>
 #include <memory>
 #include <string>
 #include <cstdint>

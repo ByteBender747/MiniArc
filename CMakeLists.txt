@@ -8,7 +8,6 @@ include(sonar.cmake)
 
 find_package(SDL3 REQUIRED)
 find_package(SDL3_ttf REQUIRED)
-find_package(SDL3_image REQUIRED)
 
 # Set compiler standards
 set(CMAKE_C_STANDARD 11)
@@ -17,11 +16,14 @@ set(CMAKE_CXX_STANDARD 20)
 # create compile_commands.json for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Build sound effects from source using sonar
+set(SONAR_BUILD_SFX OFF)
+
 add_subdirectory(sdlc)
 
 # add target executable
 add_executable(${PROJECT_NAME})
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image sdlc)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf sdlc)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/inc)
 
 # audio format for sfx
@@ -59,12 +61,14 @@ target_sources(${PROJECT_NAME} PRIVATE
 )
 
 # generate sound effect wave files from xml sources
-sonar_generate_wave(alien-shot)
-sonar_generate_wave(charged-shot)
-sonar_generate_wave(charging)
-sonar_generate_wave(explosion)
-sonar_generate_wave(game-over)
-sonar_generate_wave(hit-effect)
-sonar_generate_wave(laser-shot)
-sonar_generate_wave(pickup)
-sonar_generate_wave(spawn-effect)
+if (SONAR_BUILD_SFX)
+	sonar_generate_wave(alien-shot)
+	sonar_generate_wave(charged-shot)
+	sonar_generate_wave(charging)
+	sonar_generate_wave(explosion)
+	sonar_generate_wave(game-over)
+	sonar_generate_wave(hit-effect)
+	sonar_generate_wave(laser-shot)
+	sonar_generate_wave(pickup)
+	sonar_generate_wave(spawn-effect)
+endif()

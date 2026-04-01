@@ -13,7 +13,7 @@ class AudioDataBuffer
 {
 public:
     AudioDataBuffer() = default;
-    AudioDataBuffer(uint32_t size, u_int8_t channels, uint32_t sampleRate, SDL_AudioFormat format);
+    AudioDataBuffer(uint32_t size, uint8_t channels, uint32_t sampleRate, SDL_AudioFormat format);
     AudioDataBuffer(const SDL_AudioSpec &deviceSpec, const std::filesystem::path &waveFileName);
     AudioDataBuffer(const AudioDataBuffer &other);
     AudioDataBuffer(AudioDataBuffer &&other) noexcept;
