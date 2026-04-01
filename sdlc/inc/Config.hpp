@@ -23,3 +23,31 @@
 #ifndef WINDOW_TITLE
 #define WINDOW_TITLE "SDL3 Application"
 #endif
+
+#ifndef ORG_NAME
+#define ORG_NAME "Unamed org"
+#endif
+
+#ifndef APP_NAME
+#define APP_NAME "Unnamed app"
+#endif 
+
+#ifndef RENDER_LOGICAL_WIDTH
+#define RENDER_LOGICAL_WIDTH 0
+#endif
+
+#ifndef  RENDER_LOGICAL_HEIGHT
+#define RERENDER_LOGICAL_HEIGHT 0
+#endif
+
+#ifndef RENDER_VSYNC
+#define RERENDER_VSYNC 0
+#endif
+
+struct AppConfig {
+    int width{WINDOW_WIDTH};
+    int height{WINDOW_HEIGHT};
+    int logicalWidth{RENDER_LOGICAL_WIDTH};
+    int logicalHeight{RENDER_LOGICAL_HEIGHT};
+    int vSync{RENDER_VSYNC};
+};

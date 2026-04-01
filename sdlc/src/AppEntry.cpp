@@ -1,9 +1,13 @@
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_log.h>
 #include <SDL3/SDL_main.h>
 
 #include <string>
+#include <filesystem>
 
+#include "ConfigFile.hpp"
+#include "Utility.hpp"
 #include "AppState.hpp"
 #include "Config.hpp"
 
@@ -41,6 +45,27 @@ SDL_AppResult SDL_AppInit(void** appState, int argc, char** argv)
     state->argv = argv;
     state->argc = argc;
 
+    ConfigFile iniFile;
+    std::filesystem::path cfgPath = GetSaveGameFolder(ORG_NAME, APP_NAME) / "config.ini";
+    if (iniFile.read(cfgPath)) {
+        std::string temp = cfgPath.string();
+        SDL_Log("Load config file: %s", temp.c_str());
+        iniFile.beginSection("Window");
+        iniFile.getValue<int>(state->config.width, "width");
+        iniFile.getValue<int>(state->config.height, "height");
+        if (iniFile.exists("pixelSize")) {
+            int pixelSize;
+            iniFile.getValue<int>(pixelSize, "pixelSize");
+            state->config.logicalWidth = state->config.width / pixelSize;
+            state->config.logicalHeight = state->config.height / pixelSize;
+        } else {
+            iniFile.getValue<int>(state->config.logicalWidth, "logicalWidth");
+            iniFile.getValue<int>(state->config.logicalHeight, "logicalHeight");
+        }
+        iniFile.getValue<int>(state->config.vSync, "vSync");
+        iniFile.endSection();
+    }
+
     SDL_InitFlags flags = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
 
 #ifdef AUDIO_FORMAT
@@ -58,8 +83,8 @@ SDL_AppResult SDL_AppInit(void** appState, int argc, char** argv)
     }
     SDL_Log("Initialized sub-systems: %s", subSystems.c_str());
 
-    SDL_Log("Creating application window %dx%d with creation flags: 0x%x", WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_FLAGS);
-    state->window = SDL_CreateWindow(WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_FLAGS);
+    SDL_Log("Creating application window %dx%d with creation flags: 0x%x", state->config.width, state->config.height, WINDOW_FLAGS);
+    state->window = SDL_CreateWindow(WINDOW_TITLE, state->config.width, state->config.height, WINDOW_FLAGS);
     if (!state->window) {
         SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "SDL_CreateWindow() failed: %s", SDL_GetError());
         return SDL_APP_FAILURE;
@@ -80,20 +105,23 @@ SDL_AppResult SDL_AppInit(void** appState, int argc, char** argv)
     }
 #endif
 
-#ifdef RENDER_VSYNC
-    SDL_SetRenderVSync(state->renderer, RENDER_VSYNC);
-    SDL_Log("Enabled v-sync: %d", RENDER_VSYNC);
-#endif
-#if defined(RENDER_LOGICAL_WIDTH) && defined(RENDER_LOGICAL_HEIGHT)
-    SDL_SetRenderLogicalPresentation(state->renderer, RENDER_LOGICAL_WIDTH, RENDER_LOGICAL_HEIGHT, SDL_LOGICAL_PRESENTATION_STRETCH);
-    SDL_Log("Logical presentation size is %dx%d", RENDER_LOGICAL_WIDTH, RENDER_LOGICAL_HEIGHT);
-#endif
+    if (state->config.vSync) {
+        SDL_SetRenderVSync(state->renderer, state->config.vSync);
+        SDL_Log("Enabled v-sync: %d", state->config.vSync);
+    }
+    if (state->config.logicalWidth > 0 && state->config.logicalHeight > 0) {
+        SDL_SetRenderLogicalPresentation(
+            state->renderer, state->config.logicalWidth, state->config.logicalHeight,
+            SDL_LOGICAL_PRESENTATION_STRETCH);
+        SDL_Log("Logical presentation size is %dx%d", state->config.logicalWidth, state->config.logicalHeight);
+    }
 
 #ifdef AUDIO_FORMAT
     state->audio.audioSpec.freq = AUDIO_FREQ;
     state->audio.audioSpec.format = AUDIO_FORMAT;
     state->audio.audioSpec.channels = AUDIO_CHANNELS;
-    SDL_Log("Initializing audio device with frequency: %d, channels: %d, format: 0x%x", AUDIO_FREQ, AUDIO_CHANNELS, AUDIO_FORMAT);
+    SDL_Log("Initializing audio device with frequency: %d, channels: %d, format: 0x%x", AUDIO_FREQ, AUDIO_CHANNELS,
+            AUDIO_FORMAT);
     state->audio.device.id = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &state->audio.audioSpec);
     if (!state->audio.device.id) {
         SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "SDL_OpenAudioDevice() failed: %s", SDL_GetError());
@@ -113,7 +141,7 @@ SDL_AppResult SDL_AppInit(void** appState, int argc, char** argv)
 #ifdef SCENE_CLASS
     state->scene = std::make_unique<SCENE_CLASS>(state);
 #else
-#error Default scene must be defined
+#error Default scene must be defined!
 #endif
 
     return SDL_APP_CONTINUE;

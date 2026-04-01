@@ -46,6 +46,8 @@ target_compile_definitions(sdlc PUBLIC
     AUDIO_FREQ=${WAVE_SAMPLE_FREQ}
     AUDIO_CHANNELS=1
     AUDIO_NUM_STREAMS=4
+    ORG_NAME="PIB Games"
+    APP_NAME="MiniArc"
 )
 
 # Add source files for MiniArc target

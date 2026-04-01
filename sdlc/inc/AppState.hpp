@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <unordered_map>
 
+#include "Config.hpp"
 #include "AppLayer.hpp"
 #include "Keyboard.hpp"
 #include "AudioDevice.hpp"
@@ -47,6 +48,7 @@ struct AppState
     char **argv{nullptr};
     int argc{0};
     SDL_Color clearColor{0, 0, 0, 255};
+    AppConfig config;
     std::unique_ptr<Scene> scene;
     std::unordered_map<std::string, sdlc::Property> properties;
     struct {

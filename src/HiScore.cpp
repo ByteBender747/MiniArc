@@ -8,8 +8,8 @@
 
 #include <SDL3/SDL.h>
 
-const char* gameName = "MiniArc";
-const char* orgName  = "PIB Games";
+const char* gameName = APP_NAME;
+const char* orgName  = ORG_NAME;
 
 template <typename value_type>
 static value_type parse_value(const std::string &sval)

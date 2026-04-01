@@ -27,7 +27,7 @@ HiScoreScreen::HiScoreScreen(sdlc::FontRenderer *font)
 void HiScoreScreen::printScoreLine(int line)
 {
     float oldScale = m_font->scale();
-    std::string outputStr = std::format("{}. {}", line, m_scoreTable[line].playerName);
+    std::string outputStr = std::format("{}. {}", line + 1, m_scoreTable[line].playerName);
     sdlc::Dimension<float> dim = m_font->measureText(outputStr);
     m_font->setScale(.15f);
     m_font->setTextColor(sdlc::RGBA(255, 255, 255, 255));
