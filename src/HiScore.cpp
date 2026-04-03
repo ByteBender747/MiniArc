@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdint>
 #include <sstream>
 #include <fstream>
@@ -7,6 +8,7 @@
 #include "Utility.hpp"
 
 #include <SDL3/SDL.h>
+#include <string_view>
 
 const char* gameName = APP_NAME;
 const char* orgName  = ORG_NAME;
@@ -33,6 +35,15 @@ int ScoreRating(const HiScoreTable &table, uint32_t score)
         }
     }
     return pos;
+}
+
+void AddNewRating(HiScoreTable &table, std::string_view name, uint32_t score)
+{
+    table.back().playerName = name;
+    table.back().score = score;
+    std::sort(table.begin(), table.end(), [](const HiScoreRecord &a, const HiScoreRecord &b) {
+        return a.score > b.score;
+    });
 }
 
 static uint32_t GetMinScore(HiScoreTable &table)

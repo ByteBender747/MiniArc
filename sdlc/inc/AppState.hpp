@@ -44,6 +44,7 @@ struct AppState
     Uint64 iterations{0};
     double timeStamp{0};
     float deltaTime{0};
+    float timeScale{1};
     bool isRunning{true};
     char **argv{nullptr};
     int argc{0};

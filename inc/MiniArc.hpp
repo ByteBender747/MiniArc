@@ -51,3 +51,4 @@ struct MiniArcGame : sdlc::Scene
 uint32_t LoadHiScore(HiScoreTable &table);
 void SaveHiScore(const HiScoreTable &table);
 int ScoreRating(const HiScoreTable &table, uint32_t score);
+void AddNewRating(HiScoreTable &table, std::string_view name, uint32_t score);

@@ -1,9 +1,5 @@
 #pragma once
 
-#ifdef TTF_INIT
-#include <SDL3_ttf/SDL_ttf.h>
-#endif
-
 #ifndef AUDIO_NUM_STREAMS
 #define AUDIO_NUM_STREAMS 1
 #endif
@@ -44,10 +40,14 @@
 #define RERENDER_VSYNC 0
 #endif
 
+namespace sdlc
+{
 struct AppConfig {
-    int width{WINDOW_WIDTH};
-    int height{WINDOW_HEIGHT};
+    int windowWidth{WINDOW_WIDTH};
+    int windowHeight{WINDOW_HEIGHT};
     int logicalWidth{RENDER_LOGICAL_WIDTH};
     int logicalHeight{RENDER_LOGICAL_HEIGHT};
     int vSync{RENDER_VSYNC};
+    int windowFlags{WINDOW_FLAGS};
 };
+}

@@ -62,8 +62,7 @@ NameInput::NameInput(sdlc::AppState *appState, sdlc::FontRenderer *font)
             if (accepted) {
                 int rating = ScoreRating(m_table, currentScore);
                 if (rating > -1) {
-                    m_table[rating].playerName = text;
-                    m_table[rating].score = currentScore;
+                    AddNewRating(m_table, text, currentScore);
                     SaveHiScore(m_table);
                 }
             }

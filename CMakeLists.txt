@@ -48,6 +48,7 @@ target_compile_definitions(sdlc PUBLIC
     AUDIO_NUM_STREAMS=4
     ORG_NAME="PIB Games"
     APP_NAME="MiniArc"
+    LOAD_APP_CONFIG
 )
 
 # Add source files for MiniArc target

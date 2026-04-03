@@ -4,18 +4,23 @@
 #include <SDL3/SDL_main.h>
 
 #include <string>
-#include <filesystem>
 
-#include "ConfigFile.hpp"
-#include "Utility.hpp"
 #include "AppState.hpp"
 #include "Config.hpp"
+
+#ifdef TTF_INIT
+#include <SDL3_ttf/SDL_ttf.h>
+#endif
 
 #ifdef SCENE_HEADER
 #include SCENE_HEADER
 #endif
 
 using namespace sdlc;
+
+#ifdef LOAD_APP_CONFIG
+void AppLoadConfig(AppConfig &config);
+#endif
 
 Scene::Scene(AppState *appState)
     : manager(appState), appState(appState)
@@ -45,26 +50,9 @@ SDL_AppResult SDL_AppInit(void** appState, int argc, char** argv)
     state->argv = argv;
     state->argc = argc;
 
-    ConfigFile iniFile;
-    std::filesystem::path cfgPath = GetSaveGameFolder(ORG_NAME, APP_NAME) / "config.ini";
-    if (iniFile.read(cfgPath)) {
-        std::string temp = cfgPath.string();
-        SDL_Log("Load config file: %s", temp.c_str());
-        iniFile.beginSection("Window");
-        iniFile.getValue<int>(state->config.width, "width");
-        iniFile.getValue<int>(state->config.height, "height");
-        if (iniFile.exists("pixelSize")) {
-            int pixelSize;
-            iniFile.getValue<int>(pixelSize, "pixelSize");
-            state->config.logicalWidth = state->config.width / pixelSize;
-            state->config.logicalHeight = state->config.height / pixelSize;
-        } else {
-            iniFile.getValue<int>(state->config.logicalWidth, "logicalWidth");
-            iniFile.getValue<int>(state->config.logicalHeight, "logicalHeight");
-        }
-        iniFile.getValue<int>(state->config.vSync, "vSync");
-        iniFile.endSection();
-    }
+#ifdef LOAD_APP_CONFIG
+    AppLoadConfig(state->config);
+#endif
 
     SDL_InitFlags flags = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
 
@@ -83,8 +71,9 @@ SDL_AppResult SDL_AppInit(void** appState, int argc, char** argv)
     }
     SDL_Log("Initialized sub-systems: %s", subSystems.c_str());
 
-    SDL_Log("Creating application window %dx%d with creation flags: 0x%x", state->config.width, state->config.height, WINDOW_FLAGS);
-    state->window = SDL_CreateWindow(WINDOW_TITLE, state->config.width, state->config.height, WINDOW_FLAGS);
+    SDL_Log("Creating application window %dx%d with creation flags: 0x%x", 
+        state->config.windowWidth, state->config.windowHeight, state->config.windowFlags);
+    state->window = SDL_CreateWindow(WINDOW_TITLE, state->config.windowWidth, state->config.windowHeight, state->config.windowFlags);
     if (!state->window) {
         SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "SDL_CreateWindow() failed: %s", SDL_GetError());
         return SDL_APP_FAILURE;
@@ -162,7 +151,7 @@ SDL_AppResult SDL_AppIterate(void* appState)
     auto state = static_cast<AppState*>(appState);
     double now = SDL_GetPerformanceCounter() / static_cast<double>(SDL_GetPerformanceFrequency());
     if (state->timeStamp > 0) {
-        state->deltaTime = static_cast<float>(now - state->timeStamp);
+        state->deltaTime = static_cast<float>(now - state->timeStamp) * state->timeScale;
     }
     state->timeStamp = now;
 
