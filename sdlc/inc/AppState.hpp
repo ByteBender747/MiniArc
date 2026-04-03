@@ -15,6 +15,7 @@
 #include "Keyboard.hpp"
 #include "AudioDevice.hpp"
 #include "AudioStream.hpp"
+#include "StopWatch.hpp"
 
 namespace sdlc
 {
@@ -41,10 +42,14 @@ struct AppState
 {
     SDL_Window* window;
     SDL_Renderer* renderer;
-    Uint64 iterations{0};
-    double timeStamp{0};
+    int currentFPS;
+    int frameCounter{0};
+    int maxFPS{0};
+    StopWatch timeStamp;
+    StopWatch frameTimer;
     float deltaTime{0};
     float timeScale{1};
+    bool showFPS{false};
     bool isRunning{true};
     char **argv{nullptr};
     int argc{0};

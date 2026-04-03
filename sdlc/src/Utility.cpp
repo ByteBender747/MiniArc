@@ -1,4 +1,8 @@
 
+#include <SDL3/SDL_rect.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_stdinc.h>
+#include <cstdint>
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -9,6 +13,7 @@
 #include "CSVParser.hpp"
 #include "ResPtr.hpp"
 #include "SpriteRenderer.hpp"
+#include "MathFunc.hpp"
 
 #include <SDL3/SDL.h>
 
@@ -50,6 +55,19 @@ std::filesystem::path GetSaveGameFolder(const char* orgName, const char* gameNam
     std::filesystem::path result = folder;
     SDL_free(folder);
     return result;
+}
+
+void RenderEllipse(SDL_Renderer *renderer, float x, float y, float r1, float r2, int slices)
+{
+    float phase{0};
+    SDL_FPoint points[361];
+    slices = clamp<int>(slices, 1, 360);
+    for (int i = 0; i < slices + 1; ++i) {
+        points[i].x = x + r1 * SDL_cosf(phase);
+        points[i].y = y + r2 * SDL_sinf(phase);
+        phase += static_cast<float>(tau) / static_cast<float>(slices);
+    }
+    SDL_RenderLines(renderer, points, slices + 1);
 }
 
 SDL_Texture* LoadTexture(SDL_Renderer* renderer, const std::filesystem::path &filePath)

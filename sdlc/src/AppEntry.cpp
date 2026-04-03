@@ -4,6 +4,7 @@
 #include <SDL3/SDL_main.h>
 
 #include <string>
+#include <cstdio>
 
 #include "AppState.hpp"
 #include "Config.hpp"
@@ -149,11 +150,8 @@ SDL_AppResult SDL_AppEvent(void* appState, SDL_Event* event)
 SDL_AppResult SDL_AppIterate(void* appState)
 {
     auto state = static_cast<AppState*>(appState);
-    double now = SDL_GetPerformanceCounter() / static_cast<double>(SDL_GetPerformanceFrequency());
-    if (state->timeStamp > 0) {
-        state->deltaTime = static_cast<float>(now - state->timeStamp) * state->timeScale;
-    }
-    state->timeStamp = now;
+    state->deltaTime = static_cast<float>(state->timeStamp.current()) * state->timeScale;
+    state->timeStamp.start();
 
     SDL_SetRenderDrawColor(
         state->renderer,
@@ -161,7 +159,7 @@ SDL_AppResult SDL_AppIterate(void* appState)
     );
     SDL_RenderClear(state->renderer);
 
-    // Current scene can be replaced safely with 'cachedScenePointer'
+    // Current scene can be replaced safely at this point with 'cachedScenePointer'
     if (state->properties.contains("cachedScenePointer")) {
         auto ptr = static_cast<Scene*>(state->properties["cachedScenePointer"].pointer);
         if (ptr) {
@@ -174,9 +172,27 @@ SDL_AppResult SDL_AppIterate(void* appState)
     state->scene->manager.update(state->deltaTime);
     state->scene->manager.render(state->renderer);
 
+    if (state->showFPS) {
+        char fps[25];
+        std::sprintf(fps, "FPS: %d", state->currentFPS);
+        SDL_SetRenderDrawColor(state->renderer, 255, 255, 255, 255);
+        SDL_RenderDebugText(state->renderer, 0, 0, fps);
+    }
+
     SDL_RenderPresent(state->renderer);
 
-    ++state->iterations;
+    // calculate current FPS
+    ++state->frameCounter;
+    if (state->frameTimer.current() >= .25) { // update every 250ms
+        state->currentFPS = state->frameCounter * 4;
+        state->frameCounter = 0;
+        state->frameTimer.start();
+    }
+
+    if (state->maxFPS > 0 && state->maxFPS <= 1000) {
+        SDL_Delay(1000 / state->maxFPS);
+    }
+
     return state->isRunning ? SDL_APP_CONTINUE : SDL_APP_SUCCESS;
 }
 
