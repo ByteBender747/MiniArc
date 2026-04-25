@@ -10,6 +10,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "Dimension.hpp"
 #include "Rect.hpp"
 
 namespace sdlc
@@ -61,12 +62,18 @@ public:
     void setModifier(SpriteRenderModifier *modifier) { m_modifier = modifier; }
     void hide() { m_visible = false; }
     void show() { m_visible = true; }
+    void setScale(float x, float y) { m_scale.width = x; m_scale.height = y; }
+    void setWorldView(float x, float y) { m_worldView.x = x; m_worldView.y = y; }
+    void setFlipMode(SDL_FlipMode flipMode) { m_flipMode = flipMode; }
     [[nodiscard]] bool visible() const { return m_visible; }
     [[nodiscard]] SpriteRenderModifier * modifier() const { return m_modifier; }
     [[nodiscard]] const SDL_FRect& source() const { return m_source; }
     [[nodiscard]] const SDL_FRect& destination() const { return m_destination; }
     [[nodiscard]] const SDL_FPoint& position() const { return m_position; }
     [[nodiscard]] double rotation() const { return m_rotation; }
+    [[nodiscard]] const Dimension<float> & scale() const { return m_scale; }
+    [[nodiscard]] const Point2D<float>& worldView() const { return m_worldView; }
+    [[nodiscard]] SDL_FlipMode flipMode() const { return m_flipMode; }
 private:
     bool m_visible{true};
     bool m_rotated{false};
@@ -77,7 +84,11 @@ private:
         SDL_ScaleMode scaleMode;
         SDL_BlendMode blendMode;
     } m_savedState;
+    Point2D<float> m_worldView;
     SpriteRenderModifier* m_modifier{nullptr};
+    Dimension<float> m_scale{1, 1};
+    bool m_textureStateSaved{false};
+    SDL_FlipMode m_flipMode{SDL_FLIP_NONE};
     SDL_Texture* m_texture;
     SDL_FRect m_source{0, 0, 0, 0};
     SDL_FRect m_destination{0, 0, 0, 0};

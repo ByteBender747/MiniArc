@@ -1,5 +1,6 @@
 #include <cassert>
 
+#include <SDL3/SDL_log.h>
 #include <SDL3/SDL_blendmode.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
@@ -18,21 +19,22 @@ SpriteRenderer::SpriteRenderer(SDL_Texture* texture)
 
 void SpriteRenderer::setPosition(float x, float y, SpritePositionOffset offset)
 {
+    SDL_FRect source { m_source.x, m_source.y, m_source.w * m_scale.width, m_source.h * m_scale.height };
     switch (offset) {
     case SpritePositionOffset::TopLeft:
-        setDestination(x, y, m_source.w, m_source.h);
+        setDestination(x, y, source.w, source.h);
         break;
     case SpritePositionOffset::TopRight:
-        setDestination(x - m_source.w, y, m_source.w, m_source.h);
+        setDestination(x - source.w, y, source.w, source.h);
         break;
     case SpritePositionOffset::BottomLeft:
-        setDestination(x, y - m_source.h, m_source.w, m_source.h);
+        setDestination(x, y - source.h, source.w, source.h);
         break;
     case SpritePositionOffset::BottomRight:
-        setDestination(x - m_source.w, y - m_source.h, m_source.w, m_source.h);
+        setDestination(x - source.w, y - source.h, source.w, source.h);
         break;
     case SpritePositionOffset::Center:
-        setDestination(x - m_source.w / 2.0f, y - m_source.h / 2.0f, m_source.w, m_source.h);
+        setDestination(x - source.w / 2.0f, y - source.h / 2.0f, source.w, source.h);
         break;
     }
     m_position = {x, y};
@@ -97,14 +99,20 @@ void SpriteRenderer::saveTextureState()
     m_savedState.blendMode = blendMode();
     m_savedState.scaleMode = scaleMode();
     m_savedState.colorMod = colorMod();
+    m_textureStateSaved = true;
 }
 
 void SpriteRenderer::restoreTextureState()
 {
-    setAlphaMod(m_savedState.alphaMod);
-    setBlendMode(m_savedState.blendMode);
-    setScaleMode(m_savedState.scaleMode);
-    setColorMod(m_savedState.colorMod.r, m_savedState.colorMod.g, m_savedState.colorMod.b);
+    if (m_textureStateSaved) {
+        setAlphaMod(m_savedState.alphaMod);
+        setBlendMode(m_savedState.blendMode);
+        setScaleMode(m_savedState.scaleMode);
+        setColorMod(m_savedState.colorMod.r, m_savedState.colorMod.g, m_savedState.colorMod.b);
+        m_textureStateSaved = false;
+    } else {
+        SDL_LogWarn(SDL_LOG_CATEGORY_RENDER, "Texture state has not been saved before.");
+    }
 }
 
 void SpriteRenderer::setRotation(double angle)
@@ -132,14 +140,15 @@ void SpriteRenderer::setDestination(float x, float y, float w, float h)
 void SpriteRenderer::render(SDL_Renderer* renderer, float deltaTime)
 {
     if (m_visible && m_source.w > 0 && m_source.h > 0 && m_destination.w > 0 && m_destination.h > 0) {
+        SDL_FRect destination = {m_destination.x - m_worldView.x, m_destination.y - m_worldView.y, m_destination.w, m_destination.h};
         if (m_modifier) {
             m_modifier->renderBegin(renderer, *this, deltaTime);
         }
-        if (m_rotated) {
-            SDL_FPoint center{m_destination.x + m_destination.w / 2, m_destination.y + m_destination.h / 2};
-            SDL_RenderTextureRotated(renderer, m_texture, &m_source, &m_destination, m_rotation, &center, SDL_FLIP_NONE);
+        if (m_rotated || m_flipMode != SDL_FLIP_NONE) {
+            SDL_FPoint center{destination.x + destination.w / 2, destination.y + destination.h / 2};
+            SDL_RenderTextureRotated(renderer, m_texture, &m_source, &destination, m_rotation, &center, m_flipMode);
         } else {
-            SDL_RenderTexture(renderer, m_texture, &m_source, &m_destination);
+            SDL_RenderTexture(renderer, m_texture, &m_source, &destination);
         }
         if (m_modifier) {
             m_modifier->renderEnd(renderer, *this, deltaTime);
@@ -150,9 +159,10 @@ void SpriteRenderer::render(SDL_Renderer* renderer, float deltaTime)
 bool SpriteRenderer::isOnScreen(SDL_Renderer* renderer) const
 {
     int width, height;
+    SDL_FRect destination = {m_destination.x - m_worldView.x, m_destination.y - m_worldView.y, m_destination.w, m_destination.h};
     assert(SDL_GetCurrentRenderOutputSize(renderer, &width, &height));
     Rect<float> screenRect(0, 0, width, height);
-    Rect<float> source(m_source);
+    Rect<float> source(destination);
     return screenRect.intersects(source);
 }
 
