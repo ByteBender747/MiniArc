@@ -11,7 +11,7 @@ namespace sdlc
 AudioDataBufferPtr LoadWaveRelative(AppState *state, const std::filesystem::path &filePath)
 {
     return std::make_unique<sdlc::AudioDataBuffer>(
-        AudioDataBuffer(state->audio.audioSpec, ResolveRelativeToExe(filePath.string())));
+               AudioDataBuffer(state->audio.audioSpec, ResolveRelativeToExe(filePath.string())));
 }
 
 bool LoadWaveRelative(AudioDataBuffer& buf, AppState *state, const std::filesystem::path &filePath)
@@ -48,22 +48,22 @@ float AudioDataBuffer::getPlayTime() const
 {
     int sampleSize;
     switch (m_waveSpec.format) {
-        case SDL_AUDIO_U8:
-        case SDL_AUDIO_S8:
-            sampleSize = 1;
-            break;
-        case SDL_AUDIO_S16LE:
-        case SDL_AUDIO_S16BE:
-            sampleSize = 2;
-            break;
-        case SDL_AUDIO_S32LE:
-        case SDL_AUDIO_S32BE:
-        case SDL_AUDIO_F32LE:
-        case SDL_AUDIO_F32BE:
-            sampleSize = 4;
-            break;
-        default:
-            sampleSize = 0;
+    case SDL_AUDIO_U8:
+    case SDL_AUDIO_S8:
+        sampleSize = 1;
+        break;
+    case SDL_AUDIO_S16LE:
+    case SDL_AUDIO_S16BE:
+        sampleSize = 2;
+        break;
+    case SDL_AUDIO_S32LE:
+    case SDL_AUDIO_S32BE:
+    case SDL_AUDIO_F32LE:
+    case SDL_AUDIO_F32BE:
+        sampleSize = 4;
+        break;
+    default:
+        sampleSize = 0;
     }
     if (m_data && m_size && sampleSize && m_waveSpec.channels && m_waveSpec.freq) {
         return static_cast<float>(m_size) / m_waveSpec.freq / m_waveSpec.channels / sampleSize;
@@ -71,14 +71,12 @@ float AudioDataBuffer::getPlayTime() const
     return 0;
 }
 
-bool AudioDataBuffer::loadWave(const SDL_AudioSpec &deviceSpec, const std::filesystem::path &filePath)
+bool AudioDataBuffer::loadWave(const SDL_AudioSpec &deviceSpec, SDL_IOStream* stream)
 {
     bool result = true;
-    std::string tmpfilePath = filePath.string();
     freeBuffer(); // Delete old data first if there are any
-    SDL_Log("Loading WAV file: %s", tmpfilePath.c_str());
-    if (!SDL_LoadWAV(tmpfilePath.c_str(), &m_waveSpec, &m_data, &m_size)) {
-        SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Unable to load WAV file: %s", tmpfilePath.c_str());
+    if (!SDL_LoadWAV_IO(stream, true, &m_waveSpec, &m_data, &m_size)) {
+        SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Error reading audio data from IO stream");
         m_data = nullptr;
         m_size = 0;
         result = false;
@@ -98,6 +96,26 @@ bool AudioDataBuffer::loadWave(const SDL_AudioSpec &deviceSpec, const std::files
         }
     }
     return result;
+}
+
+bool AudioDataBuffer::loadWave(const SDL_AudioSpec &deviceSpec, const std::filesystem::path &filePath)
+{
+    std::string tempFilePath = filePath.string();
+    SDL_IOStream* stream = SDL_IOFromFile(tempFilePath.c_str(), "rb");
+    if (!stream) {
+        SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "Error reading audio stream from file %s", tempFilePath.c_str());
+        return false;
+    }
+    return loadWave(deviceSpec, stream);
+}
+
+bool AudioDataBuffer::loadWave(const SDL_AudioSpec& deviceSpec, Archive& arch, const char* fileName)
+{
+    ArchiveStreamBuffer buffer = arch.extract(fileName);
+    if (!buffer.isEmpty()) {
+        return loadWave(deviceSpec, buffer.getStream());
+    }
+    return false;
 }
 
 AudioDataBuffer::AudioDataBuffer(const SDL_AudioSpec &deviceSpec, const std::filesystem::path &waveFileName)

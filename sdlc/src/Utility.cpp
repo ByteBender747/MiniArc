@@ -96,13 +96,13 @@ SDL_Texture* LoadTexture(SDL_Renderer* renderer, const std::filesystem::path &fi
     return texture;
 }
 
-bool LoadSpriteDefinitions(SpriteDefinitions &def, const std::filesystem::path &filePath)
+bool LoadSpriteDefinitions(SpriteDefinitions &def, std::istream input)
 {
     bool result = true;
     SDL_Rect rect;
     std::string name;
     try {
-        csv::parse(filePath, ',', [&](const csv::CellData &cdata) {
+        csv::parse(input, ',', [&](const csv::CellData &cdata) {
             switch (cdata.index()) {
             case 0:
                 name = cdata.value();
@@ -119,7 +119,7 @@ bool LoadSpriteDefinitions(SpriteDefinitions &def, const std::filesystem::path &
             case 4:
                 rect.h = cdata.value<int>();
                 if (def.contains(name)) {
-                    std::cerr << "Error parsing file: '" << filePath.filename() << "'" << std::endl;
+                    std::cerr << "Error parsing file map file" << std::endl;
                     std::cerr << "Line: " << cdata.line() << " at cell: " << cdata.index()
                               << "Element: '" << name << "' already existing!" << std::endl;
                     result = false;
@@ -130,7 +130,7 @@ bool LoadSpriteDefinitions(SpriteDefinitions &def, const std::filesystem::path &
             }
         });
     } catch (const std::exception &e) {
-        std::cerr << "Error parsing file: '" << filePath.filename() << "'" << std::endl;
+        std::cerr << "Error parsing map file: ";
         std::cerr << e.what() << '\n';
         result = false;
     }

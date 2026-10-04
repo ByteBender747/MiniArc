@@ -4,7 +4,10 @@
 #include <memory>
 #include <filesystem>
 #include <SDL3/SDL_audio.h>
+#include <SDL3/SDL_iostream.h>
 #include <sys/types.h>
+
+#include "Archive.hpp"
 
 namespace sdlc
 {
@@ -18,7 +21,9 @@ public:
     AudioDataBuffer(const AudioDataBuffer &other);
     AudioDataBuffer(AudioDataBuffer &&other) noexcept;
     virtual ~AudioDataBuffer();
-    float getPlayTime() const;
+    [[nodiscard]] float getPlayTime() const;
+    bool loadWave(const SDL_AudioSpec& deviceSpec, Archive& arch, const char* fileName);
+    bool loadWave(const SDL_AudioSpec& deviceSpec, SDL_IOStream* stream);
     bool loadWave(const SDL_AudioSpec& deviceSpec, const std::filesystem::path &filePath);
 
     [[nodiscard]] const void * data() const {

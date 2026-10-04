@@ -1,3 +1,4 @@
+#include <SDL3/SDL_log.h>
 #include <string>
 
 #include <SDL3/SDL.h>
@@ -11,6 +12,7 @@
 #include "Utility.hpp"
 #include "ResPtr.hpp"
 #include "ConfigFile.hpp"
+#include "Archive.hpp"
 
 void AppLoadConfig(sdlc::AppConfig &config)
 {
@@ -42,17 +44,19 @@ void AppLoadConfig(sdlc::AppConfig &config)
 MiniArcGame::MiniArcGame(sdlc::AppState *appState)
     : Scene(appState)
 {
-    assets.spriteTexture = sdlc::LoadTexture(appState->renderer, sdlc::ResolveRelativeToExe("../Assets/arcade.png").c_str());
-    sdlc::LoadSpriteDefinitions(assets.sprites, sdlc::ResolveRelativeToExe("../Assets/arcade.map"));
-    sdlc::LoadWaveRelative(assets.alienShot, appState, "../Assets/alien-shot.wav");
-    sdlc::LoadWaveRelative(assets.laserShot, appState, "../Assets/laser-shot.wav");
-    sdlc::LoadWaveRelative(assets.explosion, appState, "../Assets/explosion.wav");
-    sdlc::LoadWaveRelative(assets.spawnEffect, appState, "../Assets/spawn-effect.wav");
-    sdlc::LoadWaveRelative(assets.hitEffect, appState, "../Assets/hit-effect.wav");
-    sdlc::LoadWaveRelative(assets.gameOver, appState, "../Assets/game-over.wav");
-    sdlc::LoadWaveRelative(assets.pickup, appState, "../Assets/pickup.wav");
-    sdlc::LoadWaveRelative(assets.charging, appState, "../Assets/charging.wav");
-    sdlc::LoadWaveRelative(assets.chargedShot, appState, "../Assets/charged-shot.wav");
+    sdlc::Archive arch(sdlc::ResolveRelativeToExe("MiniArc.dat").c_str());
+    assets.spriteTexture = arch.loadTexture(appState->renderer, "Assets/arcade.png");
+    assets.alienShot.loadWave(appState->audio.audioSpec, arch, "Assets/alien-shot.wav");
+    assets.laserShot.loadWave(appState->audio.audioSpec, arch, "Assets/laser-shot.wav");
+    assets.explosion.loadWave(appState->audio.audioSpec, arch, "Assets/explosion.wav");
+    assets.spawnEffect.loadWave(appState->audio.audioSpec, arch, "Assets/spawn-effect.wav");
+    assets.hitEffect.loadWave(appState->audio.audioSpec, arch, "Assets/hit-effect.wav");
+    assets.gameOver.loadWave(appState->audio.audioSpec, arch, "Assets/game-over.wav");
+    assets.pickup.loadWave(appState->audio.audioSpec, arch, "Assets/pickup.wav");
+    assets.charging.loadWave(appState->audio.audioSpec, arch, "Assets/charging.wav");
+    assets.chargedShot.loadWave(appState->audio.audioSpec, arch, "Assets/charged-shot..wav");
+    auto buffer = arch.extract("Assets/arcade.map");
+    sdlc::LoadSpriteDefinitions(assets.sprites, std::istream(&buffer));
     appState->input.keys.mapKey("shipUp", SDL_SCANCODE_W);
     appState->input.keys.mapKey("shipDown", SDL_SCANCODE_S);
     appState->input.keys.mapKey("shipLeft", SDL_SCANCODE_A);

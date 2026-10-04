@@ -51,6 +51,14 @@ target_compile_definitions(sdlc PUBLIC
     LOAD_APP_CONFIG
 )
 
+# Create asset archive
+file(ARCHIVE_CREATE 
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/MiniArc.dat 
+    PATHS ${CMAKE_CURRENT_SOURCE_DIR}/Assets
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    FORMAT "zip"
+)
+
 # Add source files for MiniArc target
 target_sources(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MiniArc.cpp
