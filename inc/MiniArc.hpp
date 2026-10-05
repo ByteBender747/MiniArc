@@ -14,6 +14,8 @@ struct GameAssets
 {
     sdlc::SpriteDefinitions sprites;
     sdlc::ResPtr<SDL_Texture> spriteTexture;
+    sdlc::ResPtr<SDL_Texture> startImage;
+    sdlc::ResPtr<SDL_Texture> gameOverImage;
     sdlc::AudioDataBuffer laserShot;
     sdlc::AudioDataBuffer alienShot;
     sdlc::AudioDataBuffer explosion;

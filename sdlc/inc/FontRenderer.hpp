@@ -8,6 +8,7 @@
 
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_iostream.h>
 
 #include "ColorConverter.hpp"
 #include "Dimension.hpp"
@@ -36,7 +37,7 @@ enum class FontRenderMode {
 class FontRenderer
 {
 public:
-    FontRenderer(SDL_Renderer* renderer, const char* filePath, float size, FontRenderMode mode);
+    FontRenderer(SDL_Renderer* renderer, SDL_IOStream* io, float size, FontRenderMode mode);
     int renderText(float x, float y, std::string_view text);
     void renderFontTexture(float x, float y);
     Dimension<float> measureText(std::string_view text);

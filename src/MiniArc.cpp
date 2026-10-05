@@ -46,6 +46,8 @@ MiniArcGame::MiniArcGame(sdlc::AppState *appState)
 {
     sdlc::Archive arch(sdlc::ResolveRelativeToExe("MiniArc.dat").c_str());
     assets.spriteTexture = arch.loadTexture(appState->renderer, "Assets/arcade.png");
+    assets.startImage = arch.loadTexture(appState->renderer, "Assets/start.png");
+    assets.gameOverImage = arch.loadTexture(appState->renderer, "Assets/game_over.png");
     assets.alienShot.loadWave(appState->audio.audioSpec, arch, "Assets/alien-shot.wav");
     assets.laserShot.loadWave(appState->audio.audioSpec, arch, "Assets/laser-shot.wav");
     assets.explosion.loadWave(appState->audio.audioSpec, arch, "Assets/explosion.wav");
@@ -54,7 +56,7 @@ MiniArcGame::MiniArcGame(sdlc::AppState *appState)
     assets.gameOver.loadWave(appState->audio.audioSpec, arch, "Assets/game-over.wav");
     assets.pickup.loadWave(appState->audio.audioSpec, arch, "Assets/pickup.wav");
     assets.charging.loadWave(appState->audio.audioSpec, arch, "Assets/charging.wav");
-    assets.chargedShot.loadWave(appState->audio.audioSpec, arch, "Assets/charged-shot..wav");
+    assets.chargedShot.loadWave(appState->audio.audioSpec, arch, "Assets/charged-shot.wav");
     auto buffer = arch.extract("Assets/arcade.map");
     sdlc::LoadSpriteDefinitions(assets.sprites, std::istream(&buffer));
     appState->input.keys.mapKey("shipUp", SDL_SCANCODE_W);
@@ -69,7 +71,7 @@ MiniArcGame::MiniArcGame(sdlc::AppState *appState)
     stars = new BackgroundStars(this);
     player = new PlayerShip(this);
     enemies = new EnemySpawner(this);
-    uiLayer = new UILayer(this);
+    uiLayer = new UILayer(this, arch);
 
     manager.addLayer(stars);
     manager.addLayer(player);

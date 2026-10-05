@@ -101,18 +101,15 @@ void NameInput::handleEvent(SDL_Event &event)
     m_textInput.handleEvent(event);
 }
 
-UILayer::UILayer(MiniArcGame *game)
+UILayer::UILayer(MiniArcGame *game, sdlc::Archive& archive)
     : AppLayer("UILayer", uiZIndex)
       , m_appState(game->appState)
       , m_assets(&game->assets)
 {
     m_font = new sdlc::FontRenderer(
         m_appState->renderer,
-        sdlc::ResolveRelativeToExe("../Assets/Gameplay.ttf").string().c_str(),
+        archive.extract("Assets/Gameplay.ttf").getStream(),
         32, sdlc::FontRenderMode::Solid);
-    m_startImage = sdlc::LoadTexture(m_appState->renderer, sdlc::ResolveRelativeToExe("../Assets/start.png").c_str());
-    m_gameOverImage = sdlc::LoadTexture(m_appState->renderer,
-                                        sdlc::ResolveRelativeToExe("../Assets/game_over.png").c_str());
     m_font->setScale(0.25);
 }
 
@@ -132,7 +129,7 @@ void UILayer::render(SDL_Renderer *renderer)
     renderShipCount();
     renderModTime();
     if (isGameOver()) {
-        sdlc::SpriteRenderer sr(m_gameOverImage);
+        sdlc::SpriteRenderer sr(m_assets->gameOverImage);
         sr.setPosition(RENDER_LOGICAL_WIDTH / 2., RENDER_LOGICAL_HEIGHT / 2. - 10);
         sr.render(renderer);
         if (!m_gameOverSfxFlag) {

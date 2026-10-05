@@ -20,14 +20,12 @@ constexpr SDL_Color white = { 255, 255, 255, 255 };
 namespace sdlc
 {
 
-FontRenderer::FontRenderer(SDL_Renderer* renderer, const char* filePath, float size, FontRenderMode mode)
+FontRenderer::FontRenderer(SDL_Renderer* renderer, SDL_IOStream* io, float size, FontRenderMode mode)
     : m_renderer(renderer)
 {
-    SDL_Log("Loading font file: %s", filePath);
-    TTF_Font* ttf = TTF_OpenFont(filePath, size);
+    TTF_Font* ttf = TTF_OpenFontIO(io, true, size);
     if (!ttf) {
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Could not load font file: %s", filePath);
-        SDL_LogTrace(SDL_LOG_CATEGORY_SYSTEM, "SDL_GetError(): %s", SDL_GetError());
+        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Could not load font from stream: %s", SDL_GetError());
         exit(EXIT_FAILURE);
     }
     int charX = 0;

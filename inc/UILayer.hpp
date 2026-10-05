@@ -4,8 +4,8 @@
 #include "FontRenderer.hpp"
 #include "MiniArc.hpp"
 #include "Rect.hpp"
-#include "ResPtr.hpp"
 #include "TextInput.hpp"
+#include "Archive.hpp"
 #include <SDL3/SDL_render.h>
 
 struct MiniArcGame;
@@ -43,7 +43,7 @@ private:
 class UILayer : public sdlc::AppLayer
 {
 public:
-    UILayer(MiniArcGame* game);
+    UILayer(MiniArcGame* game, sdlc::Archive& archive);
     ~UILayer();
     void render(SDL_Renderer* renderer) override;
     void update(float deltaTime) override;
@@ -60,8 +60,6 @@ private:
     bool m_gameOverSfxFlag{false};
     bool m_nameInputStarted{false};
     GameAssets* m_assets;
-    sdlc::ResPtr<SDL_Texture> m_startImage;
-    sdlc::ResPtr<SDL_Texture> m_gameOverImage;
     sdlc::FontRenderer* m_font;
     sdlc::AppState* m_appState;
 };
